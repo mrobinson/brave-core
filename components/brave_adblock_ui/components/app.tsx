@@ -31,6 +31,7 @@ export class AdblockPage extends React.Component<Props, State> {
   constructor (props: Props) {
     super(props)
     this.state = { playlists: [] }
+    this.getPlaylist()
   }
 
   get actions () {
@@ -44,18 +45,7 @@ export class AdblockPage extends React.Component<Props, State> {
   }
 
   componentDidMount () {
-    this.getPlaylist()
-
     chrome.bravePlaylists.onPlaylistsChanged.addListener((changeType, id) => {
-      // cc mark. this shows the change type and the id of the changed video
-      // as expected, but does not update the playlist `partialReady` attr
-      // audio/video are not often updated, even with the file available on disk
-      console.log('changeType:', changeType, 'id', id)
-      chrome.bravePlaylists.getPlaylist(id, (something: any) => {
-        console.time('changeType')
-        console.log('something', something)
-        console.timeEnd('changeType')
-      })
       this.getPlaylist()
     })
   }
@@ -66,13 +56,8 @@ export class AdblockPage extends React.Component<Props, State> {
     }
   }
 
-  getPlaylistHeader = (): Cell[] => {
-    return [
-      { content: 'INDEX' },
-      { content: 'NAME' },
-      { content: 'STATUS' },
-      { content: 'REMOVE' }
-    ]
+  getImgSrc = (playlistId: string) => {
+    return 'chrome://playlists-image/' + playlistId
   }
 
   get lazyButtonStyle () {
@@ -87,92 +72,58 @@ export class AdblockPage extends React.Component<Props, State> {
     return lazyButtonStyle
   }
 
+  getPlaylistHeader = (): Cell[] => {
+      return [
+        { content: 'INDEX' },
+        { content: 'NAME' },
+        { content: 'STATUS' },
+        { content: 'REMOVE' }
+      ]
+  }
+
   getPlaylistRows = (playlist?: any): Row[] | undefined => {
     if (playlist == null) {
       return
     }
 
     return playlist.map((item: any, index: any): any => {
-      console.log('video file', item.videoMediaFilePath)
-      console.log('audio file', item.audioMediaFilePath)
       const cell: Row = {
         content: [
-          { content: (<div style={{ textAlign: 'center' }}>{index}</div>) },
+          { content: (<div style={{ textAlign: 'center' }}>{index+1}</div>) },
           { content: (
             <div>
-              {
-                item.audioMediaFilePath && item.videoMediaFilePath
-                  ? (
-                    <>
-                      <video
-                        controls={true}
-                        muted={true}
-                        width={640}
-                        height={320}
-                        poster={item.thumbnailUrl}
-                      >
-                        <source src={item.videoMediaFilePath} type='video/mp4' />
-                      </video>
-                      <audio controls={true}>
-                        <source src={item.audioMediaFilePath} type='audio/mp4' />
-                      </audio>
-                    </>
-                  )
-                  : <h2>Video is being downloaded. It will show here once available</h2>
-              }
               <h3>{item.playlistName}</h3>
+              <a href='#' onClick={this.onClickPlayVideo.bind(this, item.id)}>
+                <img style={{ maxWidth: '200px' }}
+                  src={this.getImgSrc(item.id)}
+                />
+                </a>
             </div>
           ) },
-          { content: (<span>{item.audioMediaFilePath && item.videoMediaFilePath ? 'Completed' : 'In progress'}</span>) },
-          { content: (<button style={this.lazyButtonStyle} onClick={this.onClickRemoveVideo}><CloseCircleOIcon /></button>) }
+          { content: (<span>{item.videoMediaFilePath ? 'Ready' : 'Downloading'}</span>) },
+          { content: (<button style={this.lazyButtonStyle} onClick={this.onClickRemoveVideo.bind(this, item.id)}><CloseCircleOIcon /></button>) }
         ]
       }
       return cell
     })
   }
 
-  onClickRemoveALlVideos = () => {
-    console.log('nothing')
+  onClickPlayVideo = (playlistId: string) => {
+    chrome.bravePlaylists.play(playlistId)
   }
 
-  onClickRemoveVideo = () => {
-    console.log('nothing')
-  }
-
-  onClickPlayVideo = () => {
-    console.log('nothing')
+  onClickRemoveVideo = (playlistId: string) => {
+    chrome.bravePlaylists.deletePlaylist(playlistId)
   }
 
   render () {
     const { actions, adblockData } = this.props
     const { playlists } = this.state
-
-    // chrome.bravePlaylists.onPlaylistsChanged.addListener((changeType, id) => {
-    //   // cc mark. this shows the change type and the id of the changed video
-    //   // as expected, but does not update the playlist `partialReady` atrr
-    //   // and no audio/video/thumbnail is shown
-    //   console.log('changeType:', changeType, 'id', id)
-    //   chrome.bravePlaylists.getPlaylist(id, (something: any) => {
-    //     console.log('something', something)
-    //   })
-    // })
-
     return (
       <div id='adblockPage'>
         <div style={{ minHeight: '600px', width: '1200px' }}>
-          <button
-            style={
-              Object.assign(
-                {},
-                this.lazyButtonStyle,
-                { width: 'fit-content', fontSize: '16px' }
-              )
-            }
-          >
-            Delete all playlists
-          </button>
           <Table header={this.getPlaylistHeader()} rows={this.getPlaylistRows(playlists)}>
-            YOUR PLAYLIST IS NOW EMPTY
+            YOUR PLAYLIST IS EMPTY
           </Table>
         </div>
         <hr />
