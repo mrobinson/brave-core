@@ -23,3 +23,5 @@ const char kExtensionSettingsURL[] = "brave://settings/extensions";
 const char kWalletHost[] = "wallet";
 const char kBraveSyncPath[] = "braveSync";
 const char kBraveSyncSetupPath[] = "braveSync/setup";
+const char kPlaylistsHost[] = "playlists";
+const char kBraveUIPlaylistsURL[] = "chrome://playlists/";

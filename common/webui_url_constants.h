@@ -26,5 +26,7 @@ extern const char kExtensionSettingsURL[];
 extern const char kWalletHost[];
 extern const char kBraveSyncPath[];
 extern const char kBraveSyncSetupPath[];
+extern const char kPlaylistsHost[];
+extern const char kBraveUIPlaylistsURL[];
 
 #endif  // BRAVE_COMMON_WEBUI_URL_CONSTANTS_H_

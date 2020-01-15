@@ -119,7 +119,8 @@
       "chrome://newtab/*",
       "chrome://webcompat/*",
       "chrome://wallet/*",
-      "chrome://adblock/*"
+      "chrome://adblock/*",
+      "chrome://playlists/*"
     ]
   }]
 }
