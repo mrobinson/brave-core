@@ -30,7 +30,6 @@ config("internal_config") {
     "Ledger/Data/Model",
     "Ledger/Models",
     "Shared",
-    "components",
     "objc-gen",
     "$target_gen_dir",
   ]

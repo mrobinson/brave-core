@@ -5,8 +5,29 @@
 
 import("//build/config/ios/rules.gni")
 
+config("internal_config") {
+  cflags = [
+    "-fobjc-weak",
+    "-fobjc-abi-version=2",
+    "-fobjc-legacy-dispatch",
+    "-Wno-objc-property-synthesis",
+    "-Wno-sign-compare",
+  ]
+
+  include_dirs = [
+    ".",
+    "bookmarks",
+    "brave_sync",
+    "bookmarks_sync_service",
+    "user_prefs",
+    "prefs_service"
+  ]
+}
+
 source_set("components") {
+  configs += [ ":internal_config" ]
   configs += [ "//build/config/compiler:enable_arc" ]
+  configs -= [ "//build/config/gcc:symbol_visibility_hidden" ]
 
   sources = [
     "Bookmarks.mm",
