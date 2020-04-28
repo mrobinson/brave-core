@@ -1,0 +1,22 @@
+# Copyright (c) 2019 The Brave Authors. All rights reserved.
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+import("//build/config/ios/rules.gni")
+
+source_set("components") {
+  configs += [ "//build/config/compiler:enable_arc" ]
+
+  sources = [
+    "Bookmarks.mm",
+    "Bookmarks.h",
+  ]
+
+  deps = [
+    "//base",
+    "bookmarks",
+    "brave_sync",
+    "user_prefs"
+  ]
+}

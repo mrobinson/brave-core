@@ -1,0 +1,23 @@
+# Copyright (c) 2019 The Brave Authors. All rights reserved.
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+import("//build/config/ios/rules.gni")
+
+source_set("user_prefs") {
+  sources = [
+    "prefs_change_observer.mm",
+    "prefs_change_observer.h",
+  ]
+
+  deps = [
+    "//base",
+    "//components/bookmarks/browser",
+    "//components/prefs",
+    "//components/sync_bookmarks",
+    "//components/undo",
+    "//ios/web/public",
+    "//url",
+  ]
+}
