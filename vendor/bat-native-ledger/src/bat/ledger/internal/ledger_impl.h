@@ -258,6 +258,47 @@ class LedgerImpl : public ledger::Ledger {
       const std::map<std::string, std::string>& data,
       ledger::PublisherInfoCallback callback) override;
 
+  void UpdateMediaDuration(
+      const uint64_t window_id,
+      const std::string& media_type,
+      const std::string& url,
+      const std::string& publisher_key,
+      const std::string& publisher_name,
+      const std::string& media_id,
+      const std::string& media_key,
+      const std::string& favicon_url,
+      uint64_t duration) override;
+
+  void GetMediaPublisherInfo(
+      const std::string& media_key,
+      ledger::PublisherInfoCallback callback) override;
+
+  void GetPublisherInfo(
+      const std::string& publisher_key,
+      ledger::PublisherInfoCallback callback) override;
+
+  void GetPublisherPanelInfo(
+      const uint64_t window_id,
+      const std::string& media_type,
+      const std::string& publisher_key) override;
+
+  void SavePublisherVisit(
+      const uint64_t window_id,
+      const std::string& media_type,
+      const std::string& url,
+      const std::string& publisher_key,
+      const std::string& publisher_name,
+      const std::string& favicon_url) override;
+
+  void SaveMediaPublisherVisit(
+      const uint64_t window_id,
+      const std::string& media_type,
+      const std::string& url,
+      const std::string& publisher_key,
+      const std::string& publisher_name,
+      const std::string& media_key,
+      const std::string& favicon_url) override;
+
   void SetInlineTippingPlatformEnabled(
       const ledger::InlineTipsPlatforms platform,
       bool enabled) override;

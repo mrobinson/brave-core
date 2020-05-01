@@ -75,6 +75,218 @@ BraveRewardsOpenBrowserActionUIFunction::Run() {
   return RespondNow(NoArguments());
 }
 
+BraveRewardsUpdateMediaDurationFunction::
+    ~BraveRewardsUpdateMediaDurationFunction() {}
+
+ExtensionFunction::ResponseAction
+BraveRewardsUpdateMediaDurationFunction::Run() {
+  std::unique_ptr<brave_rewards::UpdateMediaDuration::Params> params(
+      brave_rewards::UpdateMediaDuration::Params::Create(*args_));
+  EXTENSION_FUNCTION_VALIDATE(params.get());
+
+  Profile* profile = Profile::FromBrowserContext(browser_context());
+  RewardsService* rewards_service =
+      RewardsServiceFactory::GetForProfile(profile);
+
+  if (!rewards_service) {
+    return RespondNow(NoArguments());
+  }
+
+  rewards_service->UpdateMediaDuration(
+      params->window_id,
+      params->media_type,
+      params->url,
+      params->publisher_key,
+      params->publisher_name,
+      params->media_id,
+      params->media_key,
+      params->fav_icon_url,
+      params->duration);
+
+  return RespondNow(NoArguments());
+}
+
+BraveRewardsGetMediaPublisherInfoFunction::
+~BraveRewardsGetMediaPublisherInfoFunction() {
+}
+
+ExtensionFunction::ResponseAction
+BraveRewardsGetMediaPublisherInfoFunction::Run() {
+  std::unique_ptr<brave_rewards::GetMediaPublisherInfo::Params> params(
+      brave_rewards::GetMediaPublisherInfo::Params::Create(*args_));
+  EXTENSION_FUNCTION_VALIDATE(params.get());
+
+  Profile* profile = Profile::FromBrowserContext(browser_context());
+  RewardsService* rewards_service =
+      RewardsServiceFactory::GetForProfile(profile);
+
+  if (!rewards_service) {
+    return RespondNow(Error("Rewards service is not initialized"));
+  }
+
+  rewards_service->GetMediaPublisherInfo(
+      params->media_key,
+      base::Bind(
+          &BraveRewardsGetMediaPublisherInfoFunction::OnGetMediaPublisherInfo,
+          this));
+  return RespondLater();
+}
+
+void BraveRewardsGetMediaPublisherInfoFunction::OnGetMediaPublisherInfo(
+    const int32_t result,
+    std::unique_ptr<::brave_rewards::PublisherInfo> info) {
+  auto dict = std::make_unique<base::Value>(base::Value::Type::DICTIONARY);
+
+  if (!info) {
+    Respond(
+        TwoArguments(std::make_unique<base::Value>(result), std::move(dict)));
+    return;
+  }
+
+  dict->SetStringKey("publisher_key", info->id);
+  dict->SetStringKey("name", info->name);
+  dict->SetIntKey("percentage", info->percent);
+  dict->SetIntKey("status", info->status);
+  dict->SetIntKey("excluded", info->excluded);
+  dict->SetStringKey("url", info->url);
+  dict->SetStringKey("provider", info->provider);
+  dict->SetStringKey("favicon_url", info->favicon_url);
+
+  Respond(TwoArguments(std::make_unique<base::Value>(result), std::move(dict)));
+}
+
+BraveRewardsGetPublisherInfoFunction::
+~BraveRewardsGetPublisherInfoFunction() {
+}
+
+ExtensionFunction::ResponseAction
+BraveRewardsGetPublisherInfoFunction::Run() {
+  std::unique_ptr<brave_rewards::GetPublisherInfo::Params> params(
+      brave_rewards::GetPublisherInfo::Params::Create(*args_));
+  EXTENSION_FUNCTION_VALIDATE(params.get());
+
+  Profile* profile = Profile::FromBrowserContext(browser_context());
+  RewardsService* rewards_service =
+      RewardsServiceFactory::GetForProfile(profile);
+
+  if (!rewards_service) {
+    return RespondNow(Error("Rewards service is not initialized"));
+  }
+
+  rewards_service->GetPublisherInfo(
+      params->publisher_key,
+      base::Bind(
+          &BraveRewardsGetPublisherInfoFunction::OnGetPublisherInfo,
+          this));
+  return RespondLater();
+}
+
+void BraveRewardsGetPublisherInfoFunction::OnGetPublisherInfo(
+    const int32_t result,
+    std::unique_ptr<::brave_rewards::PublisherInfo> info) {
+  auto dict = std::make_unique<base::Value>(base::Value::Type::DICTIONARY);
+
+  if (!info) {
+    Respond(
+        TwoArguments(std::make_unique<base::Value>(result), std::move(dict)));
+    return;
+  }
+
+  dict->SetStringKey("publisher_key", info->id);
+  dict->SetStringKey("name", info->name);
+  dict->SetIntKey("percentage", info->percent);
+  dict->SetIntKey("status", info->status);
+  dict->SetIntKey("excluded", info->excluded);
+  dict->SetStringKey("url", info->url);
+  dict->SetStringKey("provider", info->provider);
+  dict->SetStringKey("favicon_url", info->favicon_url);
+
+  Respond(TwoArguments(std::make_unique<base::Value>(result), std::move(dict)));
+}
+
+BraveRewardsGetPublisherPanelInfoFunction::
+    ~BraveRewardsGetPublisherPanelInfoFunction() {}
+
+ExtensionFunction::ResponseAction
+BraveRewardsGetPublisherPanelInfoFunction::Run() {
+  std::unique_ptr<brave_rewards::GetPublisherPanelInfo::Params> params(
+      brave_rewards::GetPublisherPanelInfo::Params::Create(*args_));
+  EXTENSION_FUNCTION_VALIDATE(params.get());
+
+  Profile* profile = Profile::FromBrowserContext(browser_context());
+  RewardsService* rewards_service =
+      RewardsServiceFactory::GetForProfile(profile);
+
+  if (!rewards_service) {
+    return RespondNow(NoArguments());
+  }
+
+  rewards_service->GetPublisherPanelInfo(
+      params->window_id,
+      params->media_type,
+      params->publisher_key);
+
+  return RespondNow(NoArguments());
+}
+
+BraveRewardsSavePublisherVisitFunction::
+    ~BraveRewardsSavePublisherVisitFunction() {}
+
+ExtensionFunction::ResponseAction
+BraveRewardsSavePublisherVisitFunction::Run() {
+  std::unique_ptr<brave_rewards::SavePublisherVisit::Params>
+      params(brave_rewards::SavePublisherVisit::Params::Create(
+          *args_));
+  EXTENSION_FUNCTION_VALIDATE(params.get());
+
+  Profile* profile = Profile::FromBrowserContext(browser_context());
+  RewardsService* rewards_service =
+      RewardsServiceFactory::GetForProfile(profile);
+
+  if (!rewards_service) {
+    return RespondNow(NoArguments());
+  }
+
+  rewards_service->SavePublisherVisit(
+      params->window_id,
+      params->media_type,
+      params->url,
+      params->publisher_key,
+      params->publisher_name,
+      params->fav_icon_url);
+
+  return RespondNow(NoArguments());
+}
+
+BraveRewardsSaveMediaPublisherVisitFunction::
+    ~BraveRewardsSaveMediaPublisherVisitFunction() {}
+
+ExtensionFunction::ResponseAction
+BraveRewardsSaveMediaPublisherVisitFunction::Run() {
+  std::unique_ptr<brave_rewards::SaveMediaPublisherVisit::Params> params(
+      brave_rewards::SaveMediaPublisherVisit::Params::Create(*args_));
+  EXTENSION_FUNCTION_VALIDATE(params.get());
+
+  Profile* profile = Profile::FromBrowserContext(browser_context());
+  RewardsService* rewards_service =
+      RewardsServiceFactory::GetForProfile(profile);
+
+  if (!rewards_service) {
+    return RespondNow(NoArguments());
+  }
+
+  rewards_service->SaveMediaPublisherVisit(
+      params->window_id,
+      params->media_type,
+      params->url,
+      params->publisher_key,
+      params->publisher_name,
+      params->media_key,
+      params->fav_icon_url);
+
+  return RespondNow(NoArguments());
+}
+
 BraveRewardsTipSiteFunction::~BraveRewardsTipSiteFunction() {
 }
 

@@ -34,7 +34,10 @@ std::string Media::GetLinkType(
     const std::string& first_party_url,
     const std::string& referrer) {
   std::string type;
+
+#if defined(OS_ANDROID) || defined(OS_IOS)
   type = braveledger_media::YouTube::GetLinkType(url);
+#endif
 
   if (type.empty()) {
     type = braveledger_media::Twitch::GetLinkType(
@@ -64,10 +67,12 @@ void Media::ProcessMedia(
     return;
   }
 
+#if defined(OS_ANDROID) || defined(OS_IOS)
   if (type == YOUTUBE_MEDIA_TYPE) {
     media_youtube_->ProcessMedia(parts, *visit_data);
     return;
   }
+#endif
 
   if (type == TWITCH_MEDIA_TYPE) {
     media_twitch_->ProcessMedia(parts, *visit_data);
@@ -90,9 +95,12 @@ void Media::GetMediaActivityFromUrl(
     ledger::VisitDataPtr visit_data,
     const std::string& type,
     const std::string& publisher_blob) {
+#if defined(OS_ANDROID) || defined(OS_IOS)
   if (type == YOUTUBE_MEDIA_TYPE) {
     media_youtube_->ProcessActivityFromUrl(window_id, *visit_data);
-  } else if (type == TWITCH_MEDIA_TYPE) {
+  }
+#endif
+  if (type == TWITCH_MEDIA_TYPE) {
     media_twitch_->ProcessActivityFromUrl(window_id,
                                           *visit_data,
                                           publisher_blob);
@@ -115,10 +123,7 @@ void Media::OnMediaActivityError(ledger::VisitDataPtr visit_data,
                                        uint64_t window_id) {
   std::string url;
   std::string name;
-  if (type == YOUTUBE_MEDIA_TYPE) {
-    url = YOUTUBE_TLD;
-    name = YOUTUBE_MEDIA_TYPE;
-  } else if (type == TWITCH_MEDIA_TYPE) {
+  if (type == TWITCH_MEDIA_TYPE) {
     url = TWITCH_TLD;
     name = TWITCH_MEDIA_TYPE;
   } else if (type == TWITTER_MEDIA_TYPE) {
@@ -130,6 +135,13 @@ void Media::OnMediaActivityError(ledger::VisitDataPtr visit_data,
   } else if (type == VIMEO_MEDIA_TYPE) {
     url = VIMEO_TLD;
     name = VIMEO_MEDIA_TYPE;
+  } else {
+#if defined(OS_ANDROID) || defined(OS_IOS)
+    if (type == YOUTUBE_MEDIA_TYPE) {
+      url = YOUTUBE_TLD;
+      name = YOUTUBE_MEDIA_TYPE;
+    }
+#endif
   }
 
   if (url.empty()) {

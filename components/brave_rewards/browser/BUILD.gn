@@ -44,6 +44,8 @@ source_set("browser") {
     "pending_contribution.h",
     "publisher_banner.cc",
     "publisher_banner.h",
+    "publisher_info.cc",
+    "publisher_info.h",
     "rewards_internals_info.cc",
     "rewards_internals_info.h",
     "balance.cc",

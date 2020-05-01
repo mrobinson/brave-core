@@ -8,7 +8,7 @@ import { Reducer } from 'redux'
 import { setBadgeText } from '../browserAction'
 import { isPublisherConnectedOrVerified } from '../../utils'
 
-const getWindowId = (id: number) => {
+const getTabId = (id: number) => {
   return `id_${id}`
 }
 
@@ -18,7 +18,7 @@ const updateBadgeTextAllWindows = (windows: chrome.windows.Window[], state?: Rew
   }
 
   windows.forEach((window => {
-    const id = getWindowId(window.id)
+    const id = getTabId(window.id)
     const publishers: Record<string, RewardsExtension.Publisher> = state.publishers
     const publisher = publishers[id]
 
@@ -35,6 +35,14 @@ const updateBadgeTextAllWindows = (windows: chrome.windows.Window[], state?: Rew
     setBadgeText(state, isPublisherConnectedOrVerified(publisher.status), tab.id)
   }))
 
+}
+
+const handledByGreaselion = (url: URL) => {
+  if (!url) {
+    return false
+  }
+
+  return url.hostname.endsWith('.youtube.com') || url.hostname === 'youtube.com'
 }
 
 export const rewardsPanelReducer: Reducer<RewardsExtension.State | undefined> = (state: RewardsExtension.State, action: any) => {
@@ -103,6 +111,7 @@ export const rewardsPanelReducer: Reducer<RewardsExtension.State | undefined> = 
       const tab: chrome.tabs.Tab = payload.tab
       if (
         !tab ||
+        !tab.id ||
         !tab.url ||
         tab.incognito ||
         !tab.active ||
@@ -112,18 +121,20 @@ export const rewardsPanelReducer: Reducer<RewardsExtension.State | undefined> = 
         break
       }
 
-      const id = getWindowId(tab.windowId)
+      const id = getTabId(tab.id)
       const publishers: Record<string, RewardsExtension.Publisher> = state.publishers
       const publisher = publishers[id]
       const validKey = publisher && publisher.publisher_key && publisher.publisher_key.length > 0
 
       if (!publisher || (publisher.tabUrl !== tab.url || !validKey)) {
         // Invalid publisher for tab, re-fetch publisher.
-        chrome.braveRewards.getPublisherData(
-          tab.windowId,
-          tab.url,
-          tab.favIconUrl || '',
-          payload.publisherBlob || '')
+        if (!handledByGreaselion(new URL(tab.url))) {
+          chrome.braveRewards.getPublisherData(
+            tab.id,
+            tab.url,
+            tab.favIconUrl || '',
+            payload.publisherBlob || '')
+        }
 
         if (publisher) {
           delete publishers[id]
@@ -133,6 +144,7 @@ export const rewardsPanelReducer: Reducer<RewardsExtension.State | undefined> = 
           tabUrl: tab.url,
           tabId: tab.id
         }
+
       } else if (publisher &&
                  publisher.tabUrl === tab.url &&
                  (publisher.tabId !== tab.id || payload.activeTabIsLoadingTriggered) &&
@@ -153,7 +165,7 @@ export const rewardsPanelReducer: Reducer<RewardsExtension.State | undefined> = 
     case types.ON_PUBLISHER_DATA: {
       const publisher = payload.publisher
       let publishers: Record<string, RewardsExtension.Publisher> = state.publishers
-      const id = getWindowId(payload.windowId)
+      const id = getTabId(payload.windowId)
 
       if (publisher && !publisher.publisher_key) {
         delete publishers[id]
@@ -471,10 +483,15 @@ export const rewardsPanelReducer: Reducer<RewardsExtension.State | undefined> = 
       const publishers: Record<string, RewardsExtension.Publisher> = state.publishers
 
       tabs.forEach((tab) => {
-        const id = getWindowId(tab.windowId)
+        const tabId = tab.id
+        if (!tabId) {
+          return
+        }
+
+        const id = getTabId(tabId)
         const publisher = publishers[id]
 
-        if (!publisher || publisher.tabId !== tab.id) {
+        if (!publisher || publisher.tabId !== tabId) {
           return
         }
 

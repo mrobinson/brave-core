@@ -630,6 +630,81 @@ void LedgerImpl::SaveMediaInfo(
   media()->SaveMediaInfo(type, data, callback);
 }
 
+void LedgerImpl::UpdateMediaDuration(
+    const uint64_t window_id,
+    const std::string& media_type,
+    const std::string& url,
+    const std::string& publisher_key,
+    const std::string& publisher_name,
+    const std::string& media_id,
+    const std::string& media_key,
+    const std::string& favicon_url,
+    uint64_t duration) {
+  publisher()->UpdateMediaDuration(
+      window_id,
+      media_type,
+      url,
+      publisher_key,
+      publisher_name,
+      media_id,
+      media_key,
+      favicon_url,
+      duration);
+}
+
+void LedgerImpl::GetMediaPublisherInfo(
+      const std::string& media_key,
+      ledger::PublisherInfoCallback callback) {
+  database()->GetMediaPublisherInfo(media_key, callback);
+}
+
+void LedgerImpl::GetPublisherInfo(
+      const std::string& publisher_key,
+      ledger::PublisherInfoCallback callback) {
+  database()->GetPublisherInfo(publisher_key, callback);
+}
+
+void LedgerImpl::GetPublisherPanelInfo(
+    const uint64_t window_id,
+    const std::string& media_type,
+    const std::string& publisher_key) {
+  publisher()->GetPublisherPanelInfo(window_id, media_type, publisher_key);
+}
+
+void LedgerImpl::SavePublisherVisit(
+    const uint64_t window_id,
+    const std::string& media_type,
+    const std::string& url,
+    const std::string& publisher_key,
+    const std::string& publisher_name,
+    const std::string& favicon_url) {
+  publisher()->SavePublisherVisit(
+      window_id,
+      media_type,
+      url,
+      publisher_key,
+      publisher_name,
+      favicon_url);
+}
+
+void LedgerImpl::SaveMediaPublisherVisit(
+    const uint64_t window_id,
+    const std::string& media_type,
+    const std::string& url,
+    const std::string& publisher_key,
+    const std::string& publisher_name,
+    const std::string& media_key,
+    const std::string& favicon_url) {
+  publisher()->SaveMediaPublisherVisit(
+      window_id,
+      media_type,
+      url,
+      publisher_key,
+      publisher_name,
+      media_key,
+      favicon_url);
+}
+
 void LedgerImpl::SetInlineTippingPlatformEnabled(
     const ledger::InlineTipsPlatforms platform,
     bool enabled) {

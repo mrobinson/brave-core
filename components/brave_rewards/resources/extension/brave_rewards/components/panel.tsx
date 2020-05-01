@@ -19,7 +19,7 @@ import * as utils from '../utils'
 import { getMessage } from '../background/api/locale_api'
 
 interface Props extends RewardsExtension.ComponentProps {
-  windowId: number,
+  tabId: number,
   onlyAnonWallet: boolean
 }
 
@@ -142,15 +142,15 @@ export class Panel extends React.Component<Props, State> {
   }
 
   getPublisher = () => {
-    let windowId = this.props.windowId.toString()
+    let tabId = this.props.tabId.toString()
 
-    if (!windowId) {
+    if (!tabId) {
       return undefined
     }
 
-    windowId = `id_${windowId}`
+    tabId = `id_${tabId}`
 
-    return this.props.rewardsPanelData.publishers[windowId]
+    return this.props.rewardsPanelData.publishers[tabId]
   }
 
   onSliderToggle = () => {
@@ -287,22 +287,14 @@ export class Panel extends React.Component<Props, State> {
 
   showTipSiteDetail = (monthly: boolean) => {
     const publisher: RewardsExtension.Publisher | undefined = this.getPublisher()
-    // TODO: why do we store windowId instead of active tab id in state?
-    chrome.tabs.query({
-      active: true,
-      windowId: chrome.windows.WINDOW_ID_CURRENT
-    }, (tabs) => {
-      if (!tabs || !tabs.length) {
-        return
-      }
-      const tabId = tabs[0].id
-      if (tabId === undefined || !publisher || !publisher.publisher_key) {
-        return
-      }
+    const tabId = this.props.tabId
 
-      chrome.braveRewards.tipSite(tabId, publisher.publisher_key, monthly)
-      window.close()
-    })
+    if (!publisher || !publisher.publisher_key) {
+      return
+    }
+
+    chrome.braveRewards.tipSite(tabId, publisher.publisher_key, monthly)
+    window.close()
   }
 
   onCloseNotification = (id: string) => {

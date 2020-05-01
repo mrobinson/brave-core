@@ -97,7 +97,58 @@ class Publisher {
       const std::string& publisher_key,
       ledger::GetServerPublisherInfoCallback callback);
 
+  void UpdateMediaDuration(
+      const uint64_t window_id,
+      const std::string& media_type,
+      const std::string& url,
+      const std::string& publisher_key,
+      const std::string& publisher_name,
+      const std::string& media_id,
+      const std::string& media_key,
+      const std::string& favicon_url,
+      uint64_t duration);
+
+  void GetPublisherPanelInfo(
+      const uint64_t window_id,
+      const std::string& media_type,
+      const std::string& publisher_key);
+
+  void SavePublisherVisit(
+      const uint64_t window_id,
+      const std::string& media_type,
+      const std::string& url,
+      const std::string& publisher_key,
+      const std::string& publisher_name,
+      const std::string& favicon_url);
+
+  void SaveMediaPublisherVisit(
+      const uint64_t window_id,
+      const std::string& media_type,
+      const std::string& url,
+      const std::string& publisher_key,
+      const std::string& publisher_name,
+      const std::string& media_key,
+      const std::string& favicon_url);
+
  private:
+  void SavePublisherInfo(
+      const uint64_t window_id,
+      const std::string& media_type,
+      const std::string& publisher_url,
+      const std::string& publisher_key,
+      const std::string& publisher_name,
+      const std::string& media_key,
+      const std::string& favicon_url);
+
+  void OnGetPanelPublisherInfo(
+      const ledger::Result result,
+      ledger::PublisherInfoPtr info,
+      uint64_t window_id,
+      const std::string& media_type,
+      const std::string& publisher_key);
+
+  void OnMediaActivityError(const uint64_t window_id, const std::string& url);
+
   void onPublisherActivitySave(
       uint64_t windowId,
       const ledger::VisitData& visit_data,

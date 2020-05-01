@@ -601,6 +601,113 @@ void BatLedgerImpl::SaveMediaInfo(
       std::bind(BatLedgerImpl::OnSaveMediaInfoCallback, holder, _1, _2));
 }
 
+void BatLedgerImpl::UpdateMediaDuration(
+    const uint64_t window_id,
+    const std::string& media_type,
+    const std::string& url,
+    const std::string& publisher_key,
+    const std::string& publisher_name,
+    const std::string& media_id,
+    const std::string& media_key,
+    const std::string& favicon_url,
+    uint64_t duration) {
+  ledger_->UpdateMediaDuration(
+      window_id,
+      media_type,
+      url,
+      publisher_key,
+      publisher_name,
+      media_id,
+      media_key,
+      favicon_url,
+      duration);
+}
+
+// static
+void BatLedgerImpl::OnMediaPublisherInfo(
+    CallbackHolder<GetMediaPublisherInfoCallback>* holder,
+    const ledger::Result result,
+    ledger::PublisherInfoPtr info) {
+  DCHECK(holder);
+  if (holder->is_valid())
+    std::move(holder->get()).Run(result, std::move(info));
+  delete holder;
+}
+
+void BatLedgerImpl::GetMediaPublisherInfo(
+    const std::string& media_key,
+    GetMediaPublisherInfoCallback callback) {
+  // deleted in OnMediaPublisherInfo
+  auto* holder = new CallbackHolder<GetMediaPublisherInfoCallback>(
+      AsWeakPtr(), std::move(callback));
+  ledger_->GetMediaPublisherInfo(
+      media_key,
+      std::bind(BatLedgerImpl::OnMediaPublisherInfo, holder, _1, _2));
+}
+
+// static
+void BatLedgerImpl::OnPublisherInfo(
+    CallbackHolder<GetPublisherInfoCallback>* holder,
+    const ledger::Result result,
+    ledger::PublisherInfoPtr info) {
+  DCHECK(holder);
+  if (holder->is_valid())
+    std::move(holder->get()).Run(result, std::move(info));
+  delete holder;
+}
+
+void BatLedgerImpl::GetPublisherInfo(
+    const std::string& publisher_key,
+    GetPublisherInfoCallback callback) {
+  // deleted in OnPublisherInfo
+  auto* holder = new CallbackHolder<GetPublisherInfoCallback>(
+      AsWeakPtr(), std::move(callback));
+  ledger_->GetPublisherInfo(
+      publisher_key,
+      std::bind(BatLedgerImpl::OnPublisherInfo, holder, _1, _2));
+}
+
+void BatLedgerImpl::GetPublisherPanelInfo(
+    const uint64_t window_id,
+    const std::string& media_type,
+    const std::string& publisher_key) {
+  ledger_->GetPublisherPanelInfo(window_id, media_type, publisher_key);
+}
+
+void BatLedgerImpl::SavePublisherVisit(
+    const uint64_t window_id,
+    const std::string& media_type,
+    const std::string& url,
+    const std::string& publisher_key,
+    const std::string& publisher_name,
+    const std::string& favicon_url) {
+  ledger_->SavePublisherVisit(
+      window_id,
+      media_type,
+      url,
+      publisher_key,
+      publisher_name,
+      favicon_url);
+}
+
+void BatLedgerImpl::SaveMediaPublisherVisit(
+    const uint64_t window_id,
+    const std::string& media_type,
+    const std::string& url,
+    const std::string& publisher_key,
+    const std::string& publisher_name,
+    const std::string& media_key,
+    const std::string& favicon_url) {
+  ledger_->SaveMediaPublisherVisit(
+      window_id,
+      media_type,
+      url,
+      publisher_key,
+      publisher_name,
+      media_key,
+      favicon_url);
+}
+
 void BatLedgerImpl::OnRefreshPublisher(
     CallbackHolder<RefreshPublisherCallback>* holder,
     ledger::PublisherStatus status) {

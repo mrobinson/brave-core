@@ -20,16 +20,17 @@
 #include "brave/components/brave_rewards/browser/content_site.h"
 #include "brave/components/brave_rewards/browser/contribution_info.h"
 #include "brave/components/brave_rewards/browser/external_wallet.h"
-#include "brave/components/brave_rewards/browser/publisher_banner.h"
+#include "brave/components/brave_rewards/browser/monthly_report.h"
 #include "brave/components/brave_rewards/browser/pending_contribution.h"
 #include "brave/components/brave_rewards/browser/promotion.h"
+#include "brave/components/brave_rewards/browser/publisher_banner.h"
+#include "brave/components/brave_rewards/browser/publisher_info.h"
 #include "brave/components/brave_rewards/browser/rewards_internals_info.h"
 #include "brave/components/brave_rewards/browser/rewards_notification_service.h"
-#include "brave/components/brave_rewards/browser/monthly_report.h"
 #include "brave/components/brave_rewards/browser/rewards_parameters.h"
 #include "build/build_config.h"
-#include "components/sessions/core/session_id.h"
 #include "components/keyed_service/core/keyed_service.h"
+#include "components/sessions/core/session_id.h"
 #include "url/gurl.h"
 
 class PrefRegistrySimple;
@@ -75,6 +76,12 @@ using GetPublisherBannerCallback =
     base::OnceCallback<void(std::unique_ptr<brave_rewards::PublisherBanner>)>;
 using RefreshPublisherCallback =
     base::OnceCallback<void(uint32_t, const std::string&)>;
+using GetMediaPublisherInfoCallback = base::OnceCallback<void(
+    const int32_t,
+    std::unique_ptr<brave_rewards::PublisherInfo>)>;
+using GetPublisherInfoCallback = base::OnceCallback<void(
+    const int32_t,
+    std::unique_ptr<brave_rewards::PublisherInfo>)>;
 using SaveMediaInfoCallback =
     base::OnceCallback<void(std::unique_ptr<brave_rewards::ContentSite>)>;
 using GetInlineTippingPlatformEnabledCallback = base::OnceCallback<void(bool)>;
@@ -274,6 +281,47 @@ class RewardsService : public KeyedService {
       const std::string& media_type,
       const std::map<std::string, std::string>& args,
       SaveMediaInfoCallback callback) = 0;
+
+  virtual void UpdateMediaDuration(
+      const uint64_t window_id,
+      const std::string& media_type,
+      const std::string& url,
+      const std::string& publisher_key,
+      const std::string& publisher_name,
+      const std::string& media_id,
+      const std::string& media_key,
+      const std::string& favicon_url,
+      uint64_t duration) = 0;
+
+  virtual void GetMediaPublisherInfo(
+      const std::string& media_key,
+      GetMediaPublisherInfoCallback callback) = 0;
+
+  virtual void GetPublisherInfo(
+      const std::string& publisher_key,
+      GetPublisherInfoCallback callback) = 0;
+
+  virtual void GetPublisherPanelInfo(
+      const uint64_t window_id,
+      const std::string& media_type,
+      const std::string& publisher_key) = 0;
+
+  virtual void SavePublisherVisit(
+      const uint64_t window_id,
+      const std::string& media_type,
+      const std::string& url,
+      const std::string& publisher_key,
+      const std::string& publisher_name,
+      const std::string& favicon_url) = 0;
+
+  virtual void SaveMediaPublisherVisit(
+      const uint64_t window_id,
+      const std::string& media_type,
+      const std::string& url,
+      const std::string& publisher_key,
+      const std::string& publisher_name,
+      const std::string& media_key,
+      const std::string& favicon_url) = 0;
 
   virtual void SetInlineTippingPlatformEnabled(
       const std::string& key,

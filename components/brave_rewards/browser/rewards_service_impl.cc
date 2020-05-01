@@ -2053,6 +2053,181 @@ void RewardsServiceImpl::SaveInlineMediaInfo(
                     std::move(callback)));
 }
 
+void RewardsServiceImpl::UpdateMediaDuration(
+    const uint64_t window_id,
+    const std::string& media_type,
+    const std::string& url,
+    const std::string& publisher_key,
+    const std::string& publisher_name,
+    const std::string& media_id,
+    const std::string& media_key,
+    const std::string& favicon_url,
+    uint64_t duration) {
+  if (!Connected()) {
+    return;
+  }
+
+  bat_ledger_->UpdateMediaDuration(
+      window_id,
+      media_type,
+      url,
+      publisher_key,
+      publisher_name,
+      media_id,
+      media_key,
+      favicon_url,
+      duration);
+}
+
+void RewardsServiceImpl::GetMediaPublisherInfo(
+    const std::string& media_key,
+    GetMediaPublisherInfoCallback callback) {
+  if (!Connected()) {
+    return;
+  }
+
+  bat_ledger_->GetMediaPublisherInfo(
+      media_key,
+      base::BindOnce(&RewardsServiceImpl::OnMediaPublisherInfo,
+          AsWeakPtr(),
+          std::move(callback)));
+}
+
+void RewardsServiceImpl::OnMediaPublisherInfo(
+    GetMediaPublisherInfoCallback callback,
+    const ledger::Result result,
+    ledger::PublisherInfoPtr info) {
+  const auto result_converted = static_cast<int>(result);
+  if (result != ledger::Result::LEDGER_OK) {
+    std::move(callback).Run(result_converted, nullptr);
+    return;
+  }
+
+  brave_rewards::PublisherInfo brave_publisher_info;
+  brave_publisher_info.id = info->id;
+  brave_publisher_info.duration = info->duration;
+  brave_publisher_info.score = info->score;
+  brave_publisher_info.visits = info->visits;
+  brave_publisher_info.percent = info->percent;
+  brave_publisher_info.weight = info->weight;
+  brave_publisher_info.excluded = static_cast<int>(info->excluded);
+  brave_publisher_info.category = info->category;
+  brave_publisher_info.reconcile_stamp = info->reconcile_stamp;
+  brave_publisher_info.status = static_cast<int>(info->status);
+  brave_publisher_info.status_updated_at = info->status_updated_at;
+  brave_publisher_info.name = info->name;
+  brave_publisher_info.url = info->url;
+  brave_publisher_info.provider = info->provider;
+  brave_publisher_info.favicon_url = info->favicon_url;
+
+  auto brave_publisher_info_ptr =
+      std::make_unique<brave_rewards::PublisherInfo>(brave_publisher_info);
+  std::move(callback).Run(
+      result_converted,
+      std::move(brave_publisher_info_ptr));
+}
+
+void RewardsServiceImpl::GetPublisherInfo(
+    const std::string& publisher_key,
+    GetPublisherInfoCallback callback) {
+  if (!Connected()) {
+    return;
+  }
+
+  bat_ledger_->GetPublisherInfo(
+      publisher_key,
+      base::BindOnce(&RewardsServiceImpl::OnPublisherInfo,
+          AsWeakPtr(),
+          std::move(callback)));
+}
+
+void RewardsServiceImpl::OnPublisherInfo(
+    GetPublisherInfoCallback callback,
+    const ledger::Result result,
+    ledger::PublisherInfoPtr info) {
+  const auto result_converted = static_cast<int>(result);
+  if (result != ledger::Result::LEDGER_OK) {
+    std::move(callback).Run(result_converted, nullptr);
+    return;
+  }
+
+  brave_rewards::PublisherInfo brave_publisher_info;
+  brave_publisher_info.id = info->id;
+  brave_publisher_info.duration = info->duration;
+  brave_publisher_info.score = info->score;
+  brave_publisher_info.visits = info->visits;
+  brave_publisher_info.percent = info->percent;
+  brave_publisher_info.weight = info->weight;
+  brave_publisher_info.excluded = static_cast<int>(info->excluded);
+  brave_publisher_info.category = info->category;
+  brave_publisher_info.reconcile_stamp = info->reconcile_stamp;
+  brave_publisher_info.status = static_cast<int>(info->status);
+  brave_publisher_info.status_updated_at = info->status_updated_at;
+  brave_publisher_info.name = info->name;
+  brave_publisher_info.url = info->url;
+  brave_publisher_info.provider = info->provider;
+  brave_publisher_info.favicon_url = info->favicon_url;
+
+  auto brave_publisher_info_ptr =
+      std::make_unique<brave_rewards::PublisherInfo>(brave_publisher_info);
+  std::move(callback).Run(
+      result_converted,
+      std::move(brave_publisher_info_ptr));
+}
+
+void RewardsServiceImpl::GetPublisherPanelInfo(
+    const uint64_t window_id,
+    const std::string& media_type,
+    const std::string& publisher_key) {
+  if (!Connected()) {
+    return;
+  }
+
+  bat_ledger_->GetPublisherPanelInfo(window_id, media_type, publisher_key);
+}
+
+void RewardsServiceImpl::SavePublisherVisit(
+    const uint64_t window_id,
+    const std::string& media_type,
+    const std::string& url,
+    const std::string& publisher_key,
+    const std::string& publisher_name,
+    const std::string& favicon_url) {
+  if (!Connected()) {
+    return;
+  }
+
+  bat_ledger_->SavePublisherVisit(
+      window_id,
+      media_type,
+      url,
+      publisher_key,
+      publisher_name,
+      favicon_url);
+}
+
+void RewardsServiceImpl::SaveMediaPublisherVisit(
+    const uint64_t window_id,
+    const std::string& media_type,
+    const std::string& url,
+    const std::string& publisher_key,
+    const std::string& publisher_name,
+    const std::string& media_key,
+    const std::string& favicon_url) {
+  if (!Connected()) {
+    return;
+  }
+
+  bat_ledger_->SaveMediaPublisherVisit(
+      window_id,
+      media_type,
+      url,
+      publisher_key,
+      publisher_name,
+      media_key,
+      favicon_url);
+}
+
 void RewardsServiceImpl::OnGetRecurringTips(
     GetRecurringTipsCallback callback,
     ledger::PublisherInfoList list) {
