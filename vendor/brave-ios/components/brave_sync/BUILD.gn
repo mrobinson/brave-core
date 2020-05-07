@@ -9,6 +9,10 @@ source_set("brave_sync") {
   sources = [
     "brave_sync_service.mm",
     "brave_sync_service.h",
+    "BraveBrowserState.h",
+    "BraveBrowserState.mm",
+    "BraveBrowserStateIOData.h",
+    "BraveBrowserStateIOData.mm"
   ]
 
   deps = [

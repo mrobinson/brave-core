@@ -6,6 +6,7 @@
 #include "brave/vendor/brave-ios/components/brave_sync/brave_sync_service.h"
 #include "brave/vendor/brave-ios/components/bookmarks/bookmark_client.h"
 #include "brave/vendor/brave-ios/components/bookmarks/bookmarks_api.h"
+#include "brave/vendor/brave-ios/components/brave_sync/BraveBrowserState.h"
 
 #include "base/task/post_task.h"
 #include "base/base_paths.h"
@@ -42,11 +43,11 @@ namespace {
 const char kPreferencesFilename[] = "Preferences";
 
 bool GetUserDataDir(base::FilePath* result) {
-//  bool success = base::mac::GetUserDirectory(NSSearchPathDirectory::NSApplicationSupportDirectory,
-//                                             result);
-    
   bool success = base::mac::GetUserDirectory(NSSearchPathDirectory::NSApplicationSupportDirectory,
     result);
+  
+//  bool success = base::PathService::Get(ios::DIR_USER_DATA, &result);
+//  DCHECK(result);
 
   // On IOS, this directory does not exist unless it is created explicitly.
   if (success && !base::PathExists(*result))
@@ -87,14 +88,14 @@ BraveSyncService::BraveSyncService()
       factory.CreateSyncable(pref_registry_.get());
 
   // Register on BrowserState.
-  // user_prefs::UserPrefs::Set(this, prefs_.get());
-        
-  std::unique_ptr<BookmarkClient> client =
+  //user_prefs::UserPrefs::Set(this, prefs_.get());
 
+  //ChromeBrowserState* browser_state,
+  //sync_bookmarks::BookmarkSyncService* bookmark_sync_service
   bookmarks_api_ = std::make_unique<bookmarks::BookmarksAPI>(prefs_.get(),
       browser_state_path,
       io_task_runner_.get(),
-      std::make_unique<bookmarks::BraveBookmarkClient>());
+      std::make_unique<bookmarks::BraveBookmarkClient>(new BraveBrowserState(), this));
 }
 
 BraveSyncService::~BraveSyncService() {}

@@ -15,13 +15,10 @@
 #include "components/bookmarks/browser/bookmark_client.h"
 
 class GURL;
+class ChromeBrowserState;
 
 namespace sync_bookmarks {
 class BookmarkSyncService;
-}
-
-namespace brave {
-class BraveBrowserState;
 }
 
 namespace bookmarks {
@@ -30,7 +27,7 @@ class BookmarkPermanentNode;
 
 class BraveBookmarkClient: public bookmarks::BookmarkClient {
  public:
-  BraveBookmarkClient(brave::BraveBrowserState* browser_state,
+  BraveBookmarkClient(ChromeBrowserState* browser_state,
                       sync_bookmarks::BookmarkSyncService* bookmark_sync_service);
   ~BraveBookmarkClient() override;
     
@@ -60,7 +57,7 @@ class BraveBookmarkClient: public bookmarks::BookmarkClient {
  private:
   // Pointer to the associated ios::ChromeBrowserState. Must outlive
   // BookmarkClientImpl.
-  brave::BraveBrowserState* browser_state_;
+  ChromeBrowserState* browser_state_;
 
   bookmarks::BookmarkModel* model_;
 

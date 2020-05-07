@@ -24,7 +24,7 @@
 
 namespace bookmarks {
 BraveBookmarkClient::BraveBookmarkClient(
-    BraveBrowserState* browser_state,
+    ChromeBrowserState* browser_state,
     sync_bookmarks::BookmarkSyncService* bookmark_sync_service)
     : browser_state_(browser_state),
       bookmark_sync_service_(bookmark_sync_service) {}
