@@ -4,9 +4,12 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "brave/vendor/brave-ios/components/brave_sync/brave_sync_service.h"
-#include "brave/vendor/brave-ios/components/bookmarks/bookmark_client.h"
 #include "brave/vendor/brave-ios/components/bookmarks/bookmarks_api.h"
-#include "brave/vendor/brave-ios/components/brave_sync/BraveBrowserState.h"
+#include "brave/vendor/brave-ios/components/browser_state/brave_browser_state.h"
+#include "brave/vendor/brave-ios/components/browser_state/brave_browser_state_manager.h"
+#include "brave/vendor/brave-ios/components/user_prefs/user_prefs.h"
+#include "brave/vendor/brave-ios/components/context/application_context.h"
+#include "brave/vendor/brave-ios/components/bookmarks/bookmark_client.h"
 
 #include "base/task/post_task.h"
 #include "base/base_paths.h"
@@ -24,8 +27,6 @@
 namespace chrome {
     enum class Channel {
       UNKNOWN = 0,
-      // DEFAULT is an alias for UNKNOWN because the build files use DEFAULT but the
-      // code uses UNKNOWN. TODO(paulmiller): Combine DEFAULT & UNKNOWN.
       DEFAULT = UNKNOWN,
       CANARY = 1,
       DEV = 2,
@@ -88,14 +89,14 @@ BraveSyncService::BraveSyncService()
       factory.CreateSyncable(pref_registry_.get());
 
   // Register on BrowserState.
-  //user_prefs::UserPrefs::Set(this, prefs_.get());
+  user_prefs::UserPrefs::Set(this, prefs_.get());
 
-  //ChromeBrowserState* browser_state,
-  //sync_bookmarks::BookmarkSyncService* bookmark_sync_service
-  bookmarks_api_ = std::make_unique<bookmarks::BookmarksAPI>(prefs_.get(),
-      browser_state_path,
-      io_task_runner_.get(),
-      std::make_unique<bookmarks::BraveBookmarkClient>(new BraveBrowserState(), this));
+  brave::ChromeBrowserState* browser_state = brave::BraveBrowserState::FromBrowserState(brave::GetApplicationContext()->GetChromeBrowserStateManager()->GetLastUsedBrowserState());
+        (void)browser_state;
+//  bookmarks_api_ = std::make_unique<bookmarks::BookmarksAPI>(prefs_.get(),
+//      browser_state_path,
+//      io_task_runner_.get(),
+//      std::make_unique<brave::BraveBookmarkClient>(browser_state, this));
 }
 
 BraveSyncService::~BraveSyncService() {}

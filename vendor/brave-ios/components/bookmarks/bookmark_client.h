@@ -24,7 +24,9 @@ class BookmarkSyncService;
 namespace bookmarks {
 class BookmarkModel;
 class BookmarkPermanentNode;
+}
 
+namespace brave {
 class BraveBookmarkClient: public bookmarks::BookmarkClient {
  public:
   BraveBookmarkClient(ChromeBrowserState* browser_state,

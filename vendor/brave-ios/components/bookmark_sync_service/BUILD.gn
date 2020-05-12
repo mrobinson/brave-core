@@ -18,20 +18,21 @@ config("internal_config") {
   ]
 }
 
-source_set("brave_sync") {
+source_set("bookmark_sync_service") {
   configs += [ ":internal_config" ]
   configs += [ "//build/config/compiler:enable_arc" ]
   configs -= [ "//build/config/gcc:symbol_visibility_hidden" ]
 
   sources = [
-    "brave_sync_service.mm",
-    "brave_sync_service.h"
+    "bookmark_sync_service_factory.h",
+    "bookmark_sync_service_factory.cc",
+    "bookmark_undo_service_factory.h",
+    "bookmark_undo_service_factory.cc",
   ]
 
   deps = [
     "//base",
-    "//components/prefs",
-    "//components/pref_registry",
-    "//components/sync_preferences"
+    "//components/sync_bookmarks",
+    "//components/keyed_service/core"
   ]
 }

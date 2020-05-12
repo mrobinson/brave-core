@@ -23,6 +23,10 @@ namespace sync_bookmarks {
 class BookmarkSyncService;
 }
 
+namespace web {
+class URLDataManagerIOSBackend;
+}
+
 namespace bookmarks {
 
 class BookmarkClient;

@@ -11,7 +11,8 @@
 #include <memory>
 
 #include "base/macros.h"
-#include "ios/chrome/browser/browser_state/chrome_browser_state.h"
+#include "base/files/file_path.h"
+#include "brave/vendor/brave-ios/components/browser_state/BraveBrowserStateIOData.h"
 
 namespace sync_preferences {
 class PrefServiceSyncable;
@@ -19,6 +20,14 @@ class PrefServiceSyncable;
 
 namespace user_prefs {
 class PrefRegistrySyncable;
+}
+
+namespace base {
+class FilePath;
+}
+
+namespace bookmarks {
+class BookmarkModel;
 }
 
 namespace brave {
@@ -31,14 +40,12 @@ public:
    bool HasOffTheRecordChromeBrowserState() const override;
    ChromeBrowserState* GetOffTheRecordChromeBrowserState() override;
    void DestroyOffTheRecordChromeBrowserState() override;
-   PrefProxyConfigTracker* GetProxyConfigTracker() override;
+//   PrefProxyConfigTracker* GetProxyConfigTracker() override;
    PrefService* GetPrefs() override;
    PrefService* GetOffTheRecordPrefs() override;
-   ChromeBrowserStateIOData* GetIOData() override;
-   void ClearNetworkingHistorySince(base::Time time,
-                                    const base::Closure& completion) override;
-   net::URLRequestContextGetter* CreateRequestContext(
-       ProtocolHandlerMap* protocol_handlers) override;
+   BraveBrowserStateIOData* GetIOData() override;
+//   void ClearNetworkingHistorySince(base::Time time,
+//                                    const base::Closure& completion) override;
 
    // BrowserState:
    bool IsOffTheRecord() const override;
@@ -63,7 +70,7 @@ public:
    scoped_refptr<user_prefs::PrefRegistrySyncable> pref_registry_;
    std::unique_ptr<sync_preferences::PrefServiceSyncable> prefs_;
    std::unique_ptr<sync_preferences::PrefServiceSyncable> otr_prefs_;
-   std::unique_ptr<BraveBrowserStateImplIOData::Handle> io_data_;
+   std::unique_ptr<BraveBrowserStateIOData::Handle> io_data_;
 
    std::unique_ptr<PrefProxyConfigTracker> pref_proxy_config_tracker_;
    DISALLOW_COPY_AND_ASSIGN(BraveBrowserState);

@@ -22,7 +22,7 @@
 #include "ios/web/public/thread/web_task_traits.h"
 #include "url/gurl.h"
 
-namespace bookmarks {
+namespace brave {
 BraveBookmarkClient::BraveBookmarkClient(
     ChromeBrowserState* browser_state,
     sync_bookmarks::BookmarkSyncService* bookmark_sync_service)
@@ -59,22 +59,22 @@ bool BraveBookmarkClient::SupportsTypedCountForUrls() {
 void BraveBookmarkClient::GetTypedCountForUrls(
     UrlTypedCountMap* url_typed_count_map) {
     
-  history::HistoryService* history_service =
-      ios::HistoryServiceFactory::GetForBrowserState(
-          browser_state_, ServiceAccessType::EXPLICIT_ACCESS);
-    
-  history::URLDatabase* url_db =
-      history_service ? history_service->InMemoryDatabase() : nullptr;
-    
-  for (auto& url_typed_count_pair : *url_typed_count_map) {
-    int typed_count = 0;
-    history::URLRow url_row;
-    const GURL* url = url_typed_count_pair.first;
-    if (url_db && url && url_db->GetRowForURL(*url, &url_row))
-      typed_count = url_row.typed_count();
-
-    url_typed_count_pair.second = typed_count;
-  }
+//  history::HistoryService* history_service =
+//      ios::HistoryServiceFactory::GetForBrowserState(
+//          browser_state_, ServiceAccessType::EXPLICIT_ACCESS);
+//    
+//  history::URLDatabase* url_db =
+//      history_service ? history_service->InMemoryDatabase() : nullptr;
+//    
+//  for (auto& url_typed_count_pair : *url_typed_count_map) {
+//    int typed_count = 0;
+//    history::URLRow url_row;
+//    const GURL* url = url_typed_count_pair.first;
+//    if (url_db && url && url_db->GetRowForURL(*url, &url_row))
+//      typed_count = url_row.typed_count();
+//
+//    url_typed_count_pair.second = typed_count;
+//  }
 }
 
 bool BraveBookmarkClient::IsPermanentNodeVisible(

@@ -18,20 +18,23 @@ config("internal_config") {
   ]
 }
 
-source_set("brave_sync") {
+source_set("context") {
   configs += [ ":internal_config" ]
   configs += [ "//build/config/compiler:enable_arc" ]
   configs -= [ "//build/config/gcc:symbol_visibility_hidden" ]
 
   sources = [
-    "brave_sync_service.mm",
-    "brave_sync_service.h"
+    "application_context.cc",
+    "application_context.h",
+    "brave_application_context.cc",
+    "brave_application_context.h",
   ]
 
   deps = [
     "//base",
-    "//components/prefs",
-    "//components/pref_registry",
-    "//components/sync_preferences"
+    "//ios/chrome/browser",
+    "//ios/chrome/common",
+    "//ios/web/public",
+    "//ios/web/public/thread"
   ]
 }

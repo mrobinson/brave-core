@@ -18,20 +18,21 @@ config("internal_config") {
   ]
 }
 
-source_set("brave_sync") {
+source_set("keyed_service") {
   configs += [ ":internal_config" ]
   configs += [ "//build/config/compiler:enable_arc" ]
   configs -= [ "//build/config/gcc:symbol_visibility_hidden" ]
 
   sources = [
-    "brave_sync_service.mm",
-    "brave_sync_service.h"
+    "browser_state_keyed_service_factory.h",
+    "browser_state_keyed_service_factory.cc",
+    "browser_state_dependency_manager.h",
+    "browser_state_dependency_manager.cc",
   ]
 
   deps = [
     "//base",
-    "//components/prefs",
-    "//components/pref_registry",
-    "//components/sync_preferences"
+    "//components/bookmarks/browser",
+    "//components/keyed_service/core"
   ]
 }

@@ -11,10 +11,12 @@
 #include "base/compiler_specific.h"
 #include "base/macros.h"
 #include "base/sequenced_task_runner.h"
+#include "base/supports_user_data.h"
+#include "brave/vendor/brave-ios/components/bookmarks/bookmarks_api.h"
 
-namespace bookmarks {
-class BookmarksAPI;
-}
+//namespace bookmarks {
+//class BookmarksAPI;
+//}
 
 namespace sync_preferences {
 class PrefServiceSyncable;
@@ -25,7 +27,7 @@ namespace user_prefs {
 class PrefRegistrySyncable;
 }
 
-class BraveSyncService {
+class BraveSyncService : public base::SupportsUserData {
  public:
   BraveSyncService();
   ~BraveSyncService();

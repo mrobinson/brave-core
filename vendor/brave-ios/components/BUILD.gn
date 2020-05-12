@@ -18,9 +18,12 @@ config("internal_config") {
     ".",
     "bookmarks",
     "brave_sync",
-    "bookmarks_sync_service",
+    "bookmark_sync_service",
     "user_prefs",
-    "prefs_service"
+    "prefs_service",
+    "browser_state",
+    "context",
+    "keyed_service"
   ]
 }
 
@@ -38,6 +41,10 @@ source_set("components") {
     "//base",
     "bookmarks",
     "brave_sync",
-    "user_prefs"
+    "bookmark_sync_service",
+    "user_prefs",
+    "browser_state",
+    "context",
+    "keyed_service"
   ]
 }

@@ -1,4 +1,4 @@
-#include "prefs_change_observer.h"
+#include "brave/vendor/brave-ios/components/user_prefs/prefs_change_observer.h"
 #include "base/bind.h"
 #include "base/callback.h"
 #include "components/prefs/pref_service.h"
@@ -21,8 +21,6 @@
 }
 
 - (void)dealloc {
-    [super dealloc];
-    
     registrar.reset();
     service = nullptr;
 }
