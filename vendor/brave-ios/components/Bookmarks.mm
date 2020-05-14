@@ -1,9 +1,11 @@
 #include "brave/vendor/brave-ios/components/Bookmarks.h"
 
+#include "base/files/file_path.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/strings/sys_string_conversions.h"
 #include "brave/vendor/brave-ios/components/bookmarks/bookmarks_api.h"
 #include "brave/vendor/brave-ios/components/brave_sync/brave_sync_service.h"
+#include "brave/vendor/brave-ios/components/browser_state/chrome_browser_state.h"
 
 @interface BookmarksAPI()
 {
@@ -36,6 +38,7 @@
 
 @interface BookmarksService()
 {
+    std::unique_ptr<ChromeBrowserState> browser_state_;
     std::unique_ptr<BraveSyncService> sync_service_;
 }
 @end
@@ -44,7 +47,10 @@
 - (instancetype)init {
     if ((self = [super init])) {
         // TODO(bridiver)
-        sync_service_ = std::make_unique<BraveSyncService>(nullptr);
+        browser_state_ = std::make_unique<ChromeBrowserState>(
+            base::FilePath(kIOSChromeInitialBrowserState));
+        sync_service_ = std::make_unique<BraveSyncService>(
+            browser_state_.get());
     }
     return self;
 }

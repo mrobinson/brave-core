@@ -29,6 +29,7 @@ source_set("components") {
     "//base",
     "bookmarks",
     "brave_sync",
+    "browser_state",
     ":channel_info",
   ]
 }

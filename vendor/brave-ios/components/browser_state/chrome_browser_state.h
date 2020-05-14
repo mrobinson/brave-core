@@ -29,27 +29,28 @@ namespace user_prefs {
 class PrefRegistrySyncable;
 }
 
+extern const char kProductDirName[];
+extern const char kIOSChromeInitialBrowserState[];
+
 class ChromeBrowserState : public web::BrowserState {
  public:
+  explicit ChromeBrowserState(const base::FilePath& name);
   ~ChromeBrowserState() override;
 
   static ChromeBrowserState* FromBrowserState(BrowserState* browser_state);
 
   net::URLRequestContextGetter* GetRequestContext() override;
+  bool IsOffTheRecord() const override;
+  base::FilePath GetStatePath() const override;
 
   PrefService* GetPrefs();
   scoped_refptr<base::SequencedTaskRunner> GetIOTaskRunner();
 
- protected:
-  explicit ChromeBrowserState(
-      scoped_refptr<base::SequencedTaskRunner> io_task_runner,
-      const base::FilePath& path);
-
  private:
   net::URLRequestContextGetter* CreateRequestContext();
 
-  scoped_refptr<base::SequencedTaskRunner> io_task_runner_;
   base::FilePath state_path_;
+  scoped_refptr<base::SequencedTaskRunner> io_task_runner_;
   scoped_refptr<user_prefs::PrefRegistrySyncable> pref_registry_;
   std::unique_ptr<sync_preferences::PrefServiceSyncable> prefs_;
   scoped_refptr<net::URLRequestContextGetter> request_context_getter_;

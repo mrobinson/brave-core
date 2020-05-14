@@ -8,8 +8,11 @@
 #include "brave/vendor/brave-ios/components/browser_state/chrome_browser_state.h"
 
 #include "base/files/file_util.h"
+#include "base/mac/foundation_util.h"
+#include "base/path_service.h"
 #include "base/sequenced_task_runner.h"
 #include "base/supports_user_data.h"
+#include "base/task/post_task.h"
 #include "base/threading/thread_restrictions.h"
 #include "components/keyed_service/ios/browser_state_dependency_manager.h"
 #include "components/prefs/pref_service.h"
@@ -25,9 +28,32 @@
 #error "This file requires ARC support."
 #endif
 
-
+const base::FilePath::CharType kProductDirName[] = FILE_PATH_LITERAL("Brave");
+const base::FilePath::CharType kIOSChromeInitialBrowserState[] =
+    FILE_PATH_LITERAL("Default");
 
 namespace {
+
+bool GetDefaultUserDataDirectory(base::FilePath* result) {
+  if (!base::mac::GetUserDirectory(NSApplicationSupportDirectory,
+                                                 result)) {
+    NOTREACHED();
+    return false;
+  }
+
+  if (!base::PathExists(*result) && !base::CreateDirectory(*result))
+    return false;
+
+  *result = result->Append(kProductDirName);
+  return true;
+}
+
+base::FilePath GetUserDataDir() {
+  base::FilePath user_data_dir;
+  bool result = GetDefaultUserDataDirectory(&user_data_dir);
+  DCHECK(result);
+  return user_data_dir;
+}
 
 // Returns a bool indicating whether the necessary directories were able to be
 // created (or already existed).
@@ -52,11 +78,11 @@ bool EnsureBrowserStateDirectoriesCreated(const base::FilePath& path) {
 const char kBrowserStateIsChromeBrowserState[] = "IsChromeBrowserState";
 }
 
-ChromeBrowserState::ChromeBrowserState(
-    scoped_refptr<base::SequencedTaskRunner> io_task_runner,
-    const base::FilePath& path)
-    : io_task_runner_(std::move(io_task_runner)),
-      state_path_(path),
+ChromeBrowserState::ChromeBrowserState(const base::FilePath& name)
+    : state_path_(GetUserDataDir().Append(name)),
+      io_task_runner_(base::CreateSequencedTaskRunner(
+          {base::ThreadPool(), base::TaskShutdownBehavior::BLOCK_SHUTDOWN,
+           base::MayBlock()})),
       pref_registry_(new user_prefs::PrefRegistrySyncable) {
   DCHECK(io_task_runner_);
   SetUserData(kBrowserStateIsChromeBrowserState,
@@ -111,6 +137,14 @@ net::URLRequestContextGetter* ChromeBrowserState::GetRequestContext() {
 net::URLRequestContextGetter* ChromeBrowserState::CreateRequestContext() {
   // TODO(bridiver)
   return nullptr;
+}
+
+bool ChromeBrowserState::IsOffTheRecord() const {
+  return false;
+}
+
+base::FilePath ChromeBrowserState::GetStatePath() const {
+  return state_path_;
 }
 
 scoped_refptr<base::SequencedTaskRunner> ChromeBrowserState::GetIOTaskRunner() {
