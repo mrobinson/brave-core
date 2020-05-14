@@ -29,5 +29,16 @@ source_set("components") {
     "//base",
     "bookmarks",
     "brave_sync",
+    ":channel_info",
+  ]
+}
+
+source_set("channel_info") {
+  sources = [
+    "channel_info.cc",
+  ]
+
+  deps = [
+    "//components/version_info",
   ]
 }
