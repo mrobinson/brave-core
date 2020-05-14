@@ -21,7 +21,9 @@
 #include "components/user_prefs/user_prefs.h"
 #include "ios/chrome/browser/prefs/ios_chrome_pref_service_factory.h"
 #include "ios/web/public/browser_state.h"
+#include "ios/web/public/thread/web_task_traits.h"
 #include "ios/web/public/thread/web_thread.h"
+#include "ios/web/shell/shell_url_request_context_getter.h"
 #include "net/url_request/url_request_context_getter.h"
 
 #if !defined(__has_feature) || !__has_feature(objc_arc)
@@ -135,8 +137,9 @@ net::URLRequestContextGetter* ChromeBrowserState::GetRequestContext() {
 }
 
 net::URLRequestContextGetter* ChromeBrowserState::CreateRequestContext() {
-  // TODO(bridiver)
-  return nullptr;
+  return new web::ShellURLRequestContextGetter(
+      GetStatePath(), this,
+      base::CreateSingleThreadTaskRunner({web::WebThread::IO}));
 }
 
 bool ChromeBrowserState::IsOffTheRecord() const {
