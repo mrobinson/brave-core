@@ -8,6 +8,7 @@
 #include "base/logging.h"
 #include "components/content_settings/core/common/content_settings_pattern.h"
 #include "brave/vendor/brave-ios/components/bookmarks/bookmark_model_factory.h"
+#include "brave/vendor/brave-ios/components/bookmarks/startup_task_runner_service_factory.h"
 #include "brave/vendor/brave-ios/components/bookmark_sync_service/bookmark_undo_service_factory.h"
 #include "net/url_request/url_request.h"
 #include "ui/base/l10n/l10n_util_mac.h"
@@ -46,7 +47,9 @@ void BraveWebMainParts::PreMainMessageLoopRun() {
   ContentSettingsPattern::SetNonWildcardDomainNonPortSchemes(nullptr, 0);
 
   // Ensure that the browser state is initialized.
+  // Just add these directly for now
   // EnsureBrowserStateKeyedServiceFactoriesBuilt();
   ios::BookmarkModelFactory::GetInstance();
   ios::BookmarkUndoServiceFactory::GetInstance();
+  ios::StartupTaskRunnerServiceFactory::GetInstance();
 }
