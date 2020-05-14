@@ -1,10 +1,9 @@
-#include "Bookmarks.h"
-#include "bookmarks/bookmarks_api.h"
-#include "brave_sync/brave_sync_service.h"
+#include "brave/vendor/brave-ios/components/Bookmarks.h"
+
 #include "base/strings/utf_string_conversions.h"
 #include "base/strings/sys_string_conversions.h"
-#include "url/gurl.h"
-#include "ios/chrome/common/string_util.h"
+#include "brave/vendor/brave-ios/components/bookmarks/bookmarks_api.h"
+#include "brave/vendor/brave-ios/components/brave_sync/brave_sync_service.h"
 
 @interface BookmarksAPI()
 {
@@ -25,10 +24,10 @@
 }
 
 - (void)createWithParentId:(NSUInteger)parentId index:(NSUInteger)index title:(NSString *)title url:(NSURL *)url {
-    
+
     base::string16 title_;
     base::UTF8ToUTF16([title UTF8String], [title length], &title_);
-    
+
 //    GURL url_ = parsedUrl(url.absoluteString.UTF8String);
 //    api_->Create(parentId, index, title_, url_);
 }
@@ -44,7 +43,8 @@
 @implementation BookmarksService
 - (instancetype)init {
     if ((self = [super init])) {
-        sync_service_ = std::make_unique<BraveSyncService>();
+        // TODO(bridiver)
+        sync_service_ = std::make_unique<BraveSyncService>(nullptr);
     }
     return self;
 }
