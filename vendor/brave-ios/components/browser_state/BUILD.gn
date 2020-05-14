@@ -27,6 +27,7 @@ source_set("browser_state") {
   ]
 
   deps = [
+    ":chromium_sources",
     "//base",
     "//components/keyed_service/ios",
     "//components/prefs",
@@ -39,5 +40,23 @@ source_set("browser_state") {
 
   public_deps = [
     "//ios/web/public",
+  ]
+}
+
+source_set("chromium_sources") {
+  sources = [
+    "//ios/chrome/browser/prefs/ios_chrome_pref_service_factory.cc",
+    "//ios/chrome/browser/prefs/ios_chrome_pref_service_factory.h",
+    "//ios/chrome/browser/prefs/ios_chrome_pref_model_associator_client.cc",
+    "//ios/chrome/browser/prefs/ios_chrome_pref_model_associator_client.h",
+  ]
+
+  deps = [
+    "//base",
+    "//components/content_settings/core/browser",
+    "//components/prefs",
+    "//components/proxy_config",
+    "//components/sync_preferences",
+    "//components/user_prefs",
   ]
 }

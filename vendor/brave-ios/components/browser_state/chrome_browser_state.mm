@@ -16,6 +16,7 @@
 #include "components/pref_registry/pref_registry_syncable.h"
 #include "components/sync_preferences/pref_service_syncable.h"
 #include "components/user_prefs/user_prefs.h"
+#include "ios/chrome/browser/prefs/ios_chrome_pref_service_factory.h"
 #include "ios/web/public/browser_state.h"
 #include "ios/web/public/thread/web_thread.h"
 #include "net/url_request/url_request_context_getter.h"
@@ -68,9 +69,8 @@ ChromeBrowserState::ChromeBrowserState(
   BrowserStateDependencyManager::GetInstance()
       ->RegisterBrowserStatePrefsForServices(pref_registry_.get());
 
-  // TODO(bridiver)
-  // prefs_ = CreateBrowserStatePrefs(state_path_, GetIOTaskRunner().get(),
-  //                                  pref_registry_);
+  prefs_ = CreateBrowserStatePrefs(state_path_, GetIOTaskRunner().get(),
+                                   pref_registry_);
   // Register on BrowserState.
   user_prefs::UserPrefs::Set(this, prefs_.get());
 
