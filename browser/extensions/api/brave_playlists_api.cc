@@ -34,11 +34,13 @@ constexpr char kAlreadyInitializedError[] = "Already initialized";
 constexpr char kInvalidArgsError[] = "Invalid arguments";
 constexpr char kUnknownError[] = "Unknown";
 constexpr char kNotExistPlaylistError[] = "Playlist does not exist";
+constexpr char kFeatureDisabled[] = "Playlist feature is disabled";
 
 PlaylistsController* GetPlaylistsController(content::BrowserContext* context) {
-  return PlaylistsServiceFactory::GetInstance()
-      ->GetForProfile(Profile::FromBrowserContext(context))
-      ->controller();
+  brave_playlists::PlaylistsService* service =
+      PlaylistsServiceFactory::GetInstance()
+          ->GetForProfile(Profile::FromBrowserContext(context));
+  return service ? service->controller() : nullptr;
 }
 
 CreatePlaylistParams GetCreatePlaylistParamsFromCreateParams(
@@ -60,7 +62,12 @@ namespace extensions {
 namespace api {
 
 ExtensionFunction::ResponseAction BravePlaylistsCreatePlaylistFunction::Run() {
-  if (!GetPlaylistsController(browser_context())->initialized())
+  auto* controller = GetPlaylistsController(browser_context());
+  if (!controller) {
+    return RespondNow(Error(kFeatureDisabled));
+  }
+
+  if (!controller->initialized())
     return RespondNow(Error(kNotInitializedError));
 
   std::unique_ptr<CreatePlaylist::Params> params(
@@ -77,14 +84,24 @@ ExtensionFunction::ResponseAction BravePlaylistsCreatePlaylistFunction::Run() {
 }
 
 ExtensionFunction::ResponseAction BravePlaylistsIsInitializedFunction::Run() {
-  const bool initialized =
-      GetPlaylistsController(browser_context())->initialized();
-  return RespondNow(OneArgument(std::make_unique<base::Value>(initialized)));
+  auto* controller = GetPlaylistsController(browser_context());
+  if (!controller) {
+    return RespondNow(Error(kFeatureDisabled));
+  }
+
+  return RespondNow(OneArgument(std::make_unique<base::Value>(
+      controller->initialized())));
 }
 
 ExtensionFunction::ResponseAction BravePlaylistsInitializeFunction::Run() {
-  if (GetPlaylistsController(browser_context())->initialized())
+  auto* controller = GetPlaylistsController(browser_context());
+  if (!controller) {
+    return RespondNow(Error(kFeatureDisabled));
+  }
+
+  if (controller->initialized()) {
     return RespondNow(Error(kAlreadyInitializedError));
+  }
 
   if (PlaylistsServiceFactory::GetInstance()
           ->GetForProfile(Profile::FromBrowserContext(browser_context()))
@@ -96,7 +113,12 @@ ExtensionFunction::ResponseAction BravePlaylistsInitializeFunction::Run() {
 }
 
 ExtensionFunction::ResponseAction BravePlaylistsGetAllPlaylistsFunction::Run() {
-  if (!GetPlaylistsController(browser_context())->initialized())
+  auto* controller = GetPlaylistsController(browser_context());
+  if (!controller) {
+    return RespondNow(Error(kFeatureDisabled));
+  }
+
+  if (!controller->initialized())
     return RespondNow(Error(kNotInitializedError));
 
   if (GetPlaylistsController(browser_context())
@@ -116,7 +138,12 @@ void BravePlaylistsGetAllPlaylistsFunction::OnGetAllPlaylists(
 }
 
 ExtensionFunction::ResponseAction BravePlaylistsGetPlaylistFunction::Run() {
-  if (!GetPlaylistsController(browser_context())->initialized())
+  auto* controller = GetPlaylistsController(browser_context());
+  if (!controller) {
+    return RespondNow(Error(kFeatureDisabled));
+  }
+
+  if (!controller->initialized())
     return RespondNow(Error(kNotInitializedError));
 
   std::unique_ptr<GetPlaylist::Params> params(
@@ -135,7 +162,12 @@ ExtensionFunction::ResponseAction BravePlaylistsGetPlaylistFunction::Run() {
 }
 
 ExtensionFunction::ResponseAction BravePlaylistsRecoverPlaylistFunction::Run() {
-  if (!GetPlaylistsController(browser_context())->initialized())
+  auto* controller = GetPlaylistsController(browser_context());
+  if (!controller) {
+    return RespondNow(Error(kFeatureDisabled));
+  }
+
+  if (!controller->initialized())
     return RespondNow(Error(kNotInitializedError));
 
   std::unique_ptr<GetPlaylist::Params> params(
@@ -154,7 +186,12 @@ void BravePlaylistsGetPlaylistFunction::OnGetPlaylist(base::Value playlist) {
 }
 
 ExtensionFunction::ResponseAction BravePlaylistsDeletePlaylistFunction::Run() {
-  if (!GetPlaylistsController(browser_context())->initialized())
+  auto* controller = GetPlaylistsController(browser_context());
+  if (!controller) {
+    return RespondNow(Error(kFeatureDisabled));
+  }
+
+  if (!controller->initialized())
     return RespondNow(Error(kNotInitializedError));
 
   std::unique_ptr<DeletePlaylist::Params> params(
@@ -169,7 +206,12 @@ ExtensionFunction::ResponseAction BravePlaylistsDeletePlaylistFunction::Run() {
 
 ExtensionFunction::ResponseAction
 BravePlaylistsDeleteAllPlaylistsFunction::Run() {
-  if (!GetPlaylistsController(browser_context())->initialized())
+  auto* controller = GetPlaylistsController(browser_context());
+  if (!controller) {
+    return RespondNow(Error(kFeatureDisabled));
+  }
+
+  if (!controller->initialized())
     return RespondNow(Error(kNotInitializedError));
 
   if (GetPlaylistsController(browser_context())
@@ -188,7 +230,12 @@ void BravePlaylistsDeleteAllPlaylistsFunction::OnDeleteAllPlaylists(
 }
 
 ExtensionFunction::ResponseAction BravePlaylistsRequestDownloadFunction::Run() {
-  if (!GetPlaylistsController(browser_context())->initialized())
+  auto* controller = GetPlaylistsController(browser_context());
+  if (!controller) {
+    return RespondNow(Error(kFeatureDisabled));
+  }
+
+  if (!controller->initialized())
     return RespondNow(Error(kNotInitializedError));
 
   std::unique_ptr<RequestDownload::Params> params(
@@ -202,7 +249,12 @@ ExtensionFunction::ResponseAction BravePlaylistsRequestDownloadFunction::Run() {
 }
 
 ExtensionFunction::ResponseAction BravePlaylistsPlayFunction::Run() {
-  if (!GetPlaylistsController(browser_context())->initialized())
+  auto* controller = GetPlaylistsController(browser_context());
+  if (!controller) {
+    return RespondNow(Error(kFeatureDisabled));
+  }
+
+  if (!controller->initialized())
     return RespondNow(Error(kNotInitializedError));
 
   std::unique_ptr<GetPlaylist::Params> params(

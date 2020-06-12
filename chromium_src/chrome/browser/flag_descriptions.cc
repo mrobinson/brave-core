@@ -13,7 +13,7 @@ const char kUseDevUpdaterUrlDescription[] =
     "This is for internal testing only.";
 const char kBraveNTPBrandedWallpaperName[] =
     "New Tab Page Branded Wallpapers";
-  const char kBraveNTPBrandedWallpaperDescription[] =
+const char kBraveNTPBrandedWallpaperDescription[] =
     "Allow New Tab Page Branded Wallpapers and user preference.";
 const char kBraveNTPBrandedWallpaperDemoName[] =
     "New Tab Page Demo Branded Wallpaper";
