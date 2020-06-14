@@ -40,6 +40,7 @@
 
 #if BUILDFLAG(ENABLE_BRAVE_PLAYLISTS)
 #include "brave/browser/ui/webui/brave_playlists_ui.h"
+#include "brave/components/playlists/browser/features.h"
 #endif
 
 using content::WebUI;
@@ -71,7 +72,10 @@ WebUIController* NewWebUI<BasicUI>(WebUI* web_ui, const GURL& url) {
 #endif  // BUILDFLAG(BRAVE_WALLET_ENABLED)
 #if BUILDFLAG(ENABLE_BRAVE_PLAYLISTS)
   } else if (host == kPlaylistsHost) {
-    return new brave_playlists::BravePlaylistsUI(web_ui, url.host());
+    if (base::FeatureList::IsEnabled(
+        brave_playlists::features::kBravePlaylists)) {
+      return new brave_playlists::BravePlaylistsUI(web_ui, url.host());
+    }
 #endif  // BUILDFLAG(BRAVE_PLAYLISTS_ENABLED)
 #if BUILDFLAG(BRAVE_REWARDS_ENABLED)
   } else if (host == kRewardsPageHost) {
