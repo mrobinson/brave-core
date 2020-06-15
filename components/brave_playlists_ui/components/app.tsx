@@ -19,13 +19,14 @@ interface Props {
 }
 
 interface State {
-  playlists: any
+  playlists: any,
+  experimentalUrl: string
 }
 
 export class PlaylistsPage extends React.Component<Props, State> {
   constructor (props: Props) {
     super(props)
-    this.state = { playlists: [] }
+    this.state = { playlists: [], experimentalUrl: '' }
     this.getPlaylist()
   }
 
@@ -68,12 +69,12 @@ export class PlaylistsPage extends React.Component<Props, State> {
   }
 
   getPlaylistHeader = (): Cell[] => {
-      return [
-        { content: 'INDEX' },
-        { content: 'NAME' },
-        { content: 'STATUS' },
-        { content: 'REMOVE' }
-      ]
+    return [
+      { content: 'INDEX' },
+      { content: 'NAME' },
+      { content: 'STATUS' },
+      { content: 'REMOVE' }
+    ]
   }
 
   getPlaylistRows = (playlist?: any): Row[] | undefined => {
@@ -84,12 +85,13 @@ export class PlaylistsPage extends React.Component<Props, State> {
     return playlist.map((item: any, index: any): any => {
       const cell: Row = {
         content: [
-          { content: (<div style={{ textAlign: 'center' }}>{index+1}</div>) },
+          { content: (<div style={{ textAlign: 'center' }}>{index + 1}</div>) },
           { content: (
             <div>
               <h3>{item.playlistName}</h3>
               <a href='#' onClick={this.onClickPlayVideo.bind(this, item.id)}>
-                <img style={{ maxWidth: '200px' }}
+                <img
+                  style={{ maxWidth: '200px' }}
                   src={this.getImgSrc(item.id)}
                 />
                 </a>
@@ -111,6 +113,18 @@ export class PlaylistsPage extends React.Component<Props, State> {
     chrome.bravePlaylists.deletePlaylist(playlistId)
   }
 
+  get pageHasDownloadableVideo () {
+    return this.state.experimentalUrl.startsWith('https://www.youtube.com/watch')
+  }
+
+  onChangeExperimentalUrl = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    this.setState({ experimentalUrl: event.target.value })
+  }
+
+  onClickDownloadVideo = () => {
+    chrome.bravePlaylists.requestDownload(this.state.experimentalUrl)
+  }
+
   render () {
     const { playlists } = this.state
     return (
@@ -119,6 +133,31 @@ export class PlaylistsPage extends React.Component<Props, State> {
           <Table header={this.getPlaylistHeader()} rows={this.getPlaylistRows(playlists)}>
             YOUR PLAYLIST IS EMPTY
           </Table>
+        </div>
+
+        <div>
+          <h1>Experimental</h1>
+          <div>
+            <textarea
+              cols={100}
+              rows={10}
+              value={this.state.experimentalUrl}
+              onChange={this.onChangeExperimentalUrl}
+            />
+            <div>
+            {
+              this.pageHasDownloadableVideo
+              ? (
+                <div>
+                  <h1>This page has a video you can download</h1>
+                  <button onClick={this.onClickDownloadVideo.bind(this)}>Click here to download</button>
+                </div>
+              ) : (
+                <h1>Nothing to see here. Put a proper YouTube link to see the magic</h1>
+              )
+            }
+            </div>
+          </div>
         </div>
       </div>
     )
