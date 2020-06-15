@@ -80,22 +80,29 @@ repack("resources") {
 }
 
 grit("strings") {
-  source = "brave_components_strings.grd"
+  if (is_ios) {
+    source = "brave_components_strings.grd"
+    outputs = []
+    output_dir = "$root_gen_dir/components"
+    resource_ids = "//brave/browser/resources/resource_ids"
+  } else {
+    source = "brave_components_strings.grd"
 
-  outputs = [
-    "grit/brave_components_strings.h",
-  ]
+    outputs = [
+      "grit/brave_components_strings.h",
+    ]
 
-  defines = [
-    "enable_speedreader=$enable_speedreader",
-  ]
+    defines = [
+      "enable_speedreader=$enable_speedreader",
+    ]
 
-  foreach(locale, locales_with_fake_bidi) {
-    outputs += [ "brave_components_strings_$locale.pak" ]
+    foreach(locale, locales_with_fake_bidi) {
+      outputs += [ "brave_components_strings_$locale.pak" ]
+    }
+
+    output_dir = "$root_gen_dir/components"
+    resource_ids = "//brave/browser/resources/resource_ids"
   }
-
-  output_dir = "$root_gen_dir/components"
-  resource_ids = "//brave/browser/resources/resource_ids"
 }
 
 action("about_credits") {
