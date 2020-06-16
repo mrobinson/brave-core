@@ -34,10 +34,6 @@ BraveWebMainParts::BraveWebMainParts() {
   // cookies need to go through one of Chrome's URLRequestContexts which have
   // a ChromeNetworkDelegate attached that selectively allows cookies again.
   net::URLRequest::SetDefaultCookiePolicyToBlock();
-    
-    //TODO: Remove once we get ApplicationContext working
-    (void)local_state_;
-    (void)application_context_;
 }
 
 BraveWebMainParts::~BraveWebMainParts() {}
