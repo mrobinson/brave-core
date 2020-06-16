@@ -12,7 +12,7 @@
 #include "ios/web/public/init/web_main_parts.h"
 
 class PrefService;
-//class ApplicationContextImpl;
+class BraveApplicationContext;
 
 class BraveWebMainParts : public web::WebMainParts {
  public:
@@ -27,8 +27,8 @@ class BraveWebMainParts : public web::WebMainParts {
   void PostMainMessageLoopRun() override;
   void PostDestroyThreads() override;
     
-  //std::unique_ptr<ApplicationContextImpl> application_context_;
-  //PrefService* local_state_;
+  std::unique_ptr<BraveApplicationContext> application_context_;
+  PrefService* local_state_;
 
   DISALLOW_COPY_AND_ASSIGN(BraveWebMainParts);
 };

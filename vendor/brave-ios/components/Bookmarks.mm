@@ -52,10 +52,12 @@
   if ((self = [super init])) {
     // TODO(bridiver) - move this stuff somewhere else, the BookmarksService
     // shouldn't own all this stuff
+    
     delegate_.reset(new BraveMainDelegate());
 
     web::WebMainParams params(delegate_.get());
     params.register_exit_manager = false;
+    
     web_main_ = std::make_unique<web::WebMain>(std::move(params));
 
     browser_state_ = std::make_unique<ChromeBrowserState>(

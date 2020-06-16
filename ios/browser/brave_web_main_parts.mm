@@ -4,17 +4,23 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "brave/ios/browser/brave_web_main_parts.h"
+#import "brave/ios/browser/brave_application_context.h"
 
 #include "base/logging.h"
 #include "components/content_settings/core/common/content_settings_pattern.h"
 #include "brave/vendor/brave-ios/components/bookmarks/bookmark_model_factory.h"
 #include "brave/vendor/brave-ios/components/bookmarks/startup_task_runner_service_factory.h"
 #include "brave/vendor/brave-ios/components/bookmark_sync_service/bookmark_undo_service_factory.h"
+
+#include "ios/chrome/browser/chrome_paths.h"
+#include "base/path_service.h"
+#include "base/sequenced_task_runner.h"
+#include "base/task/post_task.h"
+#include "base/task/thread_pool.h"
 #include "net/url_request/url_request.h"
 #include "ui/base/l10n/l10n_util_mac.h"
 #include "ui/base/resource/resource_bundle.h"
 
-//#include "ios/chrome/browser/application_context_impl.h"
 //#include "ios/chrome/browser/browser_state/browser_state_keyed_service_factories.h"
 //#include "ios/chrome/browser/browser_state/chrome_browser_state.h"
 //#include "ios/chrome/browser/browser_state/chrome_browser_state_manager.h"
@@ -28,6 +34,10 @@ BraveWebMainParts::BraveWebMainParts() {
   // cookies need to go through one of Chrome's URLRequestContexts which have
   // a ChromeNetworkDelegate attached that selectively allows cookies again.
   net::URLRequest::SetDefaultCookiePolicyToBlock();
+    
+    //TODO: Remove once we get ApplicationContext working
+    (void)local_state_;
+    (void)application_context_;
 }
 
 BraveWebMainParts::~BraveWebMainParts() {}
@@ -47,26 +57,26 @@ void BraveWebMainParts::PreMainMessageLoopStart() {
 }
 
 void BraveWebMainParts::PreCreateThreads() {
-//    scoped_refptr<base::SequencedTaskRunner> local_state_task_runner =
-//    base::ThreadPool::CreateSequencedTaskRunner(
-//        {base::MayBlock(), base::TaskPriority::BEST_EFFORT,
-//         base::TaskShutdownBehavior::BLOCK_SHUTDOWN});
-//
-//    base::FilePath local_state_path;
-//    CHECK(base::PathService::Get(ios::FILE_LOCAL_STATE, &local_state_path));
-//    application_context_.reset(new ApplicationContextImpl(
-//        local_state_task_runner.get(), parsed_command_line_,
-//        l10n_util::GetLocaleOverride()));
-//    DCHECK_EQ(application_context_.get(), GetApplicationContext());
-//
-//    local_state_ = application_context_->GetLocalState();
-//    DCHECK(local_state_);
-//
-//    application_context_->PreCreateThreads();
+    scoped_refptr<base::SequencedTaskRunner> local_state_task_runner =
+    base::ThreadPool::CreateSequencedTaskRunner(
+        {base::MayBlock(), base::TaskPriority::BEST_EFFORT,
+         base::TaskShutdownBehavior::BLOCK_SHUTDOWN});
+
+    base::FilePath local_state_path;
+    CHECK(base::PathService::Get(ios::FILE_LOCAL_STATE, &local_state_path));
+    application_context_.reset(new BraveApplicationContext(
+        local_state_task_runner.get(), *base::CommandLine::ForCurrentProcess(),
+        l10n_util::GetLocaleOverride()));
+    DCHECK_EQ(application_context_.get(), GetApplicationContext());
+
+    local_state_ = application_context_->GetLocalState();
+    DCHECK(local_state_);
+
+    application_context_->PreCreateThreads();
 }
 
 void BraveWebMainParts::PreMainMessageLoopRun() {
-//  application_context_->PreMainMessageLoopRun();
+  application_context_->PreMainMessageLoopRun();
     
   // ContentSettingsPattern need to be initialized before creating the
   // ChromeBrowserState.
