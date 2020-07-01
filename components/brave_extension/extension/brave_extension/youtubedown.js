@@ -1,11 +1,11 @@
-/* Copyright (c) 2019 Jamie Zawinski <jwz@jwz.org>
+/* Copyright © 2019-2020 Jamie Zawinski <jwz@jwz.org>
 
    Permission to use, copy, modify, distribute, and sell this software and its
    documentation for any purpose is hereby granted without fee, provided that
    the above copyright notice appear in all copies and that both that
    copyright notice and this permission notice appear in supporting
    documentation.  No representations are made about the suitability of this
-   software for any purpose.  It is provided "as is" without express or
+   software for any purpose.  It is provided "as is" without express or 
    implied warranty.
 
    A JavaScript program to download youtube videos from within your browser.
@@ -75,7 +75,7 @@
 
 (function() {
 
-var version = '$Revision: 1.16 $'.replace(/^.*\s(\d[.\d]+)\s.*$/s, '$1');
+var version = '$Revision: 1.37 $'.replace(/^.*\s(\d[.\d]+)\s.*$/s, '$1');
 
 var verbose = 2;
 
@@ -117,7 +117,7 @@ function errorI (err) {
 
 
 // Convert any HTML entities to Unicode characters.
-//
+// 
 function html_unquote (str) {
   str = str.replace(/<[^<>]+>/g, '');
   var div = document.createElement('div');
@@ -277,6 +277,10 @@ var known_formats = {
   401: { v: 'av1',  w: 3840, h: 2160, a: null               },
   402: { v: 'av1',  w: 3840, h: 2160, a: null               },
   403: { v: 'av1',  w: 5888, h: 2160, a: null               },
+  597: { v: 'mp4',  w:  256, h:  144, a: null               },
+  598: { v: 'webm', w:  256, h:  144, a: null               },
+  599: { v: null,                     a: 'aac',  abr: 30    },
+  600: { v: null,                     a: 'opus', abr: 35    },
 };
 
 
@@ -305,7 +309,7 @@ async function download_url (filename, url, progress_p) {
   a.setAttribute ("download", filename);
   a.setAttribute ("target", "_blank");
 
-  // Getting "The download attribute on anchor was ignored because its
+  // Getting "The download attribute on anchor was ignored because its 
   // href URL has a different security origin."
   // Maybe the cross-origin is that 'document' is on youtube.com but
   // HREF points to googlevideo.com?
@@ -634,11 +638,16 @@ function page_cipher_base_url (url, body) {
   body = body.replace(/\\/gs, '');
   // Sometimes but not always the "ux.js" file comes before "base.js".
   // But in the past, the file was not named "base.js"...
+  // The proper document is the one that starts with "var _yt_player =".
   var c = (body.match(/\/jsbin\/((?:html5)?player[-_][^<>\"\']+?\/base)\.js/s)
            ? RegExp.$1 : null);
   if (! c)
     c   = (body.match(/\/jsbin\/((?:html5)?player[-_][^<>\"\']+?)\.js/s)
            ? RegExp.$1 : null);
+  if (! c)
+    c   = (body.match(/\/player\/([^<>\"\']+\/player[-_][^<>\"\']+\/base)\.js/s)
+           ? RegExp.$1 : null);
+
   if (c) c = c.replace(/\\/g, '');
   if (! c.match(/base$/s))
     errorI ("matched wrong cipher: " + c + ' ' + url + "\nBody:\n" + body);
@@ -726,7 +735,9 @@ function guess_cipher (cipher_id, selftest_p, nowarn) {
   }
 
   cipher_id = cipher_id.replace(/\\/gs, '');
-  url = "https://s.ytimg.com/yts/jsbin/" + cipher_id + ".js";
+  url = (cipher_id.match(/vflset/)
+         ? "https://www.youtube.com/s/player/" + cipher_id + ".js"
+         : "https://s.ytimg.com/yts/jsbin/" + cipher_id + ".js");
 
   [http, head, body] = get_url (url);
   check_http_status (id, url, http, 2);
@@ -739,8 +750,14 @@ function guess_cipher (cipher_id, selftest_p, nowarn) {
 
   // First, find the sts parameter:
   var sts = (body.match(/\bsts:(\d+)\b/si) ? RegExp.$1 : null);
-  if (!sts) errorI (cipher_id + ": no sts parameter: " + url);
 
+  if (!sts) {  // New way, 4-Jan-2020
+    // Find "N" in this: var f=18264; a.fa("ipp_signature_cipher_killswitch")
+    sts = (body.match(RX('$v = (\\d{5,}) ; $v \\("ipp_signature_cipher_killswitch"\\)'))
+           ? RegExp.$1 : null);
+  }
+
+  if (!sts) errorI (cipher_id + ": no sts parameter: " + url);
 
   // Since the script is minimized and obfuscated, we can't search for
   // specific function names, since those change. Instead we match the
@@ -774,8 +791,19 @@ function guess_cipher (cipher_id, selftest_p, nowarn) {
   body = body.replace(RX('\\(0,($v)\\)'), '$1');
 
   // If that didn't work:
+  // Find "B" in this: A = B(C(A)), D(E,F(A))
+  // Where "C" is "decodeURIComponent" and "F" is encodeURIComponent
+  if (!fn)
+    fn = (body.match(RX(' ( $v ) = ( $v ) \\(     # A = B (      \n\
+                          $v \\( \\1 \\) \\) ,    #  C ( A )),   \n\
+                          $v \\( $v ,             # D ( E,       \n\
+                          $v \\( $v \\) \\)       #  F ( A ))'))
+        ? RegExp.$2 : null);
+
+  // If that didn't work:
   // Find "C" in this: A.set (B.sp, D (C (E (B.s))))
   // where "D" is "encodeURIComponent" and "E" is "decodeURIComponent"
+  // (Note, this rule is older than the above)
   if (!fn)
     fn = (body.match(RX(' $v2 \\. set \\s* \\( \\s*    # A.set (  \n\
                        $v2 \\s* , \\s*                 #   B.sp, \n\
@@ -785,7 +813,6 @@ function guess_cipher (cipher_id, selftest_p, nowarn) {
                        $v2 \\s*                        #         B.s \n\
                        \\) \\s* \\) \\s* \\) \\s* \\)  #         ))))'))
         ? RegExp.$1 : null);
-
 
   // If that didn't work:
   // Find "C" in this: A.set (B, C (d))
@@ -971,11 +998,22 @@ function youtube_parse_urlmap (id, urlmap, cipher, into) {
 
   var cipher_printed_p = false;
 
+  if (urlmap.match(/^\{"/s)) {			// Ugh, sometimes it is JSON
+    urlmap = urlmap.replace(/^\{/, '');
+    urlmap = urlmap.replace(/"(.*?)":([^,]+)[,\}]*/g,	// "a":x, => a=x&
+                            function(m, k, v) {
+                              return k + "=" + encodeURIComponent(v) + "&";
+                            });
+    urlmap = urlmap.replace(/&\{/g, ",");
+  }
+
   var count = 0;
   for (var mapelt of urlmap.split(/,/)) {
     // Format used to be: "N|url,N|url,N|url"
     // Now it is: "url=...&quality=hd720&fallback_host=...&type=...&itag=N"
     var [k, v, e, sig, sig2, sig3, w, h, size] = [];
+    var sig_via = mapelt;
+
     if (mapelt.match (/^(\d+)\|(.*)/s)) {
       k = RegExp.$1;
       v = RegExp.$2;
@@ -990,7 +1028,25 @@ function youtube_parse_urlmap (id, urlmap, cipher, into) {
 
       k = (mapelt.match(/\bitag=(\d+)/s) ? RegExp.$1 : null);
       v = (mapelt.match(/\burl=([^&]+)/s) ? RegExp.$1 : null);
-      if (v) v = decodeURIComponent(v);
+      if (!v) v = "";
+
+      // In JSON, "cipher":"sp=sig&s=...&url=..."
+      if (mapelt.match (/\b(cipher|signatureCipher)=([^&\"]+)/s)) {
+        var sig4 = decodeURIComponent (RegExp.$2);
+        sig4 = sig4.replace (/^.*"(.*?)".*$/, '$1');
+        var s2  = (sig4.match (/\bs=([^&]+)/s)   ? RegExp.$1 : '');
+        var u2  = (sig4.match (/\burl=([^&]+)/s) ? RegExp.$1 : '');
+        if (u2) {
+          sig  = null;
+          sig2 = s2;
+          v    = u2;
+          sig_via = sig4;  // so that apply_signature can find sp=
+        }
+      }
+
+      v = v.replace (/\\u0026/g, '&');
+      v = decodeURIComponent(v);
+      v = v.replace (/^\"|\"$/gs, '');
 
       size  = (v.match(/\bclen=([^&]+)/s) ? RegExp.$1 : null);
       if (v.match(/\bsize=(\d+)x(\d+)/s)) {
@@ -998,8 +1054,16 @@ function youtube_parse_urlmap (id, urlmap, cipher, into) {
         h = RegExp.$1;
       }
 
+      if (!size && mapelt.match (/\bcontentLength=\"?(\d+)/s))
+        size = RegExp.$1;
+      if (!w && mapelt.match (/\bwidth=\"?(\d+)/s))
+        w = RegExp.$1;
+      if (!h && mapelt.match (/\bheight=\"?(\d+)/s))
+        h = RegExp.$1;
+
       q = (mapelt.match(/\bquality=([^&]+)/s) ? RegExp.$1 : null);
-      t = (mapelt.match(/\btype=([^&]+)/s) ? RegExp.$1 : null);
+      t = (mapelt.match(/\b(?:type|mimeType)=([^&]+)/s) ? RegExp.$1 : null);
+      if (q) q = decodeURIComponent(q);
       if (t) t = decodeURIComponent(t);
       if (q && t) {
         e = "\t" + q + ", " + t;
@@ -1061,7 +1125,7 @@ function youtube_parse_urlmap (id, urlmap, cipher, into) {
     v = apply_signature (id, k, v,
                          (sig2 || sig3) ? cipher : null,
                          decodeURIComponent (sig || sig2 || sig3 || ''),
-                         mapelt);
+                         sig_via);
 
     // Finally! The "ratebypass" parameter turns off rate limiting!
     // But we can't add it to a URL that signs the "ratebypass" parameter.
@@ -1164,6 +1228,17 @@ function youtube_parse_dashmpd (id, url, cipher, into) {
             /<AdaptationSet mimeType=[\"\']text\/.*?<\/AdaptationSet>/gsi,
             '');
 
+  var mpd = body2.match(/<MPD\b([^<>]*)>/si);
+  if (!mpd) error ("no MPD in DASH " + url);
+  if (mpd.match (/\btype=[\"\']dynamic[\"\']/si)) {
+    // default: type="static"
+    // The stream is live, and there will be some arbitrary (possibly large)
+    // number of segments, but that's not the whole thing. Punt.
+    if (verbose > 2)
+      LOG (id + ": DASH is a live stream", url);
+    return 0;
+  }
+
   var reps = body2.split(/<Representation\b/si);
   reps.shift();
   for (var rep of reps) {
@@ -1238,6 +1313,7 @@ var blocked_re = ['(available|blocked it) in your country',
                   'has closed their YouTube account',
                   'is not available',
                   'is unavailable',
+                  'video unavailable',
                   'is not embeddable',
                   'can\'t download rental videos',
                   'livestream videos',
@@ -1249,6 +1325,9 @@ var blocked_re = ['(available|blocked it) in your country',
                   'you are a human',
                   '\bCAPCHA required',
                   '\b429 Too Many Requests',
+                  'Premieres in \d+ (min|hour|day|week|month)',
+                  'video has not yet premiered',
+                  'live event will begin in',
                   '^[^:]+: exists: ',
                   ].join('|');
 
@@ -1336,7 +1415,16 @@ function load_youtube_formats_html (id, url, fmts) {
       oerror = err;
       http = 'HTTP/1.0 404';
     }
+
+    // youtubedown and youtubedown.js are receiving different HTML...
+    if (!err && body.match(/"status":"LOGIN_REQUIRED"/si)) {
+      err = "Content Warning";
+    }
+
   }
+
+  // #### TODO port the <TITLE>YouTube</TITLE> thing from Perl
+
 
   if (oerror) oerror = oerror.replace (/<.*?>/gs, '');
 
@@ -1378,12 +1466,44 @@ function load_youtube_formats_html (id, url, fmts) {
     v = v.replace(/\\/gs, '');
     if (!v) continue;
     if (verbose > 2) LOG (id + " HTML: found " + key);
+
+    // source%3Dyt_premiere_broadcast%26 or /source/yt_premiere_broadcast/
+    if (v.match(/yt_premiere_broadcast/)) {
+      err = "video has not yet premiered";
+      // The fmts point to a countdown video.
+      Object.keys(fmts).forEach(function(k) { delete fmts[k]; });
+      break;
+    }
+
+    if (v.match(/&live_playback=([^&]+)/) ||
+        v.match(/&live=(1)/) ||
+        v.match(/&source=(yt_live_broadcast)/)) {
+      err = "can't download live videos";
+      // The fmts point to an M3U8 that is currently of unbounded length.
+      Object.keys(fmts).forEach(function(k) { delete fmts[k]; });
+      break;
+    }
+
     if (key === 'dashmpd' || key === 'hlsvp') {
-      count += youtube_parse_dashmpd (id + " HTML", v, cipher, fmts);
+      var n = youtube_parse_dashmpd (id + " HTML", v, cipher, fmts);
+      count += n;
+      if (n == 0 && !err) err = "can't download live videos";
+
     } else if (key === 'player_response') {
-      v = (v.match(/"dashManifestUrl": *"(.*?[^\\])"/s) ? RegExp.$1 : '');
+      var ov = v;
+      v = (ov.match(/"dashManifestUrl": *"(.*?[^\\])"/s) ? RegExp.$1 : '');
       // This manifest sometimes works when the one in get_video_info doesn't.
-      if (v) count += youtube_parse_dashmpd (id + " HTML", v, cipher, fmts);
+      if (v) {
+        var n = youtube_parse_dashmpd (id + " HTML", v, cipher, fmts);
+        count += n;
+        if (n == 0 && !err) err = "can't download live videos";
+      }
+
+      // Nov 2019: Saw this on an old fmt 133 video, and it was the only
+      // list of formats available in the HTML.
+      v = (ov.match (/"adaptiveFormats": *\[(.*?)\]/s) ? RegExp.$1 : '');
+      if (v) count += youtube_parse_urlmap (id + " HTML", v, cipher, fmts);
+
     } else {
       count += youtube_parse_urlmap (id + " HTML", v, cipher, fmts);
     }
@@ -1448,7 +1568,7 @@ function load_youtube_formats_video_info (id, url, fmts) {
   //
   var extra_parameters = ['', '&el=embedded', '&el=info', '&el=detailpage'];
 
-  var [title, body, embed_p, rental, live_p] = [];
+  var [title, body, embed_p, rental, live_p, premiere_p] = [];
 
   var err = null;
   var done = false;
@@ -1473,16 +1593,34 @@ function load_youtube_formats_video_info (id, url, fmts) {
       var err2 = (check_http_status (id, url, http, 0) ? null : http);
       if (!err) err = err2;
 
+      var body2 = body;		// FFS
+      body2 = body2.replace(/%5C/g, '\\');
+      body2 = body2.replace(/\\u0026/g, '&');
+      body2 = body2.replace(/%3D/g, '=');
+
+      var prep = body2.match(/&player_response=([^&]+)/si) ? RegExp.$1 : "";
+      prep = decodeURIComponent (prep);
+
       if (!title)
-        title  = (body.match(/&title=([^&]+)/si)         ? RegExp.$1 : null);
-      embed_p  = (body.match(/&allow_embed=([^&]+)/si)   ? RegExp.$1 : null);
-      rental   = (body.match(/&ypc_vid=([^&]+)/si)       ? RegExp.$1 : null);
-      live_p   = (body.match(/&live_playback=([^&]+)/si) ? RegExp.$1 : null);
+        title  = (body2.match(/&title=([^&]+)/si)         ? RegExp.$1 : null);
+      rental   = (body2.match(/&ypc_vid=([^&]+)/si)       ? RegExp.$1 : null);
+      live_p   = ((body2.match(/&live_playback=([^&]+)/si) ||
+                   body2.match(/&live=(1)/) ||
+                   body2.match(/&source=(yt_live_broadcast)/) ||
+                   prep.match(/"is_viewed_live","value":"True"/si))
+                  ? RegExp.$1 : null);
+
+      if (body.match(/&allow_embed=([^&]+)/si)) embed_p = RegExp.$1;
+
       if (!embed_p &&
-          body.match(/on[\s+]other[\s+]websites/s))
+          body.match(/on[+\s+]other[+\s+]websites/s))
         embed_p = false;
 
-      if (!live_p)
+      // Sigh, %2526source%253Dyt_premiere_broadcast%2526
+      if (body.match(/yt_premiere_broadcast/))
+        premiere_p = true;
+
+      if (live_p)
         err = "can't download livestream videos";
       // "player_response" contains JSON:
       //   "playabilityStatus":{
@@ -1495,11 +1633,13 @@ function load_youtube_formats_video_info (id, url, fmts) {
                        'fmt_stream_map', // VEVO
                         'url_encoded_fmt_stream_map', // Aug 2011
                        'adaptive_fmts',
-                       'dashmpd']) {
+                       'dashmpd',
+                       'player_response']) {
         var v = (body.match(new RegExp('[?&]' + key + '=([^&?]+)', 'si'))
                  ? RegExp.$1 : null);
         if (!v) continue;
         v = decodeURIComponent (v);
+        v = v.replace (/\\u0026/g, '&');
         v = v.replace(/\\/gs, '');
 
         if (verbose > 1)
@@ -1508,9 +1648,16 @@ function load_youtube_formats_video_info (id, url, fmts) {
                 ? (embed_p ? " (embeddable)" : " (non-embeddable)")
                 : ""));
         if (key === 'dashmpd' || key === 'hlsvp') {
-          count += youtube_parse_dashmpd (id + " VI", v, cipher, fmts);
+          var n = youtube_parse_dashmpd (id + " VI-1", v, cipher, fmts);
+          count += n;
+          if (n == 0 && !err) err = "can't download live videos";
+
+        } else if (key === 'player_response') {
+          v = (v.match (/"adaptiveFormats":\[(.*?)\]/s) ? RegExp.$1 : '');
+          if (v)
+            count += youtube_parse_urlmap (id + " VI-2", v, cipher, fmts);
         } else {
-          count += youtube_parse_urlmap (id + " VI", v, cipher, fmts);
+          count += youtube_parse_urlmap (id + " VI-3", v, cipher, fmts);
         }
       }
 
@@ -1525,8 +1672,14 @@ function load_youtube_formats_video_info (id, url, fmts) {
       // This gets us "This video is private" instead of "Invalid parameters".
       if (body.match(/player_response=([^&]+)/s)) {
         var s = decodeURIComponent (RegExp.$1);
-        if (s.match(/"reason":"(.*?)"/si))
+        s = s.replace(/\\u0026/gsi, '&');
+        s = s.replace(/\\u003c/gsi, '<');
+        s = s.replace(/\\u003e/gsi, '>');
+        s = s.replace(/\\n/gsi, ' ');
+        if (s.match(/"reason":"(.*?)"[,\}]/si)) {
           err = RegExp.$1;
+          err = err.replace(/<[^<>]*>/gs, '');
+        }
       }
     }
     if (done) break;
@@ -1542,13 +1695,19 @@ function load_youtube_formats_video_info (id, url, fmts) {
   if (err && (embed_p !== null && !embed_p))
     err = "video is not embeddable";
 
+  if (premiere_p) {
+    err = "video has not yet premiered";
+    // The fmts point to a countdown video.
+    Object.keys(fmts).forEach(function(k) { delete fmts[k]; });
+  }
+
   if (!body) body = '';
   if (!title)
     title = (body.match(/&title=([^&]+)/si) ? RegExp.$1 : null);
   if (!title && !err)
     errorI (id + ": no title in " + info_url_1);
   if (title)
-    title = decodeURIComponent(title)
+    title = decodeURIComponent(title) 
 
   if (!err) {
     err = (body.match(/reason=([^&]+)/s) ? RegExp.$1 : '');
@@ -1586,10 +1745,8 @@ function load_youtube_formats_video_info (id, url, fmts) {
 function load_youtube_formats (id, url, size_p) {
 
   var fmts = {};
-  var err = null;
-  var err2 = null;
 
-  // Scrape the HTML page before loading get_video_info because the
+  // Scrape the HTML page before loading get_video_info because the 
   // DASH URL in the HTML page is more likely to work than the one
   // returned by get_video_info.
 
@@ -1600,12 +1757,17 @@ function load_youtube_formats (id, url, size_p) {
   //              'hl=en',
   //              'disable_polymer=true');
 
-  err2 = load_youtube_formats_html (id, url, fmts);
-  err = err || err2;
+  var err1 = load_youtube_formats_html (id, url, fmts);
+  var err2 = load_youtube_formats_video_info (id, url, fmts);
 
-  err2 = load_youtube_formats_video_info (id, url, fmts);
   // Which error sucks less? Hard to say.
-  err = err2 || err;
+  // var err = err1 ? err1 : err2;
+  var err = err2 ? err2 : err1;
+
+  var both = (err1 || '') + ' ' + (err2 || '');
+  if (both.match(/content warning/si) &&
+      both.match(/not embeddable/si))
+    error (id + ': age-restricted video is not embeddable');
 
   // It's rare, but there can be only one format available.
   // Keys: 18, cipher, title.
@@ -1717,7 +1879,7 @@ function load_vimeo_formats (id, url, size_p) {
 
   var files    = (files0 || '') + (files1 || '') + (files2 || '');
 
-  var thumb = (body.match(/"thumbs":{"\d+":"(.*?)"/)
+  var thumb = (body.match(/"thumbs":\{"\d+":"(.*?)"/)
                ? RegExp.$1 : null);
 
   // Sometimes we get empty-ish data for "Private Video", but HTTP 200.
@@ -1751,16 +1913,22 @@ function load_vimeo_formats (id, url, size_p) {
     if (!title) errorI (id + ": no title");
     fmts['title'] = title;
     var i = 0;
+    var seen = {};
     for (var f of files.split (/\},?\s*/)) {
       if (f.length < 50) continue;
-      var fmt  = (f.match(RX('^ \\" (.+?) \\": ')) ? RegExp.$1 : null);
-      if (!fmt)
-          fmt  = (f.match(RX('^ \\{ "profile": (\\d+)')) ? RegExp.$1 : null);
+  //  var fmt  = (f.match(RX('^ \\" (.+?) \\": ')) ? RegExp.$1 : null);
+  //  if (!fmt)
+      var fmt  = (f.match(RX('^ \\{ "profile": (\\d+)')) ? RegExp.$1 : null);
+      if (!fmt) continue;
+      if (seen[fmt]) continue;
+
       var url2 = (f.match(RX(' "url"   : \\s* " (.*?) "')) ? RegExp.$1 : null);
-      var w    = (f.match(RX(' "width" : \\s*   (\d+)')) ? RegExp.$1 : null);
-      var h    = (f.match(RX(' "height": \\s*   (\d+)')) ? RegExp.$1 : null);
-      if (! (fmt && url2 && !w && !h))
-        errorI (id + ": unparsable video formats");
+      var w    = (f.match(RX(' "width" : \\s*   (\\d+)'))  ? RegExp.$1 : null);
+      var h    = (f.match(RX(' "height": \\s*   (\\d+)'))  ? RegExp.$1 : null);
+
+      if (!url2) continue;
+      if (! (fmt && url2 && w && h))
+        errorI (id + ": unparsable vimeo video formats");
       if (verbose > 2)
         LOG (fmt + ": " + w + "x" + h + ": " + url2);
 
@@ -1771,6 +1939,7 @@ function load_vimeo_formats (id, url, size_p) {
                 ext.match(/^(mov)$/s)            ? 'video/quicktime' :
                 'video/mpeg');
 
+      seen[fmt] = 1;
       var v = { fmt: i,
                 url: url2,
                 content_type: ct,
@@ -1799,7 +1968,7 @@ function load_vimeo_formats (id, url, size_p) {
 //
 function load_tumblr_formats (id, url, size_p) {
 
-  // The old code doesn't work any more: I guess they locked down the
+  // The old code doesn't work any more: I guess they locked down the 
   // video info URL to require an API key.  So we can just grab the
   // "400" version, I guess...
 
@@ -1982,6 +2151,22 @@ function get_youtube_year (id, body) {
 // Given a list of available underlying videos, pick the ones we want.
 //
 function pick_download_format (id, site, url, force_fmt, fmts) {
+
+  // Youtube has started returning "video/mp4" content types that are
+  // actually VP9 / WebM rather than H.264. Those must be transcoded,
+  // not copied, to play on H.264-only devices.
+  //
+  for (var k in fmts) {
+    if (k === 'title' || k === 'year' || k === 'cipher' || k === 'thumb')
+      continue;
+    var fmt = fmts[k];
+    var ct = fmt['content_type'];
+    if (ct.match(/^video\/mp4.*vp9/i)) {	  // video/mp4;+codecs="vp9"
+      fmt['content_type'] = 'video/webm';
+    } else if (ct.match(/^audio\/mp4.*opus/i)) {  // audio/mp4;+codecs="opus"
+      fmt['content_type'] = 'audio/opus';
+    }
+  }
 
   if (force_fmt === 'all') {
     var all = [];
@@ -2826,14 +3011,14 @@ window.youtubedown               = youtubedown;
 ;; Yo dawg, we heard you liked regexps, so we put regexps in your regexps
 ;; so you can regexp while you sexpr.
 
-(defun ytre()
+(defun ytre() 
   (query-replace-regexp
    (concat "\\$\\([_a-z\d]+\\)"
            "[ \t\n]*=~[ \t\n]*"
            "s\\(.\\)\\(.*?\\)\\2\\(.*?\\)\\2\\([a-z]*\\);")
    "\\1 = \\1.replace(/\\3/\\5, '\\4');"))
 
-(defun ytre2()
+(defun ytre2() 
   (query-replace-regexp
    (concat "\\$\\([_a-z\d]+\\)"
            "[ \t\n]*=~[ \t\n]*"
