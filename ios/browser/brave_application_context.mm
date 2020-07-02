@@ -17,11 +17,35 @@
 #include "base/task/thread_pool.h"
 #include "base/time/default_clock.h"
 #include "base/time/default_tick_clock.h"
+
+#include "components/autofill/core/common/autofill_prefs.h"
+#include "components/browsing_data/core/pref_names.h"
+#include "components/feed/core/shared_prefs/pref_names.h"
+#include "components/flags_ui/pref_service_flags_storage.h"
+#include "components/history/core/common/pref_names.h"
+#include "components/language/core/browser/language_prefs.h"
+#include "components/language/core/browser/pref_names.h"
+#include "components/metrics/metrics_pref_names.h"
+#include "components/payments/core/payment_prefs.h"
+#include "components/pref_registry/pref_registry_syncable.h"
+#include "components/prefs/pref_service.h"
+#include "components/proxy_config/pref_proxy_config_tracker_impl.h"
+#include "components/safe_browsing/core/common/safe_browsing_prefs.h"
+#include "components/sessions/core/session_id_generator.h"
+#include "components/signin/public/base/signin_pref_names.h"
+#include "components/sync/base/sync_prefs.h"
+#include "components/sync_device_info/device_info_prefs.h"
+#include "components/sync_sessions/session_sync_prefs.h"
+#include "components/translate/core/browser/translate_pref_names.h"
+#include "components/translate/core/browser/translate_prefs.h"
+
 #include "components/history/core/browser/history_service.h"
 #include "components/keyed_service/core/service_access_type.h"
 #include "components/prefs/pref_registry_simple.h"
-#include "components/prefs/pref_service.h"
-#include "components/sessions/core/session_id_generator.h"
+#include "components/update_client/update_client.h"
+#include "components/variations/service/variations_service.h"
+#include "components/web_resource/web_resource_pref_names.h"
+
 #include "ios/chrome/browser/application_context.h"
 #include "ios/chrome/browser/browser_state/chrome_browser_state_manager_impl.h"
 #include "ios/chrome/browser/chrome_paths.h"
@@ -30,6 +54,7 @@
 #include "ios/chrome/browser/pref_names.h"
 #include "ios/chrome/browser/prefs/browser_prefs.h"
 #include "ios/chrome/browser/prefs/ios_chrome_pref_service_factory.h"
+#include "ios/chrome/browser/browser_state/browser_state_info_cache.h"
 #include "ios/chrome/common/channel_info.h"
 #include "ios/web/public/thread/web_task_traits.h"
 #include "ios/web/public/thread/web_thread.h"
@@ -56,23 +81,64 @@ void BindNetworkChangeManagerReceiver(
 }  // namespace
 
 namespace brave {
+namespace {
+// Deprecated 1/2020
+const char kGCMChannelStatus[] = "gcm.channel_status";
+const char kGCMChannelPollIntervalSeconds[] = "gcm.poll_interval";
+const char kGCMChannelLastCheckTime[] = "gcm.check_time";
+
+// Deprecated 2/2020
+const char kInvalidatorClientId[] = "invalidator.client_id";
+const char kInvalidatorInvalidationState[] = "invalidator.invalidation_state";
+const char kInvalidatorSavedInvalidations[] = "invalidator.saved_invalidations";
+}
+
 void RegisterLocalStatePrefs(PrefRegistrySimple* registry) {
-    //BrowserStateInfoCache::RegisterPrefs(registry);
-    sessions::SessionIdGenerator::RegisterPrefs(registry);
     
+    BrowserStateInfoCache::RegisterPrefs(registry);
+    //flags_ui::PrefServiceFlagsStorage::RegisterPrefs(registry);
+    //signin::IdentityManager::RegisterLocalStatePrefs(registry);
+    //IOSChromeMetricsServiceClient::RegisterPrefs(registry);
+    //network_time::NetworkTimeTracker::RegisterPrefs(registry);
+    //ios::NotificationPromo::RegisterPrefs(registry);
+    //policy::BrowserPolicyConnector::RegisterPrefs(registry);
+    //policy::PolicyStatisticsCollector::RegisterPrefs(registry);
+    PrefProxyConfigTrackerImpl::RegisterPrefs(registry);
+    //rappor::RapporServiceImpl::RegisterPrefs(registry);
+    sessions::SessionIdGenerator::RegisterPrefs(registry);
+    update_client::RegisterPrefs(registry);
+    variations::VariationsService::RegisterPrefs(registry);
+
     // Preferences related to the browser state manager.
     registry->RegisterStringPref(prefs::kBrowserStateLastUsed, std::string());
     registry->RegisterIntegerPref(prefs::kBrowserStatesNumCreated, 1);
     registry->RegisterListPref(prefs::kBrowserStatesLastActive);
-    
+
+    //[OmniboxGeolocationLocalState registerLocalState:registry];
+    //[MemoryDebuggerManager registerLocalState:registry];
+
     registry->RegisterBooleanPref(prefs::kBrowsingDataMigrationHasBeenPossible,
                                   false);
 
     // Preferences related to the application context.
     const char kApplicationLocale[] = "intl.app_locale";
-    registry->RegisterStringPref(kApplicationLocale, //language::prefs::kApplicationLocale
+    registry->RegisterStringPref(kApplicationLocale, //language::prefs::kApplicationLocale,
                                  std::string());
+    registry->RegisterBooleanPref(prefs::kEulaAccepted, false);
+    registry->RegisterBooleanPref(metrics::prefs::kMetricsReportingEnabled,
+                                  false);
     registry->RegisterBooleanPref(prefs::kLastSessionExitedCleanly, true);
+    //if (!base::FeatureList::IsEnabled(kUmaCellular)) {
+      registry->RegisterBooleanPref(prefs::kMetricsReportingWifiOnly, true);
+    //}
+
+    registry->RegisterBooleanPref(kGCMChannelStatus, true);
+    registry->RegisterIntegerPref(kGCMChannelPollIntervalSeconds, 0);
+    registry->RegisterInt64Pref(kGCMChannelLastCheckTime, 0);
+
+    registry->RegisterListPref(kInvalidatorSavedInvalidations);
+    registry->RegisterStringPref(kInvalidatorInvalidationState, std::string());
+    registry->RegisterStringPref(kInvalidatorClientId, std::string());
 }
 }
 

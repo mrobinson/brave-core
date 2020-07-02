@@ -25,6 +25,7 @@ source_set("browser") {
   ]
 
   deps = [
+    ":chromium_sources",
     "net",
     "first_run",
     "//base",
@@ -32,8 +33,6 @@ source_set("browser") {
     "//brave/vendor/brave-ios/components/bookmark_sync_service",
     "//components/content_settings/core/common",
     "//components/prefs",
-    "//components/sessions",
-    "//components/component_updater",
     "//ios/web/public",
     "//ios/web/public/init",
     "//ios/components/io_thread",
@@ -42,4 +41,20 @@ source_set("browser") {
   ]
 
   configs += [ "//build/config/compiler:enable_arc" ]
+}
+
+source_set("chromium_sources") {
+  sources = [
+    "//ios/chrome/browser/browser_state/browser_state_info_cache.h",
+    "//ios/chrome/browser/browser_state/browser_state_info_cache.cc",
+  ]
+
+  deps = [
+    "//base",
+    "//components/prefs",
+    "//components/variations/service",
+    "//components/sessions",
+    "//components/component_updater",
+    "//components/browsing_data/core",
+  ]
 }

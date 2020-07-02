@@ -87,7 +87,6 @@ void BraveWebMainParts::PreCreateThreads() {
     }
     
     application_context_->PreCreateThreads();
-    fprintf(stderr, "ARE WE GOOD\n");
 }
 
 void BraveWebMainParts::PreMainMessageLoopRun() {
@@ -104,7 +103,6 @@ void BraveWebMainParts::PreMainMessageLoopRun() {
 //  ChromeBrowserState* last_used_browser_state =
 //        browser_state_manager->GetLastUsedBrowserState();
     
-    fprintf(stderr, "PRE MAIN MESSAGE LOOP RUN -> BraveWebMainParts\n");
   ios::BookmarkModelFactory::GetInstance();
   ios::BookmarkUndoServiceFactory::GetInstance();
   ios::StartupTaskRunnerServiceFactory::GetInstance();
