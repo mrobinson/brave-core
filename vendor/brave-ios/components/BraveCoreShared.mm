@@ -8,6 +8,9 @@
 #include "brave/vendor/brave-ios/components/browser_state/chrome_browser_state.h"
 #include "ios/web/public/init/web_main.h"
 
+#import "base/i18n/icu_util.h"
+#import "base/ios/ios_util.h"
+
 @interface BraveCoreShared()
 @property (nonatomic, assign) NSString*(^fetchUserAgent)();
 @end
@@ -33,6 +36,13 @@
 
 - (instancetype)init {
     if ((self = [super init])) {
+        
+        const auto pathToICUDTL = [[NSBundle bundleForClass:NSClassFromString(@"BATBraveLedger")] pathForResource:@"icudtl" ofType:@"dat"];
+        base::ios::OverridePathOfEmbeddedICU(pathToICUDTL.UTF8String);
+        if (!base::i18n::InitializeICU()) {
+          //BLOG(0, @"Failed to initialize ICU data");
+        }
+        
         delegate_.reset(new BraveMainDelegate());
 
         web::WebMainParams params(delegate_.get());

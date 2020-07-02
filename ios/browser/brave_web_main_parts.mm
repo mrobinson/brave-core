@@ -5,6 +5,7 @@
 
 #include "brave/ios/browser/brave_web_main_parts.h"
 #import "brave/ios/browser/brave_application_context.h"
+#import "brave/ios/browser/first_run/first_run.h"
 
 #include "base/logging.h"
 #include "components/content_settings/core/common/content_settings_pattern.h"
@@ -24,6 +25,8 @@
 #import "brave/vendor/brave-ios/components/Bookmarks.h"
 #import "base/i18n/icu_util.h"
 #import "base/ios/ios_util.h"
+
+#include "components/metrics/persistent_histograms.h"
 
 //#include "ios/chrome/browser/browser_state/browser_state_keyed_service_factories.h"
 //#include "ios/chrome/browser/browser_state/chrome_browser_state.h"
@@ -54,12 +57,6 @@ void BraveWebMainParts::PreMainMessageLoopStart() {
   // base::PathService::Get(ios::FILE_RESOURCES_PACK, &resources_pack_path);
   // ui::ResourceBundle::GetSharedInstance().AddDataPackFromPath(
   //     resources_pack_path, ui::SCALE_FACTOR_100P);
-    
-    const auto pathToICUDTL = [[NSBundle bundleForClass:[BookmarksAPI class]] pathForResource:@"icudtl" ofType:@"dat"];
-    base::ios::OverridePathOfEmbeddedICU(pathToICUDTL.UTF8String);
-    if (!base::i18n::InitializeICU()) {
-      //BLOG(0, @"Failed to initialize ICU data");
-    }
 }
 
 void BraveWebMainParts::PreCreateThreads() {
@@ -75,10 +72,22 @@ void BraveWebMainParts::PreCreateThreads() {
         l10n_util::GetLocaleOverride()));
     DCHECK_EQ(application_context_.get(), GetApplicationContext());
 
+    FirstRun::IsChromeFirstRun();
+    
     local_state_ = application_context_->GetLocalState();
     DCHECK(local_state_);
 
+    //SetupFieldTrials
+    {
+      // Persistent histograms must be enabled as soon as possible.
+      base::FilePath user_data_dir;
+      if (base::PathService::Get(ios::DIR_USER_DATA, &user_data_dir)) {
+        InstantiatePersistentHistograms(user_data_dir);
+      }
+    }
+    
     application_context_->PreCreateThreads();
+    fprintf(stderr, "ARE WE GOOD\n");
 }
 
 void BraveWebMainParts::PreMainMessageLoopRun() {

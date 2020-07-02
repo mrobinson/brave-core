@@ -75,7 +75,6 @@ class BraveWebMainRunnerImpl : public WebMainRunner {
     main_loop_->Init();
     main_loop_->EarlyInitialization();
     main_loop_->MainMessageLoopStart();
-      fprintf(stderr, "MSG LOOP START\n");
     main_loop_->CreateStartupTasks();
       fprintf(stderr, "STARTUP TASKS\n");
     int result_code = main_loop_->GetResultCode();
