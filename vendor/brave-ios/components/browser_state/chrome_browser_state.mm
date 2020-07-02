@@ -9,6 +9,7 @@
 #include "brave/vendor/brave-ios/components/bookmarks/bookmark_model_factory.h"
 #include "brave/vendor/brave-ios/components/browser_state/bookmark_model_loaded_observer.h"
 #include "components/bookmarks/browser/bookmark_model.h"
+#include "brave/ios/browser/prefs/browser_prefs.h"
 
 #include "base/files/file_util.h"
 #include "base/mac/foundation_util.h"
@@ -92,6 +93,7 @@ ChromeBrowserState::ChromeBrowserState(const base::FilePath& name)
   DCHECK(io_task_runner_);
   SetUserData(kBrowserStateIsChromeBrowserState,
               std::make_unique<base::SupportsUserData::Data>());
+          fprintf(stderr, "CHECKING DIRECTORIES\n");
 
   bool directories_created = EnsureBrowserStateDirectoriesCreated(state_path_);
   DCHECK(directories_created);
@@ -108,19 +110,25 @@ ChromeBrowserState::ChromeBrowserState(const base::FilePath& name)
         policy_schema_registry_.get(), connector);
   }*/
 
-  // RegisterBrowserStatePrefs(pref_registry_.get());
+  fprintf(stderr, "RegisterBrowserStatePrefs\n");
+  RegisterBrowserStatePrefs(pref_registry_.get());
+          
+  fprintf(stderr, "RegisterBrowserStatePrefsForServices\n");
   BrowserStateDependencyManager::GetInstance()
       ->RegisterBrowserStatePrefsForServices(pref_registry_.get());
 
+  fprintf(stderr, "CreateBrowserStatePrefs\n");
   prefs_ = CreateBrowserStatePrefs(state_path_,
                                    GetIOTaskRunner().get(),
                                    pref_registry_,
                                    nullptr, //policy_connector_ ? policy_connector_->GetPolicyService() :
                                    nullptr); //GetApplicationContext()->GetBrowserPolicyConnector()
           
+  fprintf(stderr, "UserPrefs\n");
   // Register on BrowserState.
   user_prefs::UserPrefs::Set(this, prefs_.get());
 
+  fprintf(stderr, "CreateBrowserStateServices\n");
   BrowserStateDependencyManager::GetInstance()->CreateBrowserStateServices(
       this);
 

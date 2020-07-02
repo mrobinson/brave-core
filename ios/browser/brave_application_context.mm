@@ -1,4 +1,6 @@
 #import "brave/ios/browser/brave_application_context.h"
+//#include "brave/ios/browser/prefs/browser_prefs.h"
+#include "ios/chrome/browser/prefs/browser_prefs.h"
 #include "brave/vendor/brave-ios/components/browser_state/chrome_browser_state.h"
 
 #include <algorithm>
@@ -81,20 +83,7 @@ void BindNetworkChangeManagerReceiver(
 }  // namespace
 
 namespace brave {
-namespace {
-// Deprecated 1/2020
-const char kGCMChannelStatus[] = "gcm.channel_status";
-const char kGCMChannelPollIntervalSeconds[] = "gcm.poll_interval";
-const char kGCMChannelLastCheckTime[] = "gcm.check_time";
-
-// Deprecated 2/2020
-const char kInvalidatorClientId[] = "invalidator.client_id";
-const char kInvalidatorInvalidationState[] = "invalidator.invalidation_state";
-const char kInvalidatorSavedInvalidations[] = "invalidator.saved_invalidations";
-}
-
-void RegisterLocalStatePrefs(PrefRegistrySimple* registry) {
-    
+/*void RegisterLocalStatePrefs(PrefRegistrySimple* registry) {
     BrowserStateInfoCache::RegisterPrefs(registry);
     //flags_ui::PrefServiceFlagsStorage::RegisterPrefs(registry);
     //signin::IdentityManager::RegisterLocalStatePrefs(registry);
@@ -139,7 +128,7 @@ void RegisterLocalStatePrefs(PrefRegistrySimple* registry) {
     registry->RegisterListPref(kInvalidatorSavedInvalidations);
     registry->RegisterStringPref(kInvalidatorInvalidationState, std::string());
     registry->RegisterStringPref(kInvalidatorClientId, std::string());
-}
+}*/
 }
 
 BraveApplicationContext::BraveApplicationContext(
@@ -373,7 +362,7 @@ void BraveApplicationContext::CreateLocalState() {
   scoped_refptr<PrefRegistrySimple> pref_registry(new PrefRegistrySimple);
 
   // Register local state preferences.
-  brave::RegisterLocalStatePrefs(pref_registry.get());
+  RegisterLocalStatePrefs(pref_registry.get());
 
   policy::BrowserPolicyConnector* browser_policy_connector = nullptr;
   policy::PolicyService* policy_service = nullptr;

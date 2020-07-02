@@ -50,8 +50,10 @@
         
         web_main_ = std::make_unique<web::BraveWebMain>(std::move(params));
 
+        fprintf(stderr, "CREATING CHROME BROWSER STATE!\n");
         browser_state_ = std::make_unique<ChromeBrowserState>(
             base::FilePath(kIOSChromeInitialBrowserState));
+        fprintf(stderr, "CREATED!!\n");
     }
     return self;
 }
