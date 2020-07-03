@@ -146,7 +146,11 @@ void RegisterBrowserStatePrefs(user_prefs::PrefRegistrySyncable* registry) {
   //FontSizeTabHelper::RegisterBrowserStatePrefs(registry);
   //HostContentSettingsMap::RegisterProfilePrefs(registry);
   //ios::NotificationPromo::RegisterProfilePrefs(registry);
-  language::LanguagePrefs::RegisterProfilePrefs(registry);
+    
+  //CRASHES THE APPLICATION! - Brandon
+  //language::LanguagePrefs::RegisterProfilePrefs(registry);
+    
+    
   //ntp_snippets::ClickBasedCategoryRanker::RegisterProfilePrefs(registry);
   //ntp_snippets::ContentSuggestionsService::RegisterProfilePrefs(registry);
   //ntp_snippets::RemoteSuggestionsProviderImpl::RegisterProfilePrefs(registry);
@@ -183,9 +187,10 @@ void RegisterBrowserStatePrefs(user_prefs::PrefRegistrySyncable* registry) {
   registry->RegisterBooleanPref(
       prefs::kOfferTranslateEnabled, true,
       user_prefs::PrefRegistrySyncable::SYNCABLE_PREF);
-  registry->RegisterStringPref(prefs::kDefaultCharset,
-                               l10n_util::GetStringUTF8(IDS_DEFAULT_ENCODING),
-                               user_prefs::PrefRegistrySyncable::SYNCABLE_PREF);
+    //CRASHES THE APP - BRANDON
+//  registry->RegisterStringPref(prefs::kDefaultCharset,
+//                               l10n_util::GetStringUTF8(IDS_DEFAULT_ENCODING),
+//                               user_prefs::PrefRegistrySyncable::SYNCABLE_PREF);
   registry->RegisterBooleanPref(
       prefs::kNetworkPredictionEnabled, true,
       user_prefs::PrefRegistrySyncable::SYNCABLE_PREF);

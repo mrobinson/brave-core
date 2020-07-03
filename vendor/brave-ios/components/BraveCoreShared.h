@@ -2,8 +2,8 @@
 
 
 @interface BraveCoreShared: NSObject
-- (instancetype)init NS_UNAVAILABLE;
 + (instancetype)shared;
+- (instancetype)init NS_UNAVAILABLE;
 
 - (NSString *)getUserAgent;
 - (void)setUserAgentCallback:(NSString*(^)())userAgentCallback;

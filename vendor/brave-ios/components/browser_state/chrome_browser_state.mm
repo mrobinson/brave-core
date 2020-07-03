@@ -10,6 +10,7 @@
 #include "brave/vendor/brave-ios/components/browser_state/bookmark_model_loaded_observer.h"
 #include "components/bookmarks/browser/bookmark_model.h"
 #include "brave/ios/browser/prefs/browser_prefs.h"
+#include "brave/ios/browser/application_context.h"
 
 #include "base/files/file_util.h"
 #include "base/mac/foundation_util.h"
@@ -86,14 +87,13 @@ const char kBrowserStateIsChromeBrowserState[] = "IsChromeBrowserState";
 
 ChromeBrowserState::ChromeBrowserState(const base::FilePath& name)
     : state_path_(GetUserDataDir().Append(name)),
-      io_task_runner_(base::CreateSequencedTaskRunner(
+      io_task_runner_(GetIOTaskRunner().get() ?: base::CreateSequencedTaskRunner(
           {base::ThreadPool(), base::TaskShutdownBehavior::BLOCK_SHUTDOWN,
            base::MayBlock()})),
       pref_registry_(new user_prefs::PrefRegistrySyncable) {
   DCHECK(io_task_runner_);
   SetUserData(kBrowserStateIsChromeBrowserState,
               std::make_unique<base::SupportsUserData::Data>());
-          fprintf(stderr, "CHECKING DIRECTORIES\n");
 
   bool directories_created = EnsureBrowserStateDirectoriesCreated(state_path_);
   DCHECK(directories_created);
@@ -110,32 +110,33 @@ ChromeBrowserState::ChromeBrowserState(const base::FilePath& name)
         policy_schema_registry_.get(), connector);
   }*/
 
-  fprintf(stderr, "RegisterBrowserStatePrefs\n");
   RegisterBrowserStatePrefs(pref_registry_.get());
-          
-  fprintf(stderr, "RegisterBrowserStatePrefsForServices\n");
   BrowserStateDependencyManager::GetInstance()
       ->RegisterBrowserStatePrefsForServices(pref_registry_.get());
-
-  fprintf(stderr, "CreateBrowserStatePrefs\n");
   prefs_ = CreateBrowserStatePrefs(state_path_,
-                                   GetIOTaskRunner().get(),
+                                   io_task_runner_.get(),
                                    pref_registry_,
                                    nullptr, //policy_connector_ ? policy_connector_->GetPolicyService() :
                                    nullptr); //GetApplicationContext()->GetBrowserPolicyConnector()
-          
-  fprintf(stderr, "UserPrefs\n");
+
   // Register on BrowserState.
   user_prefs::UserPrefs::Set(this, prefs_.get());
 
-  fprintf(stderr, "CreateBrowserStateServices\n");
+  // Migrate obsolete prefs.
+  PrefService* local_state = GetApplicationContext()->GetLocalState();
+  MigrateObsoleteLocalStatePrefs(local_state);
+  MigrateObsoleteBrowserStatePrefs(prefs_.get());
+          
   BrowserStateDependencyManager::GetInstance()->CreateBrowserStateServices(
       this);
 
   // Listen for bookmark model load, to bootstrap the sync service.
   // TODO(bridiver)
+
+  fprintf(stderr, "CREATING BOOKMARK MODEL OBSERVER\n");
   bookmarks::BookmarkModel* model =
-       ios::BookmarkModelFactory::GetForBrowserState(this);
+      ios::BookmarkModelFactory::GetForBrowserState(this);
+  fprintf(stderr, "GetForBrowserState\n");
   model->AddObserver(new BookmarkModelLoadedObserver(this));
 }
 

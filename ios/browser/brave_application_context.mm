@@ -81,55 +81,6 @@ void BindNetworkChangeManagerReceiver(
 }
 }  // namespace
 
-namespace brave {
-/*void RegisterLocalStatePrefs(PrefRegistrySimple* registry) {
-    BrowserStateInfoCache::RegisterPrefs(registry);
-    //flags_ui::PrefServiceFlagsStorage::RegisterPrefs(registry);
-    //signin::IdentityManager::RegisterLocalStatePrefs(registry);
-    //IOSChromeMetricsServiceClient::RegisterPrefs(registry);
-    //network_time::NetworkTimeTracker::RegisterPrefs(registry);
-    //ios::NotificationPromo::RegisterPrefs(registry);
-    //policy::BrowserPolicyConnector::RegisterPrefs(registry);
-    //policy::PolicyStatisticsCollector::RegisterPrefs(registry);
-    PrefProxyConfigTrackerImpl::RegisterPrefs(registry);
-    //rappor::RapporServiceImpl::RegisterPrefs(registry);
-    sessions::SessionIdGenerator::RegisterPrefs(registry);
-    update_client::RegisterPrefs(registry);
-    variations::VariationsService::RegisterPrefs(registry);
-
-    // Preferences related to the browser state manager.
-    registry->RegisterStringPref(prefs::kBrowserStateLastUsed, std::string());
-    registry->RegisterIntegerPref(prefs::kBrowserStatesNumCreated, 1);
-    registry->RegisterListPref(prefs::kBrowserStatesLastActive);
-
-    //[OmniboxGeolocationLocalState registerLocalState:registry];
-    //[MemoryDebuggerManager registerLocalState:registry];
-
-    registry->RegisterBooleanPref(prefs::kBrowsingDataMigrationHasBeenPossible,
-                                  false);
-
-    // Preferences related to the application context.
-    const char kApplicationLocale[] = "intl.app_locale";
-    registry->RegisterStringPref(kApplicationLocale, //language::prefs::kApplicationLocale,
-                                 std::string());
-    registry->RegisterBooleanPref(prefs::kEulaAccepted, false);
-    registry->RegisterBooleanPref(metrics::prefs::kMetricsReportingEnabled,
-                                  false);
-    registry->RegisterBooleanPref(prefs::kLastSessionExitedCleanly, true);
-    //if (!base::FeatureList::IsEnabled(kUmaCellular)) {
-      registry->RegisterBooleanPref(prefs::kMetricsReportingWifiOnly, true);
-    //}
-
-    registry->RegisterBooleanPref(kGCMChannelStatus, true);
-    registry->RegisterIntegerPref(kGCMChannelPollIntervalSeconds, 0);
-    registry->RegisterInt64Pref(kGCMChannelLastCheckTime, 0);
-
-    registry->RegisterListPref(kInvalidatorSavedInvalidations);
-    registry->RegisterStringPref(kInvalidatorInvalidationState, std::string());
-    registry->RegisterStringPref(kInvalidatorClientId, std::string());
-}*/
-}
-
 BraveApplicationContext::BraveApplicationContext(
     base::SequencedTaskRunner* local_state_task_runner,
     const base::CommandLine& command_line,

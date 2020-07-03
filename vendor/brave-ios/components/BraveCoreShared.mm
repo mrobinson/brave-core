@@ -49,11 +49,13 @@
         params.register_exit_manager = false;
         
         web_main_ = std::make_unique<web::BraveWebMain>(std::move(params));
+        
+        /*web::ShellWebClient* client =
+            static_cast<web::ShellWebClient*>(web::GetWebClient());
+        web::BrowserState* browserState = client->browser_state();*/
 
-        fprintf(stderr, "CREATING CHROME BROWSER STATE!\n");
         browser_state_ = std::make_unique<ChromeBrowserState>(
             base::FilePath(kIOSChromeInitialBrowserState));
-        fprintf(stderr, "CREATED!!\n");
     }
     return self;
 }
