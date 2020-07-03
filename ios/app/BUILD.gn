@@ -16,6 +16,7 @@ source_set("app") {
     "//brave/ios/browser",
     "//brave/ios/web",
     "//base",
+    "//components/component_updater",
     "//ios/web/public/init",
   ]
 

@@ -19,7 +19,8 @@ source_set("prefs") {
     "//base",
     "//components/prefs",
     "//components/pref_registry",
-    "//components/content_settings/core/common",
+    #"//components/content_settings/core/common",
+    #"//components/content_settings/core/browser",
     "//third_party/metrics_proto",
   ]
 
@@ -34,20 +35,22 @@ source_set("chromium_sources") {
 
   deps = [
     "//base",
+    "//components/content_settings/core/common",
     "//components/content_settings/core/browser",
     "//components/policy/core/browser",
     "//components/prefs/ios",
     "//components/proxy_config",
     "//components/sync_preferences",
-    "//ios/chrome/browser",
+    #"//ios/chrome/browser",
     "//ios/chrome/browser/policy:feature_flags",
 
+    "//components/browsing_data/core",
     "//components/handoff",
     "//components/history/core/common",
     "//components/invalidation/impl:impl",
-    #"//components/language/core/browser",
+    "//components/language/core/browser",
     "//components/metrics",
-    #"//components/policy/core/browser",
+    "//components/policy/core/browser",
     "//components/policy/core/common",
     "//components/pref_registry",
     "//components/prefs",
@@ -58,12 +61,14 @@ source_set("chromium_sources") {
     "//components/sync",
     "//components/sync_sessions",
     "//components/sync/base",
+    "//components/translate/core/browser",
+    "//components/translate/core/common",
     "//components/ukm/ios:features",
     "//components/update_client",
     "//components/variations/service",
     "//components/web_resource",
     #"//ios/chrome/browser/first_run:first_run",
-    "//ios/chrome/browser/memory",
-    "//ios/chrome/browser/ui/bookmarks",
+    #"//ios/chrome/browser/memory",
+    #"//ios/chrome/browser/ui/bookmarks",
   ]
 }

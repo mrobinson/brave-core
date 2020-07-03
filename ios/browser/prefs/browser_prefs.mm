@@ -7,7 +7,7 @@
 
 //#include "components/autofill/core/common/autofill_prefs.h"
 #include "components/browsing_data/core/pref_names.h"
-#include "components/content_settings/core/browser/host_content_settings_map.h"
+//#include "components/content_settings/core/browser/host_content_settings_map.h"
 //#include "components/dom_distiller/core/distilled_page_prefs.h"
 #include "components/feed/core/shared_prefs/pref_names.h"
 #include "components/flags_ui/pref_service_flags_storage.h"
@@ -36,7 +36,7 @@
 #include "components/prefs/pref_service.h"
 #include "components/proxy_config/pref_proxy_config_tracker_impl.h"
 #include "components/rappor/rappor_service_impl.h"
-#include "components/safe_browsing/core/common/safe_browsing_prefs.h"
+//#include "components/safe_browsing/core/common/safe_browsing_prefs.h"
 #include "components/search_engines/template_url_prepopulate_data.h"
 #include "components/sessions/core/session_id_generator.h"
 #include "components/signin/public/base/signin_pref_names.h"
@@ -46,7 +46,7 @@
 #include "components/sync_device_info/device_info_prefs.h"
 #include "components/sync_sessions/session_sync_prefs.h"
 #include "components/translate/core/browser/translate_pref_names.h"
-//#include "components/translate/core/browser/translate_prefs.h"
+#include "components/translate/core/browser/translate_prefs.h"
 #include "components/ukm/ios/features.h"
 #include "components/unified_consent/unified_consent_service.h"
 #include "components/update_client/update_client.h"
@@ -55,14 +55,14 @@
 #include "ios/chrome/browser/browser_state/browser_state_info_cache.h"
 #include "ios/chrome/browser/first_run/first_run.h"
 //#import "ios/chrome/browser/geolocation/omnibox_geolocation_local_state.h"
-#import "ios/chrome/browser/memory/memory_debugger_manager.h"
+//#import "ios/chrome/browser/memory/memory_debugger_manager.h"
 #import "ios/chrome/browser/metrics/ios_chrome_metrics_service_client.h"
 //#include "ios/chrome/browser/notification_promo.h"
 #include "ios/chrome/browser/pref_names.h"
 //#import "ios/chrome/browser/ui/authentication/signin_promo_view_mediator.h"
-#import "ios/chrome/browser/ui/bookmarks/bookmark_mediator.h"
-#import "ios/chrome/browser/ui/bookmarks/bookmark_path_cache.h"
-#import "ios/chrome/browser/ui/bookmarks/bookmark_utils_ios.h"
+//#import "ios/chrome/browser/ui/bookmarks/bookmark_mediator.h"
+//#import "ios/chrome/browser/ui/bookmarks/bookmark_path_cache.h"
+//#import "ios/chrome/browser/ui/bookmarks/bookmark_utils_ios.h"
 //#include "ios/chrome/browser/voice/voice_search_prefs_registration.h"
 //#import "ios/chrome/browser/web/font_size_tab_helper.h"
 //#include "ios/public/provider/chrome/browser/chrome_browser_provider.h"
@@ -113,7 +113,7 @@ void RegisterLocalStatePrefs(PrefRegistrySimple* registry) {
   registry->RegisterListPref(prefs::kBrowserStatesLastActive);
 
   //[OmniboxGeolocationLocalState registerLocalState:registry];
-  [MemoryDebuggerManager registerLocalState:registry];
+  //[MemoryDebuggerManager registerLocalState:registry];
 
   registry->RegisterBooleanPref(prefs::kBrowsingDataMigrationHasBeenPossible,
                                 false);
@@ -159,7 +159,7 @@ void RegisterBrowserStatePrefs(user_prefs::PrefRegistrySyncable* registry) {
   //payments::RegisterProfilePrefs(registry);
   PrefProxyConfigTrackerImpl::RegisterProfilePrefs(registry);
   //RegisterVoiceSearchBrowserStatePrefs(registry);
-  safe_browsing::RegisterProfilePrefs(registry);
+  //safe_browsing::RegisterProfilePrefs(registry);
   sync_sessions::SessionSyncPrefs::RegisterProfilePrefs(registry);
   syncer::DeviceInfoPrefs::RegisterProfilePrefs(registry);
   syncer::InvalidatorRegistrarWithMemory::RegisterProfilePrefs(registry);
@@ -171,8 +171,8 @@ void RegisterBrowserStatePrefs(user_prefs::PrefRegistrySyncable* registry) {
   variations::VariationsService::RegisterProfilePrefs(registry);
   //ZeroSuggestProvider::RegisterProfilePrefs(registry);
 
-  [BookmarkMediator registerBrowserStatePrefs:registry];
-  [BookmarkPathCache registerBrowserStatePrefs:registry];
+  //[BookmarkMediator registerBrowserStatePrefs:registry];
+  //[BookmarkPathCache registerBrowserStatePrefs:registry];
   //[SigninPromoViewMediator registerBrowserStatePrefs:registry];
   [HandoffManager registerBrowserStatePrefs:registry];
 

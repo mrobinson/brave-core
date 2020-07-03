@@ -1,6 +1,5 @@
 #import "brave/ios/browser/brave_application_context.h"
-//#include "brave/ios/browser/prefs/browser_prefs.h"
-#include "ios/chrome/browser/prefs/browser_prefs.h"
+#include "brave/ios/browser/prefs/browser_prefs.h"
 #include "brave/vendor/brave-ios/components/browser_state/chrome_browser_state.h"
 
 #include <algorithm>
