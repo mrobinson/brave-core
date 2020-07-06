@@ -87,8 +87,8 @@ const char kBrowserStateIsChromeBrowserState[] = "IsChromeBrowserState";
 
 ChromeBrowserState::ChromeBrowserState(const base::FilePath& name)
     : state_path_(GetUserDataDir().Append(name)),
-      io_task_runner_(GetIOTaskRunner().get() ?: base::CreateSequencedTaskRunner(
-          {base::ThreadPool(), base::TaskShutdownBehavior::BLOCK_SHUTDOWN,
+      io_task_runner_(base::ThreadPool::CreateSequencedTaskRunner(
+          {base::TaskShutdownBehavior::BLOCK_SHUTDOWN,
            base::MayBlock()})),
       pref_registry_(new user_prefs::PrefRegistrySyncable) {
   DCHECK(io_task_runner_);
@@ -114,7 +114,8 @@ ChromeBrowserState::ChromeBrowserState(const base::FilePath& name)
   BrowserStateDependencyManager::GetInstance()
       ->RegisterBrowserStatePrefsForServices(pref_registry_.get());
   prefs_ = CreateBrowserStatePrefs(state_path_,
-                                   io_task_runner_.get(),
+                                   GetIOTaskRunner().get(),
+                                   //io_task_runner_.get(),
                                    pref_registry_,
                                    nullptr, //policy_connector_ ? policy_connector_->GetPolicyService() :
                                    nullptr); //GetApplicationContext()->GetBrowserPolicyConnector()
@@ -131,12 +132,8 @@ ChromeBrowserState::ChromeBrowserState(const base::FilePath& name)
       this);
 
   // Listen for bookmark model load, to bootstrap the sync service.
-  // TODO(bridiver)
-
-  fprintf(stderr, "CREATING BOOKMARK MODEL OBSERVER\n");
   bookmarks::BookmarkModel* model =
       ios::BookmarkModelFactory::GetForBrowserState(this);
-  fprintf(stderr, "GetForBrowserState\n");
   model->AddObserver(new BookmarkModelLoadedObserver(this));
 }
 
