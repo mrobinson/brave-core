@@ -9,6 +9,8 @@ source_set("bookmarks") {
   sources = [
     "bookmarks_api.cc",
     "bookmarks_api.h",
+    "bookmark_client.h",
+    "bookmark_client.cc"
   ]
 
   deps = [

@@ -4,6 +4,8 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "brave/vendor/brave-ios/components/brave_sync/brave_sync_service.h"
+#include "brave/vendor/brave-ios/components/bookmarks/bookmark_client.h"
+#include "brave/vendor/brave-ios/components/bookmarks/bookmarks_api.h"
 
 #include "base/task/post_task.h"
 #include "base/base_paths.h"
@@ -86,11 +88,13 @@ BraveSyncService::BraveSyncService()
 
   // Register on BrowserState.
   // user_prefs::UserPrefs::Set(this, prefs_.get());
+        
+  std::unique_ptr<BookmarkClient> client =
 
   bookmarks_api_ = std::make_unique<bookmarks::BookmarksAPI>(prefs_.get(),
       browser_state_path,
       io_task_runner_.get(),
-      nullptr); //std::unique_ptr<BookmarkClient>
+      std::make_unique<bookmarks::BraveBookmarkClient>());
 }
 
 BraveSyncService::~BraveSyncService() {}
