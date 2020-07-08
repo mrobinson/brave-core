@@ -14,7 +14,12 @@ config("internal_config") {
   ]
 }
 
-group("browser_state") {
+source_set("browser_state") {
+  sources = [
+    "browser_state_manager.h",
+    "browser_state_manager.mm",
+  ]
+
   deps = [
     ":chromium_sources",
     "//base",

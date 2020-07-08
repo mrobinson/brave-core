@@ -4,10 +4,10 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "brave/ios/browser/brave_web_main_parts.h"
-#include "brave/vendor/brave-ios/components/browser_state/browser_state_manager.h"
 
 #include "base/path_service.h"
 #include "brave/ios/browser/browser_state/browser_state_keyed_service_factories.h"
+#include "brave/ios/browser/browser_state/browser_state_manager.h"
 #include "components/content_settings/core/common/content_settings_pattern.h"
 #include "components/metrics/persistent_histograms.h"
 #include "ios/chrome/browser/browser_state/chrome_browser_state.h"

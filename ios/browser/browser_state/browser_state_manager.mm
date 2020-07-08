@@ -1,5 +1,5 @@
-#include "brave/vendor/brave-ios/components/browser_state/browser_state_manager.h"
-#include "brave/vendor/brave-ios/components/browser_state/chrome_browser_state.h"
+#include "brave/ios/browser/browser_state/browser_state_manager.h"
+#include "ios/chrome/browser/browser_state/chrome_browser_state.h"
 
 #include "base/path_service.h"
 
