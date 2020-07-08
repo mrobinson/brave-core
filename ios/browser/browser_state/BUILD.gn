@@ -17,7 +17,6 @@ config("internal_config") {
 source_set("browser_state") {
   sources = [
     "browser_state_manager.h",
-    "browser_state_manager.mm",
   ]
 
   deps = [
@@ -44,12 +43,19 @@ source_set("browser_state_impl") {
   sources = [
     "browser_state_keyed_service_factories.h",
     "browser_state_keyed_service_factories.mm",
+    "browser_state_manager.mm",
+    "//ios/chrome/browser/browser_state/chrome_browser_state_impl.cc",
+    "//ios/chrome/browser/browser_state/chrome_browser_state_impl.h",
   ]
 
   deps = [
     ":chromium_sources",
     "//base",
     "//ios/chrome/browser/undo",
+  ]
+
+  public_deps = [
+    ":browser_state",
   ]
 }
 
@@ -61,6 +67,8 @@ source_set("chromium_sources") {
     "//ios/chrome/browser/prefs/ios_chrome_pref_service_factory.h",
     "//ios/chrome/browser/prefs/ios_chrome_pref_model_associator_client.cc",
     "//ios/chrome/browser/prefs/ios_chrome_pref_model_associator_client.h",
+    "//ios/chrome/browser/chrome_constants.cc",
+    "//ios/chrome/browser/chrome_constants.h",
   ]
 
   deps = [

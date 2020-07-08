@@ -53,5 +53,5 @@ void BraveWebMainParts::PreMainMessageLoopRun() {
 
   // Ensure that the browser state is initialized.
   EnsureBrowserStateKeyedServiceFactoriesBuilt();
-  browser_state_ = BrowserStateManager::instance().getBrowserState();
+  browser_state_ = BrowserStateManager::GetInstance().GetBrowserState();
 }

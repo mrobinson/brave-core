@@ -4,11 +4,14 @@
 #include "base/macros.h"
 #include "components/keyed_service/core/keyed_service.h"
 
+@class ChromeIdentity;
+
 class AuthenticationService : public KeyedService {
  public:
   AuthenticationService() {}
   ~AuthenticationService() override {}
 
+  ChromeIdentity* GetAuthenticatedIdentity() const { return nullptr; }
  private:
   DISALLOW_COPY_AND_ASSIGN(AuthenticationService);
 };

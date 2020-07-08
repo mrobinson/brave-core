@@ -8,10 +8,10 @@ class ChromeBrowserState;
 
 class BrowserStateManager {
   public:
-    static BrowserStateManager& instance();
+    static BrowserStateManager& GetInstance();
     ~BrowserStateManager();
 
-    ChromeBrowserState* getBrowserState();
+    ChromeBrowserState* GetBrowserState();
 
   private:
     BrowserStateManager();
