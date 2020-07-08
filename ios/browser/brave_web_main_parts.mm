@@ -71,7 +71,7 @@ void BraveWebMainParts::PreCreateThreads() {
     DCHECK_EQ(application_context_.get(), GetApplicationContext());
 
     FirstRun::IsChromeFirstRun();
-    
+
     local_state_ = application_context_->GetLocalState();
     DCHECK(local_state_);
 
@@ -83,19 +83,22 @@ void BraveWebMainParts::PreCreateThreads() {
         InstantiatePersistentHistograms(user_data_dir);
       }
     }
-    
+
     application_context_->PreCreateThreads();
 }
 
 void BraveWebMainParts::PreMainMessageLoopRun() {
   application_context_->PreMainMessageLoopRun();
-    
+
   // ContentSettingsPattern need to be initialized before creating the
   // ChromeBrowserState.
   ContentSettingsPattern::SetNonWildcardDomainNonPortSchemes(nullptr, 0);
 
   // Ensure that the browser state is initialized.
   EnsureBrowserStateKeyedServiceFactoriesBuilt();
+  browser_state_ = std::make_unique<ChromeBrowserState>(
+            base::FilePath(kIOSChromeInitialBrowserState));
+
 //  ios::ChromeBrowserStateManager* browser_state_manager =
 //      application_context_->GetChromeBrowserStateManager();
 //

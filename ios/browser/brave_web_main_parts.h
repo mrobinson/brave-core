@@ -11,8 +11,10 @@
 #include "base/macros.h"
 #include "ios/web/public/init/web_main_parts.h"
 
-class PrefService;
 class BraveApplicationContext;
+class ChromeBrowserState;
+class PrefService;
+
 
 class BraveWebMainParts : public web::WebMainParts {
  public:
@@ -26,7 +28,8 @@ class BraveWebMainParts : public web::WebMainParts {
   void PreMainMessageLoopRun() override;
   void PostMainMessageLoopRun() override;
   void PostDestroyThreads() override;
-    
+
+  std::unique_ptr<ChromeBrowserState> browser_state_;
   std::unique_ptr<BraveApplicationContext> application_context_;
   PrefService* local_state_;
 

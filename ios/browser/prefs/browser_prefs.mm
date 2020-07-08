@@ -5,7 +5,7 @@
 #include "brave/ios/browser/prefs/browser_prefs.h"
 #include "brave/ios/browser/first_run/first_run.h"
 
-#include "brave/ios/browser/pref_names.h"
+#include "ios/chrome/browser/pref_names.h"
 //#include "components/autofill/core/common/autofill_prefs.h"
 #include "components/browsing_data/core/pref_names.h"
 //#include "components/content_settings/core/browser/host_content_settings_map.h"
@@ -147,11 +147,11 @@ void RegisterBrowserStatePrefs(user_prefs::PrefRegistrySyncable* registry) {
   //FontSizeTabHelper::RegisterBrowserStatePrefs(registry);
   //HostContentSettingsMap::RegisterProfilePrefs(registry);
   //ios::NotificationPromo::RegisterProfilePrefs(registry);
-    
+
   //CRASHES THE APPLICATION! - Brandon
   //language::LanguagePrefs::RegisterProfilePrefs(registry);
-    
-    
+
+
   //ntp_snippets::ClickBasedCategoryRanker::RegisterProfilePrefs(registry);
   //ntp_snippets::ContentSuggestionsService::RegisterProfilePrefs(registry);
   //ntp_snippets::RemoteSuggestionsProviderImpl::RegisterProfilePrefs(registry);
@@ -204,7 +204,7 @@ void RegisterBrowserStatePrefs(user_prefs::PrefRegistrySyncable* registry) {
       prefs::kSearchSuggestEnabled, true,
       user_prefs::PrefRegistrySyncable::SYNCABLE_PREF);
   registry->RegisterBooleanPref(prefs::kSavingBrowserHistoryDisabled, false);
-  registry->RegisterIntegerPref(prefs::kNtpShownPage, 1 << 10);
+  // registry->RegisterIntegerPref(prefs::kNtpShownPage, 1 << 10);
 
   // This comes from components/bookmarks/core/browser/bookmark_model.h
   // Defaults to 3, which is the id of bookmarkModel_->mobile_node()
@@ -244,7 +244,7 @@ void MigrateObsoleteLocalStatePrefs(PrefService* prefs) {
 // This method should be periodically pruned of year+ old migrations.
 void MigrateObsoleteBrowserStatePrefs(PrefService* prefs) {
   // Added 01/2018.
-  prefs->ClearPref(::prefs::kNtpShownPage);
+  // prefs->ClearPref(::prefs::kNtpShownPage);
 
   // Added 8/2018.
 //  autofill::prefs::MigrateDeprecatedAutofillPrefs(prefs);

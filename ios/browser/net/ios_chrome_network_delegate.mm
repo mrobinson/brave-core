@@ -1,5 +1,4 @@
 #import "brave/ios/browser/net/ios_chrome_network_delegate.h"
-#include "brave/ios/browser/pref_names.h"
 
 #include <stdlib.h>
 
@@ -13,6 +12,7 @@
 #include "base/task/post_task.h"
 #include "components/prefs/pref_member.h"
 #include "components/prefs/pref_service.h"
+#include "ios/chrome/browser/pref_names.h"
 #include "ios/web/public/thread/web_task_traits.h"
 #include "ios/web/public/thread/web_thread.h"
 #include "net/base/load_flags.h"

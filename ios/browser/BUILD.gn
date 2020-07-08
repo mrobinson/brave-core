@@ -16,12 +16,10 @@ source_set("browser") {
     "brave_application_context.mm",
     "ios_chrome_io_thread.h",
     "ios_chrome_io_thread.mm",
-    "pref_names.h",
-    "pref_names.cc",
     "application_context.h",
     "application_context.cc",
-    "chrome_paths.h",
-    "chrome_paths.mm",
+    "//ios/chrome/browser/pref_names.cc",
+    "//ios/chrome/browser/pref_names.h",
   ]
 
   deps = [
