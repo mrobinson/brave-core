@@ -1,5 +1,4 @@
 #include "brave/vendor/brave-ios/components/BraveCoreShared.h"
-#include "brave/ios/web/brave_webmain.h"
 
 #include "base/files/file_path.h"
 #include "base/mac/bundle_locations.h"
@@ -21,7 +20,7 @@
 @interface BraveCoreShared()
 {
     std::unique_ptr<BraveMainDelegate> delegate_;
-    std::unique_ptr<web::BraveWebMain> web_main_;
+    std::unique_ptr<web::WebMain> web_main_;
 }
 @end
 
@@ -47,7 +46,7 @@
 
         web::WebMainParams params(delegate_.get());
 
-        web_main_ = std::make_unique<web::BraveWebMain>(std::move(params));
+        web_main_ = std::make_unique<web::WebMain>(std::move(params));
 
         /*web::ShellWebClient* client =
             static_cast<web::ShellWebClient*>(web::GetWebClient());
