@@ -7,10 +7,10 @@
 #include "brave/vendor/brave-ios/components/browser_state/browser_state_manager.h"
 
 #include "base/path_service.h"
-#include "brave/vendor/brave-ios/components/browser_state/browser_state_keyed_service_factories.h"
-#include "brave/vendor/brave-ios/components/browser_state/chrome_browser_state.h"
+#include "brave/ios/browser/browser_state/browser_state_keyed_service_factories.h"
 #include "components/content_settings/core/common/content_settings_pattern.h"
 #include "components/metrics/persistent_histograms.h"
+#include "ios/chrome/browser/browser_state/chrome_browser_state.h"
 #include "ios/chrome/browser/chrome_paths.h"
 #include "ui/base/l10n/l10n_util_mac.h"
 #include "ui/base/resource/resource_bundle.h"

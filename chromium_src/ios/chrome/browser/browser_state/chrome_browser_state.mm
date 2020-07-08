@@ -1,15 +1,11 @@
-//
-//  chrome_browser_state.cpp
-//  base/third_party/double_conversion:double_conversion
-//
-//  Created by brandon on 2020-05-07.
-//
+/* Copyright (c) 2019 The Brave Authors. All rights reserved.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "brave/vendor/brave-ios/components/browser_state/chrome_browser_state.h"
-#include "brave/vendor/brave-ios/components/bookmarks/bookmark_model_factory.h"
-#include "brave/vendor/brave-ios/components/browser_state/bookmark_model_loaded_observer.h"
-#include "components/bookmarks/browser/bookmark_model.h"
+#include "ios/chrome/browser/browser_state/chrome_browser_state.h"
 
+#include "build/build_config.h"
 #include "base/files/file_util.h"
 #include "base/mac/foundation_util.h"
 #include "base/path_service.h"
@@ -17,16 +13,17 @@
 #include "base/supports_user_data.h"
 #include "base/task/post_task.h"
 #include "base/threading/thread_restrictions.h"
+#include "components/bookmarks/browser/bookmark_model.h"
 #include "components/keyed_service/ios/browser_state_dependency_manager.h"
 #include "components/prefs/pref_service.h"
 #include "components/pref_registry/pref_registry_syncable.h"
 #include "components/sync_preferences/pref_service_syncable.h"
 #include "components/user_prefs/user_prefs.h"
+#include "ios/chrome/browser/bookmarks/bookmark_model_factory.h"
 #include "ios/chrome/browser/prefs/ios_chrome_pref_service_factory.h"
 #include "ios/web/public/browser_state.h"
 #include "ios/web/public/thread/web_task_traits.h"
 #include "ios/web/public/thread/web_thread.h"
-#include "ios/web/shell/shell_url_request_context_getter.h"
 #include "net/url_request/url_request_context_getter.h"
 
 #if !defined(__has_feature) || !__has_feature(objc_arc)
@@ -130,9 +127,9 @@ ChromeBrowserState::ChromeBrowserState(const base::FilePath& name)
       this);
 
   // Listen for bookmark model load, to bootstrap the sync service.
-  bookmarks::BookmarkModel* model =
-      ios::BookmarkModelFactory::GetForBrowserState(this);
-  model->AddObserver(new BookmarkModelLoadedObserver(this));
+  // bookmarks::BookmarkModel* model =
+  //     ios::BookmarkModelFactory::GetForBrowserState(this);
+  // model->AddObserver(new BookmarkModelLoadedObserver(this));
 }
 
 ChromeBrowserState::~ChromeBrowserState() {}
@@ -150,20 +147,21 @@ ChromeBrowserState* ChromeBrowserState::FromBrowserState(
   return static_cast<ChromeBrowserState*>(browser_state);
 }
 
-net::URLRequestContextGetter* ChromeBrowserState::GetRequestContext() {
-  DCHECK_CURRENTLY_ON(web::WebThread::UI);
-  if (!request_context_getter_) {
-    request_context_getter_ =
-        base::WrapRefCounted(CreateRequestContext());
-  }
-  return request_context_getter_.get();
+
+ChromeBrowserState* ChromeBrowserState::GetOriginalChromeBrowserState() {
+  return this;
 }
 
-net::URLRequestContextGetter* ChromeBrowserState::CreateRequestContext() {
-  return new web::ShellURLRequestContextGetter(
-      GetStatePath(), this,
-      base::CreateSingleThreadTaskRunner({web::WebThread::IO}));
+net::URLRequestContextGetter* ChromeBrowserState::GetRequestContext() {
+  DCHECK_CURRENTLY_ON(web::WebThread::UI);
+  return nullptr;
 }
+
+// net::URLRequestContextGetter* ChromeBrowserState::CreateRequestContext() {
+//   return new web::ShellURLRequestContextGetter(
+//       GetStatePath(), this,
+//       base::CreateSingleThreadTaskRunner({web::WebThread::IO}));
+// }
 
 bool ChromeBrowserState::IsOffTheRecord() const {
   return false;

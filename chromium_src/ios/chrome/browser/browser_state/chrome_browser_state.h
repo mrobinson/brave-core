@@ -1,12 +1,10 @@
-//
-//  chrome_browser_state.hpp
-//  base/third_party/double_conversion:double_conversion
-//
-//  Created by brandon on 2020-05-07.
-//
+/* Copyright (c) 2019 The Brave Authors. All rights reserved.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef chrome_browser_state_hpp
-#define chrome_browser_state_hpp
+#ifndef BRAVE_CHROMIUM_SRC_IOS_CHROME_BROWSER_BROWSER_STATE_CHROME_BROWSER_STATE_H_
+#define BRAVE_CHROMIUM_SRC_IOS_CHROME_BROWSER_BROWSER_STATE_CHROME_BROWSER_STATE_H_
 
 #include "base/callback_forward.h"
 #include "base/compiler_specific.h"
@@ -43,11 +41,12 @@ class ChromeBrowserState : public web::BrowserState {
   bool IsOffTheRecord() const override;
   base::FilePath GetStatePath() const override;
 
+  virtual ChromeBrowserState* GetOriginalChromeBrowserState();
   PrefService* GetPrefs();
   scoped_refptr<base::SequencedTaskRunner> GetIOTaskRunner();
 
  private:
-  net::URLRequestContextGetter* CreateRequestContext();
+  // net::URLRequestContextGetter* CreateRequestContext();
 
   base::FilePath state_path_;
   scoped_refptr<base::SequencedTaskRunner> io_task_runner_;
@@ -58,4 +57,4 @@ class ChromeBrowserState : public web::BrowserState {
   DISALLOW_COPY_AND_ASSIGN(ChromeBrowserState);
 };
 
-#endif /* chrome_browser_state_hpp */
+#endif /* BRAVE_CHROMIUM_SRC_IOS_CHROME_BROWSER_BROWSER_STATE_CHROME_BROWSER_STATE_H_ */

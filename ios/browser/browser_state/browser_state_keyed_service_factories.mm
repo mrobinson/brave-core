@@ -1,10 +1,8 @@
-#include "brave/vendor/brave-ios/components/browser_state/browser_state_keyed_service_factories.h"
+#include "brave/ios/browser/browser_state/browser_state_keyed_service_factories.h"
 
-#include "base/logging.h"
-#include "components/content_settings/core/common/content_settings_pattern.h"
-#include "brave/vendor/brave-ios/components/bookmarks/bookmark_model_factory.h"
-#include "brave/vendor/brave-ios/components/bookmarks/startup_task_runner_service_factory.h"
-#include "brave/vendor/brave-ios/components/bookmark_sync_service/bookmark_undo_service_factory.h"
+#include "ios/chrome/browser/bookmarks/bookmark_model_factory.h"
+#include "ios/chrome/browser/bookmarks/startup_task_runner_service_factory.h"
+#include "ios/chrome/browser/undo/bookmark_undo_service_factory.h"
 
 //#include "ios/chrome/browser/history/history_service_factory.h"
 //#include "ios/chrome/browser/sync/profile_sync_service_factory.h"
@@ -23,4 +21,3 @@ void EnsureBrowserStateKeyedServiceFactoriesBuilt() {
   //ProfileSyncServiceFactory::GetInstance();
   //SyncSetupServiceFactory::GetInstance();
 }
-

@@ -11,4 +11,3 @@
 void EnsureBrowserStateKeyedServiceFactoriesBuilt();
 
 #endif  // IOS_CHROME_BROWSER_BROWSER_STATE_BROWSER_STATE_KEYED_SERVICE_FACTORIES_H_
-

@@ -7,7 +7,7 @@
 #include "base/strings/utf_string_conversions.h"
 #include "base/strings/sys_string_conversions.h"
 #include "brave/ios/app/brave_main_delegate.h"
-#include "brave/vendor/brave-ios/components/browser_state/chrome_browser_state.h"
+#include "ios/chrome/browser/browser_state/chrome_browser_state.h"
 #include "ios/web/public/init/web_main.h"
 
 #import "base/i18n/icu_util.h"
