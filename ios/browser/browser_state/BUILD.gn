@@ -53,6 +53,8 @@ source_set("browser_state_impl") {
   deps = [
     ":chromium_sources",
     "//base",
+    "//brave/ios/browser/bookmarks",
+    "//brave/ios/browser/history",
     "//brave/ios/browser/prefs",
     "//brave/ios/browser/sync",
     "//components/bookmarks/browser",

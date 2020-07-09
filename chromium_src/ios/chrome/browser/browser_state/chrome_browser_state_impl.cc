@@ -16,7 +16,11 @@
 #include "components/user_prefs/user_prefs.h"
 #include "ios/chrome/browser/bookmarks/bookmark_model_factory.h"
 #include "ios/chrome/browser/browser_state/bookmark_model_loaded_observer.h"
+#include "ios/chrome/browser/prefs/browser_prefs.h"
 #include "ios/chrome/browser/prefs/ios_chrome_pref_service_factory.h"
+
+// temporary for kEnableLocalSyncBackend
+#include "components/sync/base/pref_names.h"
 
 namespace {
 
@@ -37,7 +41,7 @@ bool EnsureBrowserStateDirectoriesCreated(const base::FilePath& path) {
   return true;
 }
 
-}
+}  // namespace
 
 ChromeBrowserStateImpl::ChromeBrowserStateImpl(
     scoped_refptr<base::SequencedTaskRunner> io_task_runner,
@@ -48,7 +52,7 @@ ChromeBrowserStateImpl::ChromeBrowserStateImpl(
   bool directories_created = EnsureBrowserStateDirectoriesCreated(state_path_);
   DCHECK(directories_created);
 
-  // RegisterBrowserStatePrefs(pref_registry_.get());
+  RegisterBrowserStatePrefs(pref_registry_.get());
   BrowserStateDependencyManager::GetInstance()
       ->RegisterBrowserStatePrefsForServices(pref_registry_.get());
   prefs_ = CreateBrowserStatePrefs(state_path_,
@@ -56,6 +60,9 @@ ChromeBrowserStateImpl::ChromeBrowserStateImpl(
                                    pref_registry_,
                                    nullptr,
                                    nullptr);
+
+  // TODO(bridiver) - remove when IdentityManager is implemented
+  prefs_->SetBoolean(syncer::prefs::kEnableLocalSyncBackend, true);
 
   // Register on BrowserState.
   user_prefs::UserPrefs::Set(this, prefs_.get());

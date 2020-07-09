@@ -7,7 +7,9 @@
 #include "base/strings/utf_string_conversions.h"
 #include "base/strings/sys_string_conversions.h"
 #include "brave/ios/app/brave_main_delegate.h"
+#include "ios/chrome/app/startup/provider_registration.h"
 #include "ios/chrome/browser/browser_state/chrome_browser_state.h"
+#include "ios/public/provider/chrome/browser/chrome_browser_provider.h"
 #include "ios/web/public/init/web_main.h"
 
 #import "base/i18n/icu_util.h"
@@ -42,11 +44,16 @@
         base::PathService::Get(base::DIR_MODULE, &path);
         base::mac::SetOverrideFrameworkBundlePath(path);
 
+        // Register all providers before calling any Chromium code.
+        [ProviderRegistration registerProviders];
+
         delegate_.reset(new BraveMainDelegate());
 
         web::WebMainParams params(delegate_.get());
 
         web_main_ = std::make_unique<web::WebMain>(std::move(params));
+
+        ios::GetChromeBrowserProvider()->Initialize();
 
         /*web::ShellWebClient* client =
             static_cast<web::ShellWebClient*>(web::GetWebClient());

@@ -34,6 +34,8 @@ source_set("components") {
     "//base",
     "//brave/ios/app",
     "//brave/ios/browser/browser_state",
+    "//ios/chrome/browser/providers:provider_factory",
+    "//ios/public/provider/chrome/browser",
     "//ios/web/public/init",
   ]
 }

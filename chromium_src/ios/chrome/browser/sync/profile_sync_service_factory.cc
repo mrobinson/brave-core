@@ -24,7 +24,9 @@
 #include "ios/chrome/browser/browser_state/chrome_browser_state.h"
 #include "ios/chrome/browser/favicon/favicon_service_factory.h"
 #include "ios/chrome/browser/history/history_service_factory.h"
-// #include "ios/chrome/browser/sync/model_type_store_service_factory.h"
+#include "ios/chrome/browser/sync/device_info_sync_service_factory.h"
+#include "ios/chrome/browser/sync/ios_chrome_sync_client.h"
+#include "ios/chrome/browser/sync/model_type_store_service_factory.h"
 // #include "ios/chrome/browser/sync/session_sync_service_factory.h"
 #include "ios/chrome/browser/undo/bookmark_undo_service_factory.h"
 // #include "ios/chrome/browser/webdata_services/web_data_service_factory.h"
@@ -105,13 +107,13 @@ ProfileSyncServiceFactory::ProfileSyncServiceFactory()
   // destruction order.
   // DependsOn(autofill::PersonalDataManagerFactory::GetInstance());
   // DependsOn(ConsentAuditorFactory::GetInstance());
-  // DependsOn(DeviceInfoSyncServiceFactory::GetInstance());
+  DependsOn(DeviceInfoSyncServiceFactory::GetInstance());
   // DependsOn(ios::AboutSigninInternalsFactory::GetInstance());
   DependsOn(ios::BookmarkModelFactory::GetInstance());
   DependsOn(ios::BookmarkSyncServiceFactory::GetInstance());
   DependsOn(ios::BookmarkUndoServiceFactory::GetInstance());
   // DependsOn(ios::FaviconServiceFactory::GetInstance());
-  // DependsOn(ios::HistoryServiceFactory::GetInstance());
+  DependsOn(ios::HistoryServiceFactory::GetInstance());
   // DependsOn(ios::TemplateURLServiceFactory::GetInstance());
   // DependsOn(ios::WebDataServiceFactory::GetInstance());
   // DependsOn(IdentityManagerFactory::GetInstance());
@@ -119,7 +121,7 @@ ProfileSyncServiceFactory::ProfileSyncServiceFactory()
   // DependsOn(IOSChromePasswordStoreFactory::GetInstance());
   // DependsOn(IOSChromeProfileInvalidationProviderFactory::GetInstance());
   // DependsOn(IOSUserEventServiceFactory::GetInstance());
-  // DependsOn(ModelTypeStoreServiceFactory::GetInstance());
+  DependsOn(ModelTypeStoreServiceFactory::GetInstance());
   // DependsOn(ReadingListModelFactory::GetInstance());
   // DependsOn(SessionSyncServiceFactory::GetInstance());
 }
@@ -145,15 +147,15 @@ ProfileSyncServiceFactory::BuildServiceInstanceFor(
   // init_params.identity_manager =
   //     IdentityManagerFactory::GetForBrowserState(browser_state);
   init_params.start_behavior = syncer::ProfileSyncService::MANUAL_START;
-  // init_params.sync_client =
-  //     std::make_unique<IOSChromeSyncClient>(browser_state);
+  init_params.sync_client =
+      std::make_unique<IOSChromeSyncClient>(browser_state);
   init_params.network_time_update_callback = base::Bind(&UpdateNetworkTime);
   init_params.url_loader_factory = browser_state->GetSharedURLLoaderFactory();
   // init_params.network_connection_tracker =
   //     GetApplicationContext()->GetNetworkConnectionTracker();
   init_params.channel = ::GetChannel();
   init_params.debug_identifier = browser_state->GetDebugName();
-  // init_params.autofill_enable_account_wallet_storage =
+  init_params.autofill_enable_account_wallet_storage = false;
   //     base::FeatureList::IsEnabled(
   //         autofill::features::kAutofillEnableAccountWalletStorage);
 
