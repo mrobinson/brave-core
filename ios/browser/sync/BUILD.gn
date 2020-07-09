@@ -31,6 +31,7 @@ source_set("sync") {
     "//brave/ios/browser/bookmarks",
     "//brave/ios/browser/browser_state",
     "//brave/ios/browser/history",
+    "//brave/ios/browser/signin",
     "//components/keyed_service/core",
     "//components/keyed_service/ios",
     "//components/network_time",

@@ -15,9 +15,6 @@
 #include "ui/base/l10n/l10n_util_mac.h"
 #include "ui/base/resource/resource_bundle.h"
 
-#include "ios/chrome/browser/sync/profile_sync_service_factory.h"
-#include "ios/chrome/browser/bookmarks/bookmark_model_factory.h"
-
 #if !defined(__has_feature) || !__has_feature(objc_arc)
 #error "This file requires ARC support."
 #endif
@@ -57,10 +54,4 @@ void BraveWebMainParts::PreMainMessageLoopRun() {
   // Ensure that the browser state is initialized.
   EnsureBrowserStateKeyedServiceFactoriesBuilt();
   browser_state_ = BrowserStateManager::GetInstance().GetBrowserState();
-
-  // auto* model =
-      // ios::BookmarkModelFactory::GetInstance()->GetForBrowserState(browser_state_);
-
-  // syncer::SyncService* service =
-      // ProfileSyncServiceFactory::GetForBrowserState(browser_state_);
 }

@@ -48,7 +48,7 @@
 // #include "ios/chrome/browser/passwords/ios_chrome_password_store_factory.h"
 #include "ios/chrome/browser/pref_names.h"
 // #include "ios/chrome/browser/reading_list/reading_list_model_factory.h"
-// #include "ios/chrome/browser/signin/identity_manager_factory.h"
+#include "ios/chrome/browser/signin/identity_manager_factory.h"
 // #include "ios/chrome/browser/sync/consent_auditor_factory.h"
 #include "ios/chrome/browser/sync/device_info_sync_service_factory.h"
 #include "ios/chrome/browser/sync/ios_trusted_vault_client.h"
@@ -122,8 +122,7 @@ PrefService* IOSChromeSyncClient::GetPrefService() {
 
 signin::IdentityManager* IOSChromeSyncClient::GetIdentityManager() {
   DCHECK_CURRENTLY_ON(web::WebThread::UI);
-  // return IdentityManagerFactory::GetForBrowserState(browser_state_);
-  return nullptr;
+  return IdentityManagerFactory::GetForBrowserState(browser_state_);
 }
 
 base::FilePath IOSChromeSyncClient::GetLocalSyncBackendFolder() {

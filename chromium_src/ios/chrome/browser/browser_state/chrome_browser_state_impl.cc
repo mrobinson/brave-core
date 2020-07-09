@@ -19,8 +19,12 @@
 #include "ios/chrome/browser/prefs/browser_prefs.h"
 #include "ios/chrome/browser/prefs/ios_chrome_pref_service_factory.h"
 
-// temporary for kEnableLocalSyncBackend
-#include "components/sync/base/pref_names.h"
+// temporary for ShellURLRequestContextGetter
+#include "base/task/post_task.h"
+#include "ios/web/public/thread/web_task_traits.h"
+#include "ios/web/public/thread/web_thread.h"
+#include "ios/web/shell/shell_url_request_context_getter.h"
+#include "net/url_request/url_request_context_getter.h"
 
 namespace {
 
@@ -53,6 +57,10 @@ ChromeBrowserStateImpl::ChromeBrowserStateImpl(
   DCHECK(directories_created);
 
   RegisterBrowserStatePrefs(pref_registry_.get());
+  // use the same registry for browser and local for now since we only have
+  // one browser state anyway
+  RegisterLocalStatePrefs(pref_registry_.get());
+
   BrowserStateDependencyManager::GetInstance()
       ->RegisterBrowserStatePrefsForServices(pref_registry_.get());
   prefs_ = CreateBrowserStatePrefs(state_path_,
@@ -60,9 +68,6 @@ ChromeBrowserStateImpl::ChromeBrowserStateImpl(
                                    pref_registry_,
                                    nullptr,
                                    nullptr);
-
-  // TODO(bridiver) - remove when IdentityManager is implemented
-  prefs_->SetBoolean(syncer::prefs::kEnableLocalSyncBackend, true);
 
   // Register on BrowserState.
   user_prefs::UserPrefs::Set(this, prefs_.get());
@@ -74,6 +79,10 @@ ChromeBrowserStateImpl::ChromeBrowserStateImpl(
 
   BrowserStateDependencyManager::GetInstance()->CreateBrowserStateServices(
       this);
+
+  request_context_getter_ = new web::ShellURLRequestContextGetter(
+      GetStatePath(), this,
+      base::CreateSingleThreadTaskRunner({web::WebThread::IO}));
 
   // Listen for bookmark model load, to bootstrap the sync service.
   bookmarks::BookmarkModel* model =
@@ -124,10 +133,9 @@ PrefProxyConfigTracker* ChromeBrowserStateImpl::GetProxyConfigTracker() {
 }
 
 net::URLRequestContextGetter* ChromeBrowserStateImpl::CreateRequestContext(
-      ProtocolHandlerMap* protocol_handlers) {
-  return nullptr;
+    ProtocolHandlerMap* protocol_handlers) {
+  return request_context_getter_.get();
 }
-
 
 bool ChromeBrowserStateImpl::IsOffTheRecord() const {
   return false;

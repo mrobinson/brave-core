@@ -3,6 +3,7 @@
 #include "ios/chrome/browser/bookmarks/bookmark_model_factory.h"
 #include "ios/chrome/browser/bookmarks/startup_task_runner_service_factory.h"
 #include "ios/chrome/browser/history/history_service_factory.h"
+#include "ios/chrome/browser/signin/identity_manager_factory.h"
 #include "ios/chrome/browser/sync/profile_sync_service_factory.h"
 #include "ios/chrome/browser/sync/sync_setup_service_factory.h"
 #include "ios/chrome/browser/undo/bookmark_undo_service_factory.h"
@@ -17,6 +18,7 @@ void EnsureBrowserStateKeyedServiceFactoriesBuilt() {
   ios::HistoryServiceFactory::GetInstance();
   //ios::InMemoryURLIndexFactory::GetInstance();
   ios::StartupTaskRunnerServiceFactory::GetInstance();
+  IdentityManagerFactory::GetInstance();
   ProfileSyncServiceFactory::GetInstance();
   SyncSetupServiceFactory::GetInstance();
 }

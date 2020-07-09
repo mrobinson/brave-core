@@ -22,9 +22,9 @@ source_set("bookmarks") {
   ]
 
   deps = [
-    ":chromium_src",
     "//base",
     "//brave/ios/browser/browser_state",
+    "//brave/ios/browser/signin",
     "//components/bookmarks/browser",
     "//components/bookmarks/managed",
     "//components/favicon/core",
@@ -43,21 +43,5 @@ source_set("bookmarks") {
   public_deps = [
     # for ios/web/public/browser_state
     "//ios/web/public",
-  ]
-}
-
-source_set("chromium_src") {
-  configs += [ "//build/config/compiler:enable_arc" ]
-
-  sources = [
-    "//ios/chrome/browser/signin/authentication_service_factory.h",
-    "//ios/chrome/browser/signin/authentication_service_factory.mm",
-  ]
-
-  deps = [
-    "//base",
-    "//components/keyed_service/core",
-    "//components/keyed_service/ios",
-    "//brave/ios/browser/browser_state",
   ]
 }

@@ -24,6 +24,7 @@
 #include "ios/chrome/browser/browser_state/chrome_browser_state.h"
 #include "ios/chrome/browser/favicon/favicon_service_factory.h"
 #include "ios/chrome/browser/history/history_service_factory.h"
+#include "ios/chrome/browser/signin/identity_manager_factory.h"
 #include "ios/chrome/browser/sync/device_info_sync_service_factory.h"
 #include "ios/chrome/browser/sync/ios_chrome_sync_client.h"
 #include "ios/chrome/browser/sync/model_type_store_service_factory.h"
@@ -116,7 +117,7 @@ ProfileSyncServiceFactory::ProfileSyncServiceFactory()
   DependsOn(ios::HistoryServiceFactory::GetInstance());
   // DependsOn(ios::TemplateURLServiceFactory::GetInstance());
   // DependsOn(ios::WebDataServiceFactory::GetInstance());
-  // DependsOn(IdentityManagerFactory::GetInstance());
+  DependsOn(IdentityManagerFactory::GetInstance());
   // DependsOn(IOSChromeGCMProfileServiceFactory::GetInstance());
   // DependsOn(IOSChromePasswordStoreFactory::GetInstance());
   // DependsOn(IOSChromeProfileInvalidationProviderFactory::GetInstance());
@@ -144,8 +145,8 @@ ProfileSyncServiceFactory::BuildServiceInstanceFor(
   // ios::AboutSigninInternalsFactory::GetForBrowserState(browser_state);
 
   syncer::ProfileSyncService::InitParams init_params;
-  // init_params.identity_manager =
-  //     IdentityManagerFactory::GetForBrowserState(browser_state);
+  init_params.identity_manager =
+      IdentityManagerFactory::GetForBrowserState(browser_state);
   init_params.start_behavior = syncer::ProfileSyncService::MANUAL_START;
   init_params.sync_client =
       std::make_unique<IOSChromeSyncClient>(browser_state);
@@ -171,6 +172,7 @@ ProfileSyncServiceFactory::BuildServiceInstanceFor(
       std::make_unique<syncer::ProfileSyncService>(std::move(init_params));
   pss->Initialize();
 
+  LOG(ERROR) << "YEAHHH!!!";
   // Hook PSS into PersonalDataManager (a circular dependency).
   // autofill::PersonalDataManager* pdm =
   //     autofill::PersonalDataManagerFactory::GetForBrowserState(browser_state);

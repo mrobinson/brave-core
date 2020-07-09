@@ -8,7 +8,6 @@
 #include "base/strings/sys_string_conversions.h"
 #include "brave/ios/app/brave_main_delegate.h"
 #include "ios/chrome/app/startup/provider_registration.h"
-#include "ios/chrome/browser/browser_state/chrome_browser_state.h"
 #include "ios/public/provider/chrome/browser/chrome_browser_provider.h"
 #include "ios/web/public/init/web_main.h"
 

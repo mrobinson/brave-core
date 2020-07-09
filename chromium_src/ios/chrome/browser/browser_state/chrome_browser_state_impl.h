@@ -57,7 +57,7 @@ class ChromeBrowserStateImpl : public ChromeBrowserState {
   // scoped_refptr<base::SequencedTaskRunner> io_task_runner_;
   scoped_refptr<user_prefs::PrefRegistrySyncable> pref_registry_;
   std::unique_ptr<sync_preferences::PrefServiceSyncable> prefs_;
-  // scoped_refptr<net::URLRequestContextGetter> request_context_getter_;
+  scoped_refptr<net::URLRequestContextGetter> request_context_getter_;
 
 
   DISALLOW_COPY_AND_ASSIGN(ChromeBrowserStateImpl);
