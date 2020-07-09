@@ -46,11 +46,20 @@ source_set("browser_state_impl") {
     "browser_state_manager.mm",
     "//ios/chrome/browser/browser_state/chrome_browser_state_impl.cc",
     "//ios/chrome/browser/browser_state/chrome_browser_state_impl.h",
+    "//ios/chrome/browser/browser_state/bookmark_model_loaded_observer.cc",
+    "//ios/chrome/browser/browser_state/bookmark_model_loaded_observer.h",
   ]
 
   deps = [
     ":chromium_sources",
     "//base",
+    "//brave/ios/browser/prefs",
+    "//brave/ios/browser/sync",
+    "//components/bookmarks/browser",
+    "//components/keyed_service/ios",
+    "//components/pref_registry",
+    "//components/sync_preferences",
+    "//components/user_prefs",
     "//ios/chrome/browser/undo",
   ]
 
@@ -63,21 +72,11 @@ source_set("chromium_sources") {
   configs += [ "//build/config/compiler:enable_arc" ]
 
   sources = [
-    "//ios/chrome/browser/prefs/ios_chrome_pref_service_factory.cc",
-    "//ios/chrome/browser/prefs/ios_chrome_pref_service_factory.h",
-    "//ios/chrome/browser/prefs/ios_chrome_pref_model_associator_client.cc",
-    "//ios/chrome/browser/prefs/ios_chrome_pref_model_associator_client.h",
     "//ios/chrome/browser/chrome_constants.cc",
     "//ios/chrome/browser/chrome_constants.h",
   ]
 
   deps = [
     "//base",
-    "//components/content_settings/core/browser",
-    "//components/prefs",
-    "//components/proxy_config",
-    "//components/sync_preferences",
-    "//components/user_prefs",
-    "//ios/chrome/browser/policy:feature_flags",
   ]
 }

@@ -1,0 +1,30 @@
+# Copyright (c) 2019 The Brave Authors. All rights reserved.
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+import("//build/config/ios/rules.gni")
+
+source_set("sync") {
+  sources = [
+    "//ios/chrome/browser/sync/profile_sync_service_factory.cc",
+    "//ios/chrome/browser/sync/profile_sync_service_factory.h",
+    "//ios/chrome/browser/sync/sync_setup_service_factory.cc",
+    "//ios/chrome/browser/sync/sync_setup_service_factory.h",
+    "//ios/chrome/browser/sync/sync_setup_service.cc",
+    "//ios/chrome/browser/sync/sync_setup_service.h",
+  ]
+
+  deps = [
+    "//base",
+    "//components/keyed_service/ios",
+    "//components/network_time",
+    "//components/sync/base",
+    "//components/sync/driver",
+    "//brave/ios/browser/bookmarks",
+    "//brave/ios/browser/browser_state",
+    "//ios/web/public",
+    "//services/network/public/cpp",
+    "//url",
+  ]
+}

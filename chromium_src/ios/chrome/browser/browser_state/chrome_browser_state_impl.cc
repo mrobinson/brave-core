@@ -9,7 +9,14 @@
 #include "base/files/file_path.h"
 #include "base/files/file_util.h"
 #include "base/threading/thread_restrictions.h"
+#include "components/bookmarks/browser/bookmark_model.h"
 #include "components/keyed_service/ios/browser_state_dependency_manager.h"
+#include "components/pref_registry/pref_registry_syncable.h"
+#include "components/sync_preferences/pref_service_syncable.h"
+#include "components/user_prefs/user_prefs.h"
+#include "ios/chrome/browser/bookmarks/bookmark_model_factory.h"
+#include "ios/chrome/browser/browser_state/bookmark_model_loaded_observer.h"
+#include "ios/chrome/browser/prefs/ios_chrome_pref_service_factory.h"
 
 namespace {
 
@@ -36,38 +43,35 @@ ChromeBrowserStateImpl::ChromeBrowserStateImpl(
     scoped_refptr<base::SequencedTaskRunner> io_task_runner,
     const base::FilePath& path)
     : ChromeBrowserState(io_task_runner),
-      state_path_(path) {
+      state_path_(path),
+      pref_registry_(new user_prefs::PrefRegistrySyncable) {
   bool directories_created = EnsureBrowserStateDirectoriesCreated(state_path_);
   DCHECK(directories_created);
 
-  //TODO: BRANDON
-  // Bring up the policy system before creating |prefs_|.
-
   // RegisterBrowserStatePrefs(pref_registry_.get());
-  // BrowserStateDependencyManager::GetInstance()
-  //     ->RegisterBrowserStatePrefsForServices(pref_registry_.get());
-  // prefs_ = CreateBrowserStatePrefs(state_path_,
-  //                                  GetIOTaskRunner().get(),
-  //                                  //io_task_runner_.get(),
-  //                                  pref_registry_,
-  //                                  nullptr, //policy_connector_ ? policy_connector_->GetPolicyService() :
-  //                                  nullptr); //GetApplicationContext()->GetBrowserPolicyConnector()
+  BrowserStateDependencyManager::GetInstance()
+      ->RegisterBrowserStatePrefsForServices(pref_registry_.get());
+  prefs_ = CreateBrowserStatePrefs(state_path_,
+                                   GetIOTaskRunner().get(),
+                                   pref_registry_,
+                                   nullptr,
+                                   nullptr);
 
-  // // Register on BrowserState.
-  // user_prefs::UserPrefs::Set(this, prefs_.get());
+  // Register on BrowserState.
+  user_prefs::UserPrefs::Set(this, prefs_.get());
 
-  // // Migrate obsolete prefs.
-  // // PrefService* local_state = GetApplicationContext()->GetLocalState();
-  // // MigrateObsoleteLocalStatePrefs(local_state);
-  // // MigrateObsoleteBrowserStatePrefs(prefs_.get());
+  // Migrate obsolete prefs.
+  // PrefService* local_state = GetApplicationContext()->GetLocalState();
+  // MigrateObsoleteLocalStatePrefs(local_state);
+  // MigrateObsoleteBrowserStatePrefs(prefs_.get());
 
   BrowserStateDependencyManager::GetInstance()->CreateBrowserStateServices(
       this);
 
   // Listen for bookmark model load, to bootstrap the sync service.
-  // bookmarks::BookmarkModel* model =
-  //     ios::BookmarkModelFactory::GetForBrowserState(this);
-  // model->AddObserver(new BookmarkModelLoadedObserver(this));
+  bookmarks::BookmarkModel* model =
+      ios::BookmarkModelFactory::GetForBrowserState(this);
+  model->AddObserver(new BookmarkModelLoadedObserver(this));
 }
 
 ChromeBrowserStateImpl::~ChromeBrowserStateImpl() {}
@@ -92,7 +96,8 @@ BrowserStatePolicyConnector* ChromeBrowserStateImpl::GetPolicyConnector() {
 }
 
 PrefService* ChromeBrowserStateImpl::GetPrefs() {
-  return nullptr;
+  DCHECK(prefs_);  // Should explicitly be initialized.
+  return prefs_.get();
 }
 
 PrefService* ChromeBrowserStateImpl::GetOffTheRecordPrefs() {

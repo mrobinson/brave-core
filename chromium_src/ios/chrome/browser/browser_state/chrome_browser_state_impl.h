@@ -14,6 +14,14 @@
 #include "ios/chrome/browser/browser_state/chrome_browser_state.h"
 #include "net/url_request/url_request_job_factory.h"
 
+namespace user_prefs {
+class PrefRegistrySyncable;
+}
+
+namespace sync_preferences {
+class PrefServiceSyncable;
+}
+
 class BrowserStatePolicyConnector;
 class PrefProxyConfigTracker;
 class SequencedTaskRunner;
@@ -47,9 +55,10 @@ class ChromeBrowserStateImpl : public ChromeBrowserState {
  private:
   base::FilePath state_path_;
   // scoped_refptr<base::SequencedTaskRunner> io_task_runner_;
-  // scoped_refptr<user_prefs::PrefRegistrySyncable> pref_registry_;
-  // std::unique_ptr<sync_preferences::PrefServiceSyncable> prefs_;
+  scoped_refptr<user_prefs::PrefRegistrySyncable> pref_registry_;
+  std::unique_ptr<sync_preferences::PrefServiceSyncable> prefs_;
   // scoped_refptr<net::URLRequestContextGetter> request_context_getter_;
+
 
   DISALLOW_COPY_AND_ASSIGN(ChromeBrowserStateImpl);
 };

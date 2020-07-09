@@ -1,0 +1,20 @@
+source_set("prefs") {
+  configs += [ "//build/config/compiler:enable_arc" ]
+  sources = [
+    "//ios/chrome/browser/prefs/ios_chrome_pref_model_associator_client.cc",
+    "//ios/chrome/browser/prefs/ios_chrome_pref_model_associator_client.h",
+    "//ios/chrome/browser/prefs/ios_chrome_pref_service_factory.cc",
+    "//ios/chrome/browser/prefs/ios_chrome_pref_service_factory.h",
+  ]
+  deps = [
+    "//base",
+    "//components/content_settings/core/browser",
+    "//components/policy/core/browser",
+    "//components/prefs",
+    "//components/prefs/ios",
+    "//components/proxy_config",
+    "//components/search_engines",
+    "//components/sync_preferences",
+    "//ios/chrome/browser/policy:feature_flags",
+  ]
+}
