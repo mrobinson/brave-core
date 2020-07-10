@@ -61,9 +61,11 @@ source_set("browser_state_impl") {
     "//components/bookmarks/browser",
     "//components/keyed_service/ios",
     "//components/pref_registry",
+    "//components/signin/public/base",
     "//components/sync_preferences",
     "//components/user_prefs",
     "//ios/chrome/browser/undo",
+    "//services/network/public/cpp",
 
     # ShellURLRequestContextGetter
     "//ios/web/public",

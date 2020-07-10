@@ -12,14 +12,16 @@
 #include "components/bookmarks/browser/bookmark_model.h"
 #include "components/keyed_service/ios/browser_state_dependency_manager.h"
 #include "components/pref_registry/pref_registry_syncable.h"
+#include "components/signin/public/base/signin_client.h"
 #include "components/sync_preferences/pref_service_syncable.h"
 #include "components/user_prefs/user_prefs.h"
 #include "ios/chrome/browser/bookmarks/bookmark_model_factory.h"
 #include "ios/chrome/browser/browser_state/bookmark_model_loaded_observer.h"
 #include "ios/chrome/browser/prefs/browser_prefs.h"
 #include "ios/chrome/browser/prefs/ios_chrome_pref_service_factory.h"
+#include "services/network/public/cpp/shared_url_loader_factory.h"
 
-// temporary for ShellURLRequestContextGetter
+// TODO(bridiver) temporary for ShellURLRequestContextGetter
 #include "base/task/post_task.h"
 #include "ios/web/public/thread/web_task_traits.h"
 #include "ios/web/public/thread/web_thread.h"
@@ -27,6 +29,43 @@
 #include "net/url_request/url_request_context_getter.h"
 
 namespace {
+
+// TODO(bridiver) - do we need to implement this?
+class FakeSigninClient : public SigninClient {
+ public:
+  FakeSigninClient(ChromeBrowserState* browser_state)
+      : browser_state_(browser_state) {}
+  ~FakeSigninClient() override {}
+  void Shutdown() override {}
+  PrefService* GetPrefs() override {
+    return browser_state_->GetPrefs();
+  }
+  scoped_refptr<network::SharedURLLoaderFactory>
+  GetURLLoaderFactory() override {
+    return browser_state_->GetSharedURLLoaderFactory();
+  }
+  network::mojom::CookieManager* GetCookieManager() override {
+    return browser_state_->GetCookieManager();
+  }
+  void DoFinalInit() override {}
+  bool AreSigninCookiesAllowed() override { return true; }
+  bool AreSigninCookiesDeletedOnExit() override { return true; }
+  void AddContentSettingsObserver(
+      content_settings::Observer* observer) override {}
+  void RemoveContentSettingsObserver(
+      content_settings::Observer* observer) override {}
+  void DelayNetworkCall(base::OnceClosure callback) override {}
+  std::unique_ptr<GaiaAuthFetcher> CreateGaiaAuthFetcher(
+      GaiaAuthConsumer* consumer,
+      gaia::GaiaSource source) override {
+    return std::unique_ptr<GaiaAuthFetcher>();
+  }
+  void PreGaiaLogout(base::OnceClosure callback) override {}
+
+ private:
+  ChromeBrowserState* browser_state_;
+  DISALLOW_COPY_AND_ASSIGN(FakeSigninClient);
+};
 
 // Returns a bool indicating whether the necessary directories were able to be
 // created (or already existed).
@@ -52,11 +91,13 @@ ChromeBrowserStateImpl::ChromeBrowserStateImpl(
     const base::FilePath& path)
     : ChromeBrowserState(io_task_runner),
       state_path_(path),
-      pref_registry_(new user_prefs::PrefRegistrySyncable) {
+      pref_registry_(new user_prefs::PrefRegistrySyncable),
+      signin_client_(new FakeSigninClient(this)) {
   bool directories_created = EnsureBrowserStateDirectoriesCreated(state_path_);
   DCHECK(directories_created);
 
   RegisterBrowserStatePrefs(pref_registry_.get());
+  // TODO(bridiver) - expose this through ApplicationContext
   // use the same registry for browser and local for now since we only have
   // one browser state anyway
   RegisterLocalStatePrefs(pref_registry_.get());
@@ -91,6 +132,10 @@ ChromeBrowserStateImpl::ChromeBrowserStateImpl(
 }
 
 ChromeBrowserStateImpl::~ChromeBrowserStateImpl() {}
+
+SigninClient* ChromeBrowserStateImpl::GetSigninClient() {
+  return signin_client_.get();
+}
 
 ChromeBrowserState* ChromeBrowserStateImpl::GetOriginalChromeBrowserState() {
   return this;

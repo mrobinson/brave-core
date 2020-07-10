@@ -152,6 +152,7 @@ ProfileSyncServiceFactory::BuildServiceInstanceFor(
       std::make_unique<IOSChromeSyncClient>(browser_state);
   init_params.network_time_update_callback = base::Bind(&UpdateNetworkTime);
   init_params.url_loader_factory = browser_state->GetSharedURLLoaderFactory();
+  // TODO(bridiver)
   // init_params.network_connection_tracker =
   //     GetApplicationContext()->GetNetworkConnectionTracker();
   init_params.channel = ::GetChannel();
@@ -160,6 +161,7 @@ ProfileSyncServiceFactory::BuildServiceInstanceFor(
   //     base::FeatureList::IsEnabled(
   //         autofill::features::kAutofillEnableAccountWalletStorage);
 
+  // TODO(bridiver) ?
   // auto* fcm_invalidation_provider =
   //     IOSChromeProfileInvalidationProviderFactory::GetForBrowserState(
   //         browser_state);
@@ -172,7 +174,6 @@ ProfileSyncServiceFactory::BuildServiceInstanceFor(
       std::make_unique<syncer::ProfileSyncService>(std::move(init_params));
   pss->Initialize();
 
-  LOG(ERROR) << "YEAHHH!!!";
   // Hook PSS into PersonalDataManager (a circular dependency).
   // autofill::PersonalDataManager* pdm =
   //     autofill::PersonalDataManagerFactory::GetForBrowserState(browser_state);

@@ -25,6 +25,7 @@ class PrefServiceSyncable;
 class BrowserStatePolicyConnector;
 class PrefProxyConfigTracker;
 class SequencedTaskRunner;
+class SigninClient;
 
 class ChromeBrowserStateImpl : public ChromeBrowserState {
  public:
@@ -52,12 +53,15 @@ class ChromeBrowserStateImpl : public ChromeBrowserState {
   net::URLRequestContextGetter* CreateRequestContext(
       ProtocolHandlerMap* protocol_handlers) override;
 
+  SigninClient* GetSigninClient();
+
  private:
   base::FilePath state_path_;
   // scoped_refptr<base::SequencedTaskRunner> io_task_runner_;
   scoped_refptr<user_prefs::PrefRegistrySyncable> pref_registry_;
   std::unique_ptr<sync_preferences::PrefServiceSyncable> prefs_;
   scoped_refptr<net::URLRequestContextGetter> request_context_getter_;
+  std::unique_ptr<SigninClient> signin_client_;
 
 
   DISALLOW_COPY_AND_ASSIGN(ChromeBrowserStateImpl);

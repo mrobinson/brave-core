@@ -15,57 +15,12 @@
 #include "components/signin/public/base/signin_client.h"
 #include "components/signin/public/identity_manager/identity_manager.h"
 #include "components/signin/public/identity_manager/identity_manager_builder.h"
+#include "components/signin/public/identity_manager/ios/fake_device_accounts_provider.h"
 #include "ios/chrome/browser/application_context.h"
 #include "ios/chrome/browser/browser_state/chrome_browser_state.h"
+#include "ios/chrome/browser/browser_state/chrome_browser_state_impl.h"
 #include "ios/chrome/browser/signin/device_accounts_provider_impl.h"
 #include "ios/chrome/browser/signin/identity_manager_factory_observer.h"
-#include "ios/chrome/browser/signin/signin_client_factory.h"
-
-// TODO(bridiver) - fix this
-#include "components/signin/public/identity_manager/ios/fake_device_accounts_provider.h"
-#include "components/signin/public/base/signin_client.h"
-#include "services/network/public/cpp/shared_url_loader_factory.h"
-
-namespace {
-
-class FakeSigninClient : public SigninClient {
- public:
-  FakeSigninClient(ChromeBrowserState* browser_state)
-      : browser_state_(browser_state) {}
-  ~FakeSigninClient() override {}
-  void Shutdown() override {}
-  PrefService* GetPrefs() override {
-    return browser_state_->GetPrefs();
-  }
-  scoped_refptr<network::SharedURLLoaderFactory>
-  GetURLLoaderFactory() override {
-    return browser_state_->GetSharedURLLoaderFactory();
-  }
-  network::mojom::CookieManager* GetCookieManager() override {
-    return browser_state_->GetCookieManager();
-  }
-  void DoFinalInit() override {}
-  bool AreSigninCookiesAllowed() override { return true; }
-  bool AreSigninCookiesDeletedOnExit() override { return true; }
-  void AddContentSettingsObserver(
-      content_settings::Observer* observer) override {}
-  void RemoveContentSettingsObserver(
-      content_settings::Observer* observer) override {}
-  void DelayNetworkCall(base::OnceClosure callback) override {}
-  std::unique_ptr<GaiaAuthFetcher> CreateGaiaAuthFetcher(
-      GaiaAuthConsumer* consumer,
-      gaia::GaiaSource source) override {
-    return std::unique_ptr<GaiaAuthFetcher>();
-  }
-  void PreGaiaLogout(base::OnceClosure callback) override {}
-
- private:
-  ChromeBrowserState* browser_state_;
-  DISALLOW_COPY_AND_ASSIGN(FakeSigninClient);
-};
-
-
-}  // namespace
 
 void IdentityManagerFactory::RegisterBrowserStatePrefs(
     user_prefs::PrefRegistrySyncable* registry) {
@@ -76,7 +31,6 @@ IdentityManagerFactory::IdentityManagerFactory()
     : BrowserStateKeyedServiceFactory(
           "IdentityManager",
           BrowserStateDependencyManager::GetInstance()) {
-  // DependsOn(SigninClientFactory::GetInstance());
 }
 
 IdentityManagerFactory::~IdentityManagerFactory() {}
@@ -118,6 +72,7 @@ std::unique_ptr<KeyedService> IdentityManagerFactory::BuildServiceInstanceFor(
 
   signin::IdentityManagerBuildParams params;
   params.account_consistency = signin::AccountConsistencyMethod::kMirror;
+  // TODO(bridiver) - fix this
   params.device_accounts_provider =
       std::make_unique<FakeDeviceAccountsProvider>();
       // std::make_unique<DeviceAccountsProviderImpl>();
@@ -127,7 +82,8 @@ std::unique_ptr<KeyedService> IdentityManagerFactory::BuildServiceInstanceFor(
   params.pref_service = browser_state->GetPrefs();
   params.profile_path = base::FilePath();
   // TODO(bridiver) - fix this, but don't worry about the leak for now
-  params.signin_client = new FakeSigninClient(browser_state);
+  params.signin_client =
+      static_cast<ChromeBrowserStateImpl*>(browser_state)->GetSigninClient();
 
   std::unique_ptr<signin::IdentityManager> identity_manager =
       signin::BuildIdentityManager(&params);
