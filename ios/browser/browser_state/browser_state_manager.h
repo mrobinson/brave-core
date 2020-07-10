@@ -15,9 +15,10 @@ class BrowserStateManager {
 
   private:
     BrowserStateManager();
-    DISALLOW_COPY_AND_ASSIGN(BrowserStateManager);
 
     std::unique_ptr<ChromeBrowserState> browser_state_;
+
+    DISALLOW_COPY_AND_ASSIGN(BrowserStateManager);
 };
 
 #endif  // BRAVE_IOS_BROWSER_BROWSER_STATE_BROWSER_STATE_MANAGER_H_
