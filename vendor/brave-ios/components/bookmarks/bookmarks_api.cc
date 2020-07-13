@@ -46,10 +46,7 @@ void BookmarksAPI::Move(int64_t id,
                    int64_t parent_id,
                    size_t index)
 {
-    #if !TARGET_IPHONE_SIMULATOR
     //DCHECK_CURRENTLY_ON(web::WebThread::UI);
-    #endif
-
     DCHECK(model_->loaded());
 
     const BookmarkNode* node =
@@ -78,10 +75,7 @@ void BookmarksAPI::Update(int64_t id,
 
 void BookmarksAPI::Remove(int64_t id)
 {
-    #if !TARGET_IPHONE_SIMULATOR
     //DCHECK_CURRENTLY_ON(web::WebThread::UI);
-    #endif
-
     DCHECK(model_->loaded());
 
     const BookmarkNode* node =
@@ -97,10 +91,7 @@ void BookmarksAPI::Remove(int64_t id)
 
 void BookmarksAPI::RemoveAll()
 {
-    #if !TARGET_IPHONE_SIMULATOR
     //DCHECK_CURRENTLY_ON(web::WebThread::UI);
-    #endif
-
     DCHECK(model_->loaded());
     model_->RemoveAllUserBookmarks();
 }
@@ -118,10 +109,7 @@ void BookmarksAPI::Search(const base::string16& search_query,
 
 void BookmarksAPI::Undo()
 {
-    #if !TARGET_IPHONE_SIMULATOR
     //DCHECK_CURRENTLY_ON(web::WebThread::UI);
-    #endif
-
     DCHECK(model_->loaded());
     UndoManager* undo_manager = bookmark_undo_service_->undo_manager();
     undo_manager->Undo();
