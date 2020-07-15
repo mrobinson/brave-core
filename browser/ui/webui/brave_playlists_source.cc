@@ -72,7 +72,8 @@ void BravePlaylistsSource::StartDataRequest(
     return;
   }
   base::FilePath thumbnail_path;
-  if (!controller->GetThumbnailPath(url.path(), &thumbnail_path)) {
+  if (!controller->GetThumbnailPath(URLDataSource::URLToRequestPath(url),
+                                    &thumbnail_path)) {
     std::move(got_data_callback).Run(nullptr);
     return;
   }
