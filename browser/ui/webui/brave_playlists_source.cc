@@ -5,6 +5,9 @@
 
 #include "brave/browser/ui/webui/brave_playlists_source.h"
 
+#include <memory>
+#include <utility>
+
 #include "base/bind.h"
 #include "base/files/file_path.h"
 #include "base/files/file_util.h"
@@ -110,14 +113,6 @@ bool BravePlaylistsSource::AllowCaching() {
 
 bool BravePlaylistsSource::ShouldReplaceExistingSource() {
   return false;
-}
-
-bool BravePlaylistsSource::ShouldServiceRequest(
-    const GURL& url,
-    content::ResourceContext* resource_context,
-    int render_process_id) {
-  return URLDataSource::ShouldServiceRequest(url, resource_context,
-                                             render_process_id);
 }
 
 }  // namespace brave_playlists

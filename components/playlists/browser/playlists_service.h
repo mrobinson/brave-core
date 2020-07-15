@@ -7,6 +7,7 @@
 #define BRAVE_COMPONENTS_PLAYLISTS_BROWSER_PLAYLISTS_SERVICE_H_
 
 #include <memory>
+#include <string>
 
 #include "base/files/file_path.h"
 #include "base/macros.h"

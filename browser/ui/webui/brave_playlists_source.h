@@ -41,9 +41,6 @@ class BravePlaylistsSource : public content::URLDataSource {
   std::string GetMimeType(const std::string&) override;
   bool AllowCaching() override;
   bool ShouldReplaceExistingSource() override;
-  bool ShouldServiceRequest(const GURL& url,
-                            content::ResourceContext* resource_context,
-                            int render_process_id) override;
 
  private:
   Profile* profile_;

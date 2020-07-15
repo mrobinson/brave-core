@@ -6,6 +6,8 @@
 #ifndef BRAVE_COMPONENTS_PLAYLISTS_BROWSER_PLAYLISTS_CONTROLLER_OBSERVER_H_
 #define BRAVE_COMPONENTS_PLAYLISTS_BROWSER_PLAYLISTS_CONTROLLER_OBSERVER_H_
 
+#include <string>
+
 #include "base/observer_list_types.h"
 #include "brave/components/playlists/browser/playlists_types.h"
 
