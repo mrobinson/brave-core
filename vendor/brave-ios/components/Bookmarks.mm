@@ -8,9 +8,16 @@
 #include "brave/ios/browser/browser_state/browser_state_manager.h"
 #include "ios/chrome/browser/browser_state/chrome_browser_state.h"
 #include "ios/web/public/init/web_main.h"
+#include "components/bookmarks/browser/bookmark_model.h"
 #include "components/bookmarks/browser/bookmark_node.h"
+#include "components/bookmarks/browser/bookmark_utils.h"
 #include "url/gurl.h"
 #import "net/base/mac/url_conversions.h"
+
+#include "components/pref_registry/pref_registry_syncable.h"
+#include "components/prefs/pref_service.h"
+#include "ios/chrome/browser/bookmarks/bookmark_model_factory.h"
+#include "ios/chrome/browser/pref_names.h"
 
 #if !defined(__has_feature) || !__has_feature(objc_arc)
 #error "This file requires ARC support."
@@ -189,12 +196,13 @@
 }
 
 - (void)createWithParentId:(NSUInteger)parentId index:(NSUInteger)index title:(NSString *)title url:(NSURL *)url {
+    ChromeBrowserState* browser_state_ = BrowserStateManager::GetInstance().GetBrowserState();
 
-//    base::string16 title_;
-//    base::UTF8ToUTF16([title UTF8String], [title length], &title_);
-
-    GURL url_ = net::GURLWithNSURL(url);
-    api_->Create(parentId, index, base::SysNSStringToUTF16(title), url_);
+    const bookmarks::BookmarkNode* defaultFolder = api_->GetBookmarksMobileFolder();
+    bookmarks::BookmarkModel* bookmarkModel =
+        ios::BookmarkModelFactory::GetForBrowserState(browser_state_);
+    bookmarkModel->AddURL(defaultFolder, defaultFolder->children().size(),
+                          base::SysNSStringToUTF16(title), net::GURLWithNSURL(url));
 }
 
 - (void)moveWithId:(NSUInteger)bookmarkId parentId:(NSUInteger)parentId index:(NSUInteger)index {
@@ -225,6 +233,16 @@
 
 - (void)undo {
     api_->Undo();
+}
+
+- (void)addBookmark:(NSString *)title url:(NSURL *)url {
+    ChromeBrowserState* browser_state_ = BrowserStateManager::GetInstance().GetBrowserState();
+
+    const bookmarks::BookmarkNode* defaultFolder = api_->GetBookmarksMobileFolder();
+    bookmarks::BookmarkModel* bookmarkModel =
+        ios::BookmarkModelFactory::GetForBrowserState(browser_state_);
+    bookmarkModel->AddURL(defaultFolder, defaultFolder->children().size(),
+                          base::SysNSStringToUTF16(title), net::GURLWithNSURL(url));
 }
 @end
 

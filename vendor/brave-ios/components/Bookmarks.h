@@ -67,6 +67,8 @@ typedef NS_ENUM(NSUInteger, BookmarksNodeFaviconState) {
 - (void)searchWithQuery:(NSString *)query maxCount:(NSUInteger)maxCount nodes:(NSArray<BookmarksNode *> *)nodes;
 
 - (void)undo;
+
+- (void)addBookmark:(NSString *)title url:(NSURL *)url;
 @end
 
 //NS_SWIFT_NAME(BookmarksService)
