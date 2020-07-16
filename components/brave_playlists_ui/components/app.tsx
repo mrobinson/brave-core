@@ -27,6 +27,7 @@ export class PlaylistsPage extends React.Component<Props, State> {
   constructor (props: Props) {
     super(props)
     this.state = { playlists: [], experimentalUrl: '' }
+    this.onClickDownloadVideo = this.onClickDownloadVideo.bind(this)
     this.getPlaylist()
   }
 
@@ -150,7 +151,7 @@ export class PlaylistsPage extends React.Component<Props, State> {
               ? (
                 <div>
                   <h1>This page has a video you can download</h1>
-                  <button onClick={this.onClickDownloadVideo.bind(this)}>Click here to download</button>
+                  <button onClick={this.onClickDownloadVideo}>Click here to download</button>
                 </div>
               ) : (
                 <h1>Nothing to see here. Put a proper YouTube link to see the magic</h1>
