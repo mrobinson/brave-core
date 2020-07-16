@@ -19,9 +19,18 @@
 #include "chrome/browser/ui/browser.h"
 #include "chrome/test/base/in_process_browser_test.h"
 #include "components/network_session_configurator/common/network_switches.h"
+#include "content/public/test/browser_test.h"
 #include "net/dns/mock_host_resolver.h"
 #include "net/test/embedded_test_server/http_request.h"
 #include "net/test/embedded_test_server/http_response.h"
+
+using brave_playlists::PlaylistsControllerObserver;
+using brave_playlists::PlaylistsChangeParams;
+using brave_playlists::CreatePlaylistParams;
+using brave_playlists::PlaylistsController;
+using brave_playlists::PlaylistsService;
+using brave_playlists::PlaylistsServiceFactory;
+using brave_playlists::kPlaylistsIDKey;
 
 namespace {
 
@@ -85,8 +94,6 @@ class PlaylistsBrowserTest : public InProcessBrowserTest,
     on_playlists_changed_called_count_++;
     change_params_ = params;
     called_change_types_.insert(change_params_.change_type);
-    // LOG(INFO) << PlaylistsChangeParams::GetPlaylistsChangeTypeAsString(
-    //        change_params_.change_type);
 
     if (change_params_.change_type ==
         PlaylistsChangeParams::ChangeType::CHANGE_TYPE_ADDED) {
