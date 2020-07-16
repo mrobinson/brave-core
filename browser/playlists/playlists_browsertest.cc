@@ -8,8 +8,10 @@
 #include "base/bind.h"
 #include "base/memory/weak_ptr.h"
 #include "base/run_loop.h"
+#include "base/test/scoped_feature_list.h"
 #include "base/values.h"
 #include "brave/browser/playlists/playlists_service_factory.h"
+#include "brave/components/playlists/browser/features.h"
 #include "brave/components/playlists/browser/playlists_constants.h"
 #include "brave/components/playlists/browser/playlists_controller.h"
 #include "brave/components/playlists/browser/playlists_controller_observer.h"
@@ -56,7 +58,10 @@ std::unique_ptr<net::test_server::HttpResponse> HandleRequest(
 class PlaylistsBrowserTest : public InProcessBrowserTest,
                              public PlaylistsControllerObserver {
  public:
-  PlaylistsBrowserTest() : weak_factory_(this) {}
+  PlaylistsBrowserTest() : weak_factory_(this) {
+    scoped_feature_list_.InitAndEnableFeature(
+        brave_playlists::features::kBravePlaylists);
+  }
   ~PlaylistsBrowserTest() override {}
 
   // InProcessBrowserTest overrides:
@@ -218,6 +223,7 @@ class PlaylistsBrowserTest : public InProcessBrowserTest,
   PlaylistsChangeParams change_params_;
   std::unique_ptr<base::RunLoop> run_loop_;
   std::unique_ptr<net::EmbeddedTestServer> https_server_;
+  base::test::ScopedFeatureList scoped_feature_list_;
   base::WeakPtrFactory<PlaylistsBrowserTest> weak_factory_;
 };
 

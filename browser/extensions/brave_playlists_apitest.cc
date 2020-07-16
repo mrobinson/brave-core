@@ -4,9 +4,11 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "base/path_service.h"
+#include "base/test/scoped_feature_list.h"
 #include "base/test/thread_test_helper.h"
 #include "brave/common/brave_paths.h"
 #include "brave/common/extensions/extension_constants.h"
+#include "brave/components/playlists/browser/features.h"
 #include "chrome/browser/extensions/extension_apitest.h"
 #include "components/network_session_configurator/common/network_switches.h"
 #include "content/public/test/browser_test.h"
@@ -41,6 +43,11 @@ std::unique_ptr<net::test_server::HttpResponse> HandleRequest(
 
 class BravePlaylistsApiTest : public ExtensionApiTest {
  public:
+  BravePlaylistsApiTest() {
+    scoped_feature_list_.InitAndEnableFeature(
+        brave_playlists::features::kBravePlaylists);
+  }
+
   void SetUp() override {
     base::ScopedAllowBlockingForTesting allow_blocking;
     brave::RegisterPathProvider();
@@ -101,6 +108,7 @@ class BravePlaylistsApiTest : public ExtensionApiTest {
 
   base::FilePath extension_dir_;
   std::unique_ptr<net::EmbeddedTestServer> https_server_;
+  base::test::ScopedFeatureList scoped_feature_list_;
 };
 
 IN_PROC_BROWSER_TEST_F(BravePlaylistsApiTest, HasAccess) {
