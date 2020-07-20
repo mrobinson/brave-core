@@ -33,7 +33,9 @@ const base::FilePath::StringType kBaseDirName(FILE_PATH_LITERAL("playlists"));
 
 PlaylistsService::PlaylistsService(content::BrowserContext* context)
     : base_dir_(context->GetPath().Append(kBaseDirName)),
+#if !defined(OS_ANDROID)
       context_(context),
+#endif
       controller_(new PlaylistsController(context)),
       weak_factory_(this) {}
 

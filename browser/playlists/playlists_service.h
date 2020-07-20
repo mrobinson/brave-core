@@ -14,6 +14,7 @@
 #include "base/memory/scoped_refptr.h"
 #include "base/memory/weak_ptr.h"
 #include "brave/components/playlists/browser/playlists_controller.h"
+#include "brave/components/playlists/browser/playlists_player.h"
 #include "components/keyed_service/core/keyed_service.h"
 #include "extensions/buildflags/buildflags.h"
 
@@ -28,8 +29,6 @@ class SequencedTaskRunner;
 class Profile;
 
 namespace brave_playlists {
-class PlaylistsController;
-class PlaylistsPlayer;
 
 #if BUILDFLAG(ENABLE_EXTENSIONS)
 class BravePlaylistsEventRouter;
@@ -51,7 +50,9 @@ class PlaylistsService : public KeyedService {
 
   scoped_refptr<base::SequencedTaskRunner> file_task_runner_;
   base::FilePath base_dir_;
+#if !defined(OS_ANDROID)
   content::BrowserContext* context_;
+#endif
   std::unique_ptr<PlaylistsController> controller_;
 #if BUILDFLAG(ENABLE_EXTENSIONS)
   std::unique_ptr<BravePlaylistsEventRouter> playlists_event_router_;
