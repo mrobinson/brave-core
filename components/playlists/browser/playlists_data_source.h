@@ -3,8 +3,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef BRAVE_BROWSER_UI_WEBUI_BRAVE_PLAYLISTS_SOURCE_H_
-#define BRAVE_BROWSER_UI_WEBUI_BRAVE_PLAYLISTS_SOURCE_H_
+#ifndef BRAVE_COMPONENTS_PLAYLISTS_BROWSER_PLAYLISTS_DATA_SOURCE_H_
+#define BRAVE_COMPONENTS_PLAYLISTS_BROWSER_PLAYLISTS_DATA_SOURCE_H_
 
 #include <string>
 
@@ -14,7 +14,6 @@
 #include "content/public/browser/url_data_source.h"
 
 class GURL;
-class Profile;
 
 namespace base {
 class FilePath;
@@ -23,12 +22,14 @@ class SequencedTaskRunner;
 
 namespace brave_playlists {
 
+class PlaylistsController;
+
 // A URL data source for chrome://playlists-image/<playlist-id>
 // resources, for use in webui pages that want to display downloaded
 // playlist thumbnail images
 class BravePlaylistsSource : public content::URLDataSource {
  public:
-  explicit BravePlaylistsSource(Profile* profile);
+  explicit BravePlaylistsSource(PlaylistsController* controller);
 
   ~BravePlaylistsSource() override;
 
@@ -43,7 +44,7 @@ class BravePlaylistsSource : public content::URLDataSource {
   bool ShouldReplaceExistingSource() override;
 
  private:
-  Profile* profile_;
+  PlaylistsController* controller_;
 
   void StartDataRequestAfterPathExists(
       const base::FilePath& thumbnail_path,
@@ -59,4 +60,4 @@ class BravePlaylistsSource : public content::URLDataSource {
 
 }  // namespace brave_playlists
 
-#endif  // BRAVE_BROWSER_UI_WEBUI_BRAVE_PLAYLISTS_SOURCE_H_
+#endif  // BRAVE_COMPONENTS_PLAYLISTS_BROWSER_PLAYLISTS_DATA_SOURCE_H_

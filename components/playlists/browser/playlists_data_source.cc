@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "brave/browser/ui/webui/brave_playlists_source.h"
+#include "brave/components/playlists/browser/playlists_data_source.h"
 
 #include <memory>
 #include <utility>
@@ -19,10 +19,8 @@
 #include "base/task/thread_pool/thread_pool_instance.h"
 #include "base/task_runner_util.h"
 #include "base/threading/thread_task_runner_handle.h"
-#include "brave/browser/playlists/playlists_service_factory.h"
 #include "brave/components/playlists/browser/playlists_controller.h"
 #include "brave/components/playlists/browser/playlists_service.h"
-#include "chrome/browser/profiles/profile.h"
 #include "url/gurl.h"
 
 namespace brave_playlists {
@@ -44,8 +42,8 @@ void ThumbnailLoaded(content::URLDataSource::GotDataCallback got_data_callback,
 
 }  // namespace
 
-BravePlaylistsSource::BravePlaylistsSource(Profile* profile)
-    : profile_(profile->GetOriginalProfile()) {
+BravePlaylistsSource::BravePlaylistsSource(PlaylistsController* controller)
+    : controller_(controller) {
   task_runner_ = base::CreateSequencedTaskRunner(
       {base::ThreadPool(), base::MayBlock(), base::TaskPriority::USER_VISIBLE,
        base::TaskShutdownBehavior::SKIP_ON_SHUTDOWN});
@@ -61,19 +59,13 @@ void BravePlaylistsSource::StartDataRequest(
     const GURL& url,
     const content::WebContents::Getter& wc_getter,
     content::URLDataSource::GotDataCallback got_data_callback) {
-  PlaylistsService* service = PlaylistsServiceFactory::GetForProfile(profile_);
-  if (!service) {
-    std::move(got_data_callback).Run(nullptr);
-    return;
-  }
-  PlaylistsController* controller = service->controller();
-  if (!controller || !controller->initialized()) {
+  if (!controller_ || !controller_->initialized()) {
     std::move(got_data_callback).Run(nullptr);
     return;
   }
   base::FilePath thumbnail_path;
-  if (!controller->GetThumbnailPath(URLDataSource::URLToRequestPath(url),
-                                    &thumbnail_path)) {
+  if (!controller_->GetThumbnailPath(URLDataSource::URLToRequestPath(url),
+                                     &thumbnail_path)) {
     std::move(got_data_callback).Run(nullptr);
     return;
   }

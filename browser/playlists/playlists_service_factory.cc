@@ -5,12 +5,15 @@
 
 #include "brave/browser/playlists/playlists_service_factory.h"
 
+#include <memory>
+
 #include "brave/components/playlists/browser/features.h"
+#include "brave/components/playlists/browser/playlists_data_source.h"
 #include "brave/components/playlists/browser/playlists_service.h"
 #include "chrome/browser/profiles/incognito_helpers.h"
 #include "chrome/browser/profiles/profile.h"
-#include "chrome/common/chrome_features.h"
 #include "components/keyed_service/content/browser_context_dependency_manager.h"
+#include "content/public/browser/url_data_source.h"
 
 namespace brave_playlists {
 
@@ -37,7 +40,11 @@ PlaylistsServiceFactory::~PlaylistsServiceFactory() {}
 
 KeyedService* PlaylistsServiceFactory::BuildServiceInstanceFor(
     content::BrowserContext* context) const {
-  return new PlaylistsService(context);
+  auto* service = new PlaylistsService(context);
+  content::URLDataSource::Add(
+      context,
+      std::make_unique<BravePlaylistsSource>(service->controller()));
+  return service;
 }
 
 content::BrowserContext* PlaylistsServiceFactory::GetBrowserContextToUse(

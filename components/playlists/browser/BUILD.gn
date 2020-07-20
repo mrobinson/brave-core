@@ -9,6 +9,8 @@ source_set("browser") {
     "playlists_controller.cc",
     "playlists_controller.h",
     "playlists_controller_observer.h",
+    "playlists_data_source.cc",
+    "playlists_data_source.h",
     "playlists_db_controller.cc",
     "playlists_db_controller.h",
     "playlists_media_file_controller.cc",

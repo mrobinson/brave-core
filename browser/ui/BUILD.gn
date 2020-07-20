@@ -350,8 +350,6 @@ source_set("ui") {
 
   if (enable_brave_playlists) {
     sources += [
-      "webui/brave_playlists_source.cc",
-      "webui/brave_playlists_source.h",
       "webui/brave_playlists_ui.cc",
       "webui/brave_playlists_ui.h",
     ]
