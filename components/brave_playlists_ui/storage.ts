@@ -7,24 +7,11 @@ import { debounce } from '../common/debounce'
 const keyName = 'playlists-data'
 
 export const defaultState: Playlists.State = {
-  settings: {
-    customFilters: '',
-    regionalLists: []
-  },
-  stats: {
-    numBlocked: 0
-  }
+  lists: []
 }
 
 export const getLoadTimeData = (state: Playlists.State): Playlists.State => {
   state = { ...state }
-  state.stats = defaultState.stats
-
-  // Expected to be numbers
-  ;['adsBlockedStat'].forEach((stat) => {
-    state.stats[stat] = parseInt(chrome.getVariableValue(stat), 10)
-  })
-
   return state
 }
 

@@ -7,29 +7,7 @@ import { action } from 'typesafe-actions'
 // Constants
 import { types } from '../constants/playlists_types'
 
-export const enableFilterList = (uuid: string, enabled: boolean) =>
-  action(types.PLAYLISTS_ENABLE_FILTER_LIST, {
-    uuid,
-    enabled
-  })
-
-export const getCustomFilters = () => action(types.PLAYLISTS_GET_CUSTOM_FILTERS)
-
-export const getRegionalLists = () => action(types.PLAYLISTS_GET_REGIONAL_LISTS)
-
-export const onGetCustomFilters = (customFilters: string) =>
-  action(types.PLAYLISTS_ON_GET_CUSTOM_FILTERS, {
-    customFilters
-  })
-
-export const onGetRegionalLists = (regionalLists: Playlists.FilterList[]) =>
-  action(types.PLAYLISTS_ON_GET_REGIONAL_LISTS, {
-    regionalLists
-  })
-
-export const statsUpdated = () => action(types.PLAYLISTS_STATS_UPDATED)
-
-export const updateCustomFilters = (customFilters: string) =>
-  action(types.PLAYLISTS_UPDATE_CUSTOM_FILTERS, {
-    customFilters
+export const enableFilterList = (id: string) =>
+  action(types.PLAYLISTS_DOWNLOAD_STATUS_CHANGED, {
+    id,
   })
