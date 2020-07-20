@@ -39,6 +39,7 @@ namespace brave_playlists {
 
 class PlaylistsControllerObserver;
 class PlaylistsDBController;
+class PlaylistsPlayer;
 
 class PlaylistsController : PlaylistsMediaFileController::Client {
  public:
@@ -52,6 +53,8 @@ class PlaylistsController : PlaylistsMediaFileController::Client {
 
   bool Init(const base::FilePath& base_dir,
             scoped_refptr<base::SequencedTaskRunner> task_runner);
+
+  void set_player(PlaylistsPlayer* player) { player_ = player; }
 
   // False when |params| are not sufficient for new playlist.
   // brave_playlists.json explains in detail about below apis.
@@ -118,8 +121,6 @@ class PlaylistsController : PlaylistsMediaFileController::Client {
                          const std::string& playlist_info_json);
 
   void DoPlay(const std::string& id, const std::string& playlist_info_json);
-  void StartHTMLFileGeneration(const std::string& id);
-  void OnHTMLFileGenerated(int success);
 
   base::SequencedTaskRunner* io_task_runner();
 
@@ -163,7 +164,8 @@ class PlaylistsController : PlaylistsMediaFileController::Client {
   content::BrowserContext* context_;
   scoped_refptr<network::SharedURLLoaderFactory> url_loader_factory_;
   SimpleURLLoaderList url_loaders_;
-  base::FilePath html_file_path_;
+
+  PlaylistsPlayer* player_ = nullptr;
 
   base::WeakPtrFactory<PlaylistsController> weak_factory_;
 

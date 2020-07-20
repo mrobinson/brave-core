@@ -23,4 +23,11 @@ source_set("playlists") {
       "//extensions/browser",
     ]
   }
+
+  if (!is_android) {
+    sources += [
+      "desktop_playlists_player.cc",
+      "desktop_playlists_player.h",
+    ]
+  }
 }

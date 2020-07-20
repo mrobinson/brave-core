@@ -29,6 +29,7 @@ class Profile;
 
 namespace brave_playlists {
 class PlaylistsController;
+class PlaylistsPlayer;
 
 #if BUILDFLAG(ENABLE_EXTENSIONS)
 class BravePlaylistsEventRouter;
@@ -50,10 +51,12 @@ class PlaylistsService : public KeyedService {
 
   scoped_refptr<base::SequencedTaskRunner> file_task_runner_;
   base::FilePath base_dir_;
+  content::BrowserContext* context_;
   std::unique_ptr<PlaylistsController> controller_;
 #if BUILDFLAG(ENABLE_EXTENSIONS)
   std::unique_ptr<BravePlaylistsEventRouter> playlists_event_router_;
 #endif
+  std::unique_ptr<PlaylistsPlayer> playlists_player_;
 
   base::WeakPtrFactory<PlaylistsService> weak_factory_;
 
