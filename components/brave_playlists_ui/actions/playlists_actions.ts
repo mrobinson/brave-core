@@ -9,5 +9,5 @@ import { types } from '../constants/playlists_types'
 
 export const enableFilterList = (id: string) =>
   action(types.PLAYLISTS_DOWNLOAD_STATUS_CHANGED, {
-    id,
+    id
   })

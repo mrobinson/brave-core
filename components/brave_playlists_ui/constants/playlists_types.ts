@@ -3,5 +3,5 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 export const enum types {
-  PLAYLISTS_DOWNLOAD_STATUS_CHANGED = '@@playlists/PLAYLISTS_DOWNLOAD_STATUS_CHANGED',
+  PLAYLISTS_DOWNLOAD_STATUS_CHANGED = '@@playlists/PLAYLISTS_DOWNLOAD_STATUS_CHANGED'
 }

@@ -41,7 +41,7 @@ window.cr.define('brave_playlists', function () {
   }
 
   return {
-    initialize,
+    initialize
   }
 })
 
