@@ -12,7 +12,6 @@ import("//brave/components/brave_wallet/browser/buildflags/buildflags.gni")
 import("//brave/components/brave_wayback_machine/buildflags/buildflags.gni")
 import("//brave/components/brave_webtorrent/browser/buildflags/buildflags.gni")
 import("//brave/components/greaselion/browser/buildflags/buildflags.gni")
-import("//brave/components/playlists/browser/buildflags/buildflags.gni")
 import("//brave/components/speedreader/buildflags.gni")
 import("//build/buildflag_header.gni")
 import("//build/config/features.gni")
@@ -149,7 +148,6 @@ source_set("browser_process") {
     "//brave/components/ntp_background_images/browser",
     "//brave/components/ntp_tiles",
     "//brave/components/p3a",
-    "//brave/components/playlists/browser/buildflags",
     "//brave/components/resources",
     "//brave/components/services:brave_content_manifest_overlays",
     "//brave/components/speedreader:buildflags",
@@ -320,15 +318,6 @@ source_set("browser_process") {
     deps += [
       "//brave/components/brave_together/browser",
     ]
-  }
-
-  if (enable_brave_playlists) {
-    sources += [
-      "playlists/playlists_service_factory.cc",
-      "playlists/playlists_service_factory.h",
-    ]
-
-    deps += [ "//brave/components/playlists/browser" ]
   }
 
   if (enable_tor) {

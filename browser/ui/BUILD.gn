@@ -354,6 +354,7 @@ source_set("ui") {
       "webui/brave_playlists_ui.h",
     ]
     deps += [
+      "//brave/browser/playlists",
       "//brave/components/brave_playlists_ui:generated_resources",
     ]
   }
