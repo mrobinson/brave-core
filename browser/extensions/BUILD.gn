@@ -122,8 +122,13 @@ source_set("extensions") {
     sources += [
       "api/brave_playlists_api.cc",
       "api/brave_playlists_api.h",
+      "brave_playlists_event_router.cc",
+      "brave_playlists_event_router.h",
     ]
-    deps += [ "//brave/browser/playlists" ]
+    deps += [
+      "//brave/browser/playlists",
+      "//brave/components/playlists/browser",
+    ]
   }
 
   if (enable_brave_webtorrent) {

@@ -210,12 +210,15 @@ PlaylistsController::~PlaylistsController() {
   io_task_runner()->DeleteSoon(FROM_HERE, std::move(db_controller_));
 }
 
-bool PlaylistsController::Init(const base::FilePath& base_dir) {
+bool PlaylistsController::Init(
+    const base::FilePath& base_dir,
+    scoped_refptr<base::SequencedTaskRunner> task_runner) {
   if (initialization_in_progress_)
     return true;
 
   initialization_in_progress_ = true;
   base_dir_ = base_dir;
+  io_task_runner_ = task_runner;
   db_controller_.reset(
       new PlaylistsDBController(base_dir.Append(kDatabaseDirName)));
   // TODO(pilgrim) dynamically set file extensions based on format
@@ -486,7 +489,6 @@ void PlaylistsController::OnGetAllPlaylists(
 
   base::Value playlists(base::Value::Type::LIST);
   for (const std::string& playlist_info_json : playlist_info_jsons) {
-    LOG(ERROR) << playlist_info_json;
     playlists.Append(
         GetPlaylistValueFromPlaylistInfoJSON(playlist_info_json));
   }
@@ -853,11 +855,6 @@ bool PlaylistsController::GetThumbnailPath(const std::string& id,
 }
 
 base::SequencedTaskRunner* PlaylistsController::io_task_runner() {
-  if (!io_task_runner_) {
-    io_task_runner_ = base::CreateSequencedTaskRunner(
-        {base::ThreadPool(), base::MayBlock(), base::TaskPriority::BEST_EFFORT,
-         base::TaskShutdownBehavior::SKIP_ON_SHUTDOWN});
-  }
   return io_task_runner_.get();
 }
 

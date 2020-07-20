@@ -1,5 +1,9 @@
+import("//extensions/buildflags/buildflags.gni")
+
 source_set("playlists") {
   sources = [
+    "playlists_service.cc",
+    "playlists_service.h",
     "playlists_service_factory.cc",
     "playlists_service_factory.h",
   ]
@@ -8,6 +12,15 @@ source_set("playlists") {
     "//base",
     "//brave/components/playlists/browser",
     "//components/keyed_service/content",
+    "//components/keyed_service/core",
     "//content/public/browser",
+    "//extensions/buildflags",
   ]
+
+  if (enable_extensions) {
+    deps += [
+      "//brave/common/extensions/api",
+      "//extensions/browser",
+    ]
+  }
 }

@@ -3,8 +3,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef BRAVE_COMPONENTS_PLAYLISTS_BROWSER_PLAYLISTS_SERVICE_H_
-#define BRAVE_COMPONENTS_PLAYLISTS_BROWSER_PLAYLISTS_SERVICE_H_
+#ifndef BRAVE_BROWSER_PLAYLISTS_PLAYLISTS_SERVICE_H_
+#define BRAVE_BROWSER_PLAYLISTS_PLAYLISTS_SERVICE_H_
 
 #include <memory>
 #include <string>
@@ -13,26 +13,28 @@
 #include "base/macros.h"
 #include "base/memory/scoped_refptr.h"
 #include "base/memory/weak_ptr.h"
-#include "base/scoped_observer.h"
 #include "brave/components/playlists/browser/playlists_controller.h"
-#include "brave/components/playlists/browser/playlists_controller_observer.h"
 #include "components/keyed_service/core/keyed_service.h"
+#include "extensions/buildflags/buildflags.h"
+
+#if BUILDFLAG(ENABLE_EXTENSIONS)
+#include "brave/browser/extensions/brave_playlists_event_router.h"
+#endif
 
 namespace base {
 class SequencedTaskRunner;
 }  // namespace base
-
-namespace content {
-class BrowserContext;
-}  // namespace content
 
 class Profile;
 
 namespace brave_playlists {
 class PlaylistsController;
 
-class PlaylistsService : public KeyedService,
-                         public PlaylistsControllerObserver {
+#if BUILDFLAG(ENABLE_EXTENSIONS)
+class BravePlaylistsEventRouter;
+#endif
+
+class PlaylistsService : public KeyedService {
  public:
   explicit PlaylistsService(content::BrowserContext* context);
   ~PlaylistsService() override;
@@ -44,18 +46,14 @@ class PlaylistsService : public KeyedService,
  private:
   void OnBaseDirectoryReady(bool ready);
 
-  // PlaylistsControllerObserver overrides:
-  void OnPlaylistsInitialized(bool initialized) override;
-  void OnPlaylistsChanged(const PlaylistsChangeParams& params) override;
-  void OnPlaylistsDownloadRequested(const std::string& url) override;
-
   base::SequencedTaskRunner* file_task_runner();
 
-  ScopedObserver<PlaylistsController, PlaylistsControllerObserver> observer_;
   scoped_refptr<base::SequencedTaskRunner> file_task_runner_;
   base::FilePath base_dir_;
-  content::BrowserContext* context_;
   std::unique_ptr<PlaylistsController> controller_;
+#if BUILDFLAG(ENABLE_EXTENSIONS)
+  std::unique_ptr<BravePlaylistsEventRouter> playlists_event_router_;
+#endif
 
   base::WeakPtrFactory<PlaylistsService> weak_factory_;
 
@@ -64,4 +62,4 @@ class PlaylistsService : public KeyedService,
 
 }  // namespace brave_playlists
 
-#endif  // BRAVE_COMPONENTS_PLAYLISTS_BROWSER_PLAYLISTS_SERVICE_H_
+#endif  // BRAVE_BROWSER_PLAYLISTS_PLAYLISTS_SERVICE_H_

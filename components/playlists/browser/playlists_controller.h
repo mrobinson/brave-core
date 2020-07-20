@@ -50,7 +50,8 @@ class PlaylistsController : PlaylistsMediaFileController::Client {
     return initialization_in_progress_;
   }
 
-  bool Init(const base::FilePath& base_dir);
+  bool Init(const base::FilePath& base_dir,
+            scoped_refptr<base::SequencedTaskRunner> task_runner);
 
   // False when |params| are not sufficient for new playlist.
   // brave_playlists.json explains in detail about below apis.

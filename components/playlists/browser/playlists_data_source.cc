@@ -20,7 +20,6 @@
 #include "base/task_runner_util.h"
 #include "base/threading/thread_task_runner_handle.h"
 #include "brave/components/playlists/browser/playlists_controller.h"
-#include "brave/components/playlists/browser/playlists_service.h"
 #include "url/gurl.h"
 
 namespace brave_playlists {

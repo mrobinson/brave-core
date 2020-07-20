@@ -7,9 +7,9 @@
 
 #include <memory>
 
+#include "brave/browser/playlists/playlists_service.h"
 #include "brave/components/playlists/browser/features.h"
 #include "brave/components/playlists/browser/playlists_data_source.h"
-#include "brave/components/playlists/browser/playlists_service.h"
 #include "chrome/browser/profiles/incognito_helpers.h"
 #include "chrome/browser/profiles/profile.h"
 #include "components/keyed_service/content/browser_context_dependency_manager.h"

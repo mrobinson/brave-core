@@ -11,10 +11,10 @@
 #include <vector>
 
 #include "base/bind.h"
+#include "brave/browser/playlists/playlists_service.h"
 #include "brave/browser/playlists/playlists_service_factory.h"
 #include "brave/common/extensions/api/brave_playlists.h"
 #include "brave/components/playlists/browser/playlists_controller.h"
-#include "brave/components/playlists/browser/playlists_service.h"
 #include "brave/components/playlists/browser/playlists_types.h"
 #include "chrome/browser/profiles/profile.h"
 
