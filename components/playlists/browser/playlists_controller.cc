@@ -200,8 +200,8 @@ PlaylistsController::~PlaylistsController() {
 bool PlaylistsController::Init(
     const base::FilePath& base_dir,
     scoped_refptr<base::SequencedTaskRunner> task_runner) {
-  if (initialization_in_progress_)
-    return true;
+  // This should be called only once.
+  DCHECK(!initialization_in_progress_ && !initialized_);
 
   initialization_in_progress_ = true;
   base_dir_ = base_dir;

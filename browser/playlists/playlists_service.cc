@@ -15,10 +15,6 @@
 #include "brave/components/playlists/browser/playlists_controller.h"
 #include "content/public/browser/browser_context.h"
 
-#if BUILDFLAG(ENABLE_EXTENSIONS)
-#include "brave/browser/extensions/brave_playlists_event_router.h"
-#endif
-
 #if !defined(OS_ANDROID)
 #include "brave/browser/playlists/desktop_playlists_player.h"
 #include "chrome/browser/profiles/profile.h"
@@ -59,6 +55,10 @@ bool PlaylistsService::Init() {
 void PlaylistsService::OnBaseDirectoryReady(bool ready) {
   // If we can't create directory in context dir, give up.
   if (!ready)
+    return;
+
+  // Each service should initialize controller only once.
+  if (controller_->initialized() || controller_->initialization_in_progress())
     return;
 
 #if BUILDFLAG(ENABLE_EXTENSIONS)

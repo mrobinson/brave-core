@@ -30,10 +30,6 @@ class Profile;
 
 namespace brave_playlists {
 
-#if BUILDFLAG(ENABLE_EXTENSIONS)
-class BravePlaylistsEventRouter;
-#endif
-
 class PlaylistsService : public KeyedService {
  public:
   explicit PlaylistsService(content::BrowserContext* context);
