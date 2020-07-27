@@ -27,7 +27,6 @@ class BravePlaylistsEventRouter : public PlaylistsControllerObserver {
 
   // PlaylistsControllerObserver overrides:
   void OnPlaylistsChanged(const PlaylistsChangeParams& params) override;
-  void OnPlaylistsDownloadRequested(const std::string& url) override;
 
  private:
   content::BrowserContext* context_;

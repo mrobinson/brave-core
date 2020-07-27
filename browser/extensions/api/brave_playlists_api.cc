@@ -17,6 +17,7 @@
 #include "brave/components/playlists/browser/playlists_controller.h"
 #include "brave/components/playlists/browser/playlists_types.h"
 #include "chrome/browser/profiles/profile.h"
+#include "extensions/browser/event_router.h"
 
 using brave_playlists::CreatePlaylistParams;
 using brave_playlists::PlaylistsController;
@@ -26,6 +27,8 @@ namespace CreatePlaylist = extensions::api::brave_playlists::CreatePlaylist;
 namespace GetPlaylist = extensions::api::brave_playlists::GetPlaylist;
 namespace DeletePlaylist = extensions::api::brave_playlists::DeletePlaylist;
 namespace RequestDownload = extensions::api::brave_playlists::RequestDownload;
+namespace OnDownloadRequested =
+    extensions::api::brave_playlists::OnDownloadRequested;
 
 namespace {
 
@@ -154,7 +157,15 @@ ExtensionFunction::ResponseAction BravePlaylistsRequestDownloadFunction::Run() {
       RequestDownload::Params::Create(*args_));
   EXTENSION_FUNCTION_VALIDATE(params.get());
 
-  controller->RequestDownload(params->url);
+  auto event = std::make_unique<extensions::Event>(
+      extensions::events::BRAVE_PLAYLISTS_ON_DOWNLOAD_REQUESTED,
+      OnDownloadRequested::kEventName,
+      OnDownloadRequested::Create(params->url),
+      browser_context());
+
+  extensions::EventRouter::Get(browser_context())->BroadcastEvent(
+      std::move(event));
+
   return RespondNow(NoArguments());
 }
 

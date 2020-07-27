@@ -61,8 +61,6 @@ class PlaylistsController : PlaylistsMediaFileController::Client {
   void DeletePlaylist(const std::string& id);
   void DeleteAllPlaylists();
   // TODO(simonhong): Remove this. API can handle.
-  void RequestDownload(const std::string& url);
-  // TODO(simonhong): Remove this. API can handle.
   void Play(const std::string& id);
 
   void AddObserver(PlaylistsControllerObserver* observer);

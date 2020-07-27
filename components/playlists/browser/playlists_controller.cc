@@ -424,14 +424,6 @@ void PlaylistsController::DeleteAllPlaylists() {
   CleanUp();
 }
 
-void PlaylistsController::RequestDownload(const std::string& url) {
-  // This is handled by third-party code (in JavaScript) so all we do here is
-  // tell observers that a download was requested and trust that someone is
-  // listening who will handle it.
-  for (PlaylistsControllerObserver& obs : observers_)
-    obs.OnPlaylistsDownloadRequested(url);
-}
-
 void PlaylistsController::Play(const std::string& id) {
   const base::Value* playlist_info =
       prefs_->Get(kBravePlaylistItems)->FindDictKey(id);

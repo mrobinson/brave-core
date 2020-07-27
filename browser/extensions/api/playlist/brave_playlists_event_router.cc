@@ -34,15 +34,4 @@ void BravePlaylistsEventRouter::OnPlaylistsChanged(
   extensions::EventRouter::Get(context_)->BroadcastEvent(std::move(event));
 }
 
-void BravePlaylistsEventRouter::OnPlaylistsDownloadRequested(
-    const std::string& url) {
-  auto event = std::make_unique<extensions::Event>(
-      extensions::events::BRAVE_PLAYLISTS_ON_DOWNLOAD_REQUESTED,
-      extensions::api::brave_playlists::OnDownloadRequested::kEventName,
-      extensions::api::brave_playlists::OnDownloadRequested::Create(url),
-      context_);
-
-  extensions::EventRouter::Get(context_)->BroadcastEvent(std::move(event));
-}
-
 }  // namespace brave_playlists
