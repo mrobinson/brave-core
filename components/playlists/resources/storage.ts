@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { debounce } from '../common/debounce'
-
 const keyName = 'playlists-data'
 
 export const defaultState: Playlists.State = {
@@ -31,9 +29,3 @@ export const load = (): Playlists.State => {
   }
   return cleanData(state)
 }
-
-export const debouncedSave = debounce((data: Playlists.State) => {
-  if (data) {
-    window.localStorage.setItem(keyName, JSON.stringify(cleanData(data)))
-  }
-}, 50)

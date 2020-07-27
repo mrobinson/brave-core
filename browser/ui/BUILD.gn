@@ -355,7 +355,7 @@ source_set("ui") {
     ]
     deps += [
       "//brave/browser/playlists",
-      "//brave/components/brave_playlists_ui:generated_resources",
+      "//brave/components/playlists/resources:generated_resources",
     ]
   }
 
