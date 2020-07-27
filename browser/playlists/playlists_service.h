@@ -14,7 +14,7 @@
 #include "extensions/buildflags/buildflags.h"
 
 #if BUILDFLAG(ENABLE_EXTENSIONS)
-#include "brave/browser/extensions/brave_playlists_event_router.h"
+#include "brave/browser/extensions/api/playlist/brave_playlists_event_router.h"
 #endif
 
 namespace brave_playlists {

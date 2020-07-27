@@ -166,9 +166,9 @@ PlaylistsController::~PlaylistsController() = default;
 
 void PlaylistsController::NotifyPlaylistChanged(
     const PlaylistsChangeParams& params) {
-  LOG(INFO) << __func__ << ": params="
-            << PlaylistsChangeParams::GetPlaylistsChangeTypeAsString(
-                   params.change_type);
+  VLOG(2) << __func__ << ": params="
+          << PlaylistsChangeParams::GetPlaylistsChangeTypeAsString(
+                 params.change_type);
 
   for (PlaylistsControllerObserver& obs : observers_)
     obs.OnPlaylistsChanged(params);
@@ -179,8 +179,7 @@ void PlaylistsController::AddPlaylistToMediaFileGenerationQueue(
   const base::Value* playlist_info =
       prefs_->Get(kBravePlaylistItems)->FindDictKey(id);
   if (!playlist_info) {
-    VLOG(1) << __func__ << ": "
-            << "Invalid playlist id for recover: " << id;
+    LOG(ERROR) << __func__ << ": Invalid playlist id for recover: " << id;
     return;
   }
 
@@ -361,12 +360,11 @@ void PlaylistsController::RecoverPlaylist(const std::string& id) {
   const base::Value* playlist_info =
       prefs_->Get(kBravePlaylistItems)->FindDictKey(id);
   if (!playlist_info) {
-    VLOG(1) << __func__ << ": "
-            << "Invalid playlist id for recover: " << id;
+    LOG(ERROR) << __func__ << ": Invalid playlist id for recover: " << id;
     return;
   }
 
-  VLOG(2) << __func__ << ": " << " This is in recovering";
+  VLOG(2) << __func__ << ": This is in recovering";
 
   const std::string* thumbnail_path_str =
       playlist_info->FindStringPath(kPlaylistsThumbnailPathKey);
@@ -385,8 +383,7 @@ void PlaylistsController::RecoverPlaylist(const std::string& id) {
   if (!video_media_file_path || video_media_file_path->empty() ||
       !audio_media_file_path || audio_media_file_path->empty() ||
       *partial_ready) {
-    VLOG(2) << __func__ << ": "
-            << "Regenerate media file";
+    VLOG(2) << __func__ << ": Regenerate media file";
     AddPlaylistToMediaFileGenerationQueue(id);
   }
 }
@@ -439,16 +436,14 @@ void PlaylistsController::Play(const std::string& id) {
   const base::Value* playlist_info =
       prefs_->Get(kBravePlaylistItems)->FindDictKey(id);
   if (!playlist_info) {
-    LOG(ERROR) << __func__ << ": "
-               << "Invalid playlist id for play: " << id;
+    LOG(ERROR) << __func__ << ": Invalid playlist id for play: " << id;
     return;
   }
 
   base::Optional<bool> partial_ready =
       playlist_info->FindBoolPath(kPlaylistsPartialReadyKey);
   if (!partial_ready && partial_ready.value()) {
-    LOG(ERROR) << __func__ << ": "
-               << "Playlist is not ready to play: " << id;
+    LOG(ERROR) << __func__ << ": Playlist is not ready to play: " << id;
     return;
   }
 

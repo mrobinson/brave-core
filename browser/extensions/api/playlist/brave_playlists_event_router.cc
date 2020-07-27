@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "brave/browser/extensions/brave_playlists_event_router.h"
+#include "brave/browser/extensions/api/playlist/brave_playlists_event_router.h"
 
 #include <memory>
 #include <utility>

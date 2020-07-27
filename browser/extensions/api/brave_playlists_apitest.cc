@@ -115,10 +115,6 @@ IN_PROC_BROWSER_TEST_F(BravePlaylistsApiTest, HasAccess) {
   runTest("testHasAccess()");
 }
 
-IN_PROC_BROWSER_TEST_F(BravePlaylistsApiTest, Initialize) {
-  runTest("testInitialize()");
-}
-
 IN_PROC_BROWSER_TEST_F(BravePlaylistsApiTest, CreatePlaylistNoCrash) {
   runTest("testCreatePlaylistNoCrash()");
 }
