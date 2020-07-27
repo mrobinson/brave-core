@@ -20,16 +20,6 @@ BravePlaylistsEventRouter::BravePlaylistsEventRouter(
 
 BravePlaylistsEventRouter::~BravePlaylistsEventRouter() = default;
 
-void BravePlaylistsEventRouter::OnPlaylistsInitialized(bool initialized) {
-  auto event = std::make_unique<extensions::Event>(
-      extensions::events::BRAVE_PLAYLISTS_ON_INITIALIZED,
-      extensions::api::brave_playlists::OnInitialized::kEventName,
-      extensions::api::brave_playlists::OnInitialized::Create(initialized),
-      context_);
-
-  extensions::EventRouter::Get(context_)->BroadcastEvent(std::move(event));
-}
-
 void BravePlaylistsEventRouter::OnPlaylistsChanged(
     const PlaylistsChangeParams& params) {
   auto event = std::make_unique<extensions::Event>(

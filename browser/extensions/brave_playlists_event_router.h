@@ -26,7 +26,6 @@ class BravePlaylistsEventRouter : public PlaylistsControllerObserver {
       const BravePlaylistsEventRouter&) = delete;
 
   // PlaylistsControllerObserver overrides:
-  void OnPlaylistsInitialized(bool initialized) override;
   void OnPlaylistsChanged(const PlaylistsChangeParams& params) override;
   void OnPlaylistsDownloadRequested(const std::string& url) override;
 

@@ -43,7 +43,6 @@ if (chrome.test) {
 }
 
 function createPlaylist (url: string) {
-  console.log(url)
   const ytdItems: chrome.bravePlaylists.YTDMediaItem[] = window.youtubedown_urls(url)
   if (ytdItems.length === 0) {
     console.log(' ##### got nothing from youtubedown_urls #####')
@@ -85,15 +84,6 @@ function makeMediaItems (item: chrome.bravePlaylists.YTDMediaItem) {
   return mediaFiles
 }
 
-chrome.bravePlaylists.isInitialized((init) => {
-  if (init) {
-    return
-  }
-  chrome.bravePlaylists.onInitialized.addListener(() => {
-    chrome.bravePlaylists.onDownloadRequested.addListener((url) => {
-      createPlaylist(url)
-    })
-  })
+chrome.bravePlaylists.onDownloadRequested.addListener((url) => {
+  createPlaylist(url)
 })
-// Initialize playlist API
-chrome.bravePlaylists.initialize()

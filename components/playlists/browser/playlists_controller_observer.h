@@ -1,4 +1,4 @@
-/* Copyright (c) 2019 The Brave Authors. All rights reserved.
+/* Copyright (c) 2020 The Brave Authors. All rights reserved.
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -16,7 +16,6 @@ namespace brave_playlists {
 class PlaylistsControllerObserver : public base::CheckedObserver {
  public:
   // |initialized| is false when init failed.
-  virtual void OnPlaylistsInitialized(bool initialized) = 0;
   virtual void OnPlaylistsChanged(const PlaylistsChangeParams& params) = 0;
   virtual void OnPlaylistsDownloadRequested(const std::string& url) = 0;
 

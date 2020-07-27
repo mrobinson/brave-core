@@ -1,4 +1,4 @@
-/* Copyright (c) 2019 The Brave Authors. All rights reserved.
+/* Copyright (c) 2020 The Brave Authors. All rights reserved.
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -55,18 +55,18 @@ struct CreatePlaylistParams {
   std::vector<MediaFileInfo> audio_media_files;
 };
 
-// Stored to db.
 struct PlaylistInfo {
   PlaylistInfo();
   PlaylistInfo(const PlaylistInfo& rhs);
   ~PlaylistInfo();
 
   std::string id;
+  // TODO(simonhong): Delete this. |create_params| has it.
   std::string playlist_name;
   std::string thumbnail_path;
   std::string video_media_file_path;
   std::string audio_media_file_path;
-  bool partial_ready;
+  bool partial_ready{false};
 
   CreatePlaylistParams create_params;
 };

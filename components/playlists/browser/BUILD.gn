@@ -11,8 +11,6 @@ source_set("browser") {
     "playlists_controller_observer.h",
     "playlists_data_source.cc",
     "playlists_data_source.h",
-    "playlists_db_controller.cc",
-    "playlists_db_controller.h",
     "playlists_media_file_controller.cc",
     "playlists_media_file_controller.h",
     "playlists_player.h",
@@ -22,9 +20,11 @@ source_set("browser") {
 
   deps = [
     "//base",
+    "//brave/components/playlists/common",
+    "//components/prefs",
+    "//components/user_prefs",
     "//content/public/browser",
     "//services/network/public/cpp",
-    "//third_party/leveldatabase",
     "//url",
   ]
 

@@ -94,37 +94,6 @@
     ],
     "functions": [
       {
-        "name": "initialize",
-        "type": "function",
-        "description": "initialze playlists",
-        "parameters": [
-          {
-            "type": "function",
-            "name": "callback",
-            "optional": true,
-            "description": "If an error occurs, runtime.lastError is set to the error message."
-          }
-        ]
-      },
-      {
-        "name": "isInitialized",
-        "type": "function",
-        "description": "For checking whether playlists backend are initialized",
-        "parameters": [
-          {
-            "type": "function",
-            "name": "callback",
-            "description": "If an error occurs, runtime.lastError is set to the error message.",
-            "parameters": [
-              {
-                "name": "initialized",
-                "type": "boolean"
-              }
-            ]
-          }
-        ]
-      },
-      {
         "name": "createPlaylist",
         "type": "function",
         "description": "create new playlist",
