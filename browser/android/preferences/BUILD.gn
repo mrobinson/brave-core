@@ -20,7 +20,7 @@ source_set("preferences") {
     "//brave/common",
     "//brave/components/brave_referrals/common",
     "//brave/components/brave_rewards/common",
-    "//brave/components/brave_shields/browser",
+    "//brave/components/brave_shields/browser:util",
     "//brave/components/brave_sync",
     "//components/content_settings/core/browser",
     "//components/prefs",

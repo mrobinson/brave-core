@@ -190,6 +190,12 @@ source_set("browser_process") {
     "//ui/base",
   ]
 
+  if (is_android) {
+    deps += [
+      ":android",
+    ]
+  }
+
   if (brave_wallet_enabled) {
     deps += [
       "//brave/components/brave_wallet/browser",
@@ -220,42 +226,6 @@ source_set("browser_process") {
       "importer",
       "infobars",
       "//brave/app:brave_generated_resources_grit",
-    ]
-  } else {
-    sources += [
-      "android/brave_relaunch_utils.cc",
-      "android/brave_shields_content_settings.cc",
-      "android/brave_shields_content_settings.h",
-      "android/brave_stats_updater_android.cc",
-    ]
-
-    if (brave_ads_enabled) {
-      sources += [
-        "brave_ads/android/brave_ads_native_helper.cc",
-      ]
-
-      deps += [
-        "brave_ads/android:jni_headers",
-      ]
-    }
-
-    if (enable_brave_sync) {
-      sources += [
-        "android/brave_sync_worker.cc",
-        "android/brave_sync_worker.h",
-        "sync/brave_sync_devices_android.cc",
-        "sync/brave_sync_devices_android.h",
-      ]
-      deps += [
-        "//components/sync_device_info",
-      ]
-    }
-
-    deps += [
-      "//brave/browser/android/preferences",
-      "//brave/build/android:jni_headers",
-      "//chrome/android:jni_headers",
-      "//components/ntp_tiles",
     ]
   }
 
@@ -434,6 +404,48 @@ buildflag_header("sparkle_buildflags") {
   flags = [
     "ENABLE_SPARKLE=$enable_sparkle",
   ]
+}
+
+if (is_android) {
+  source_set("android") {
+    sources = [
+      "android/brave_relaunch_utils.cc",
+      "android/brave_shields_content_settings.cc",
+      "android/brave_shields_content_settings.h",
+      "android/brave_stats_updater_android.cc",
+    ]
+
+    deps = []
+
+    if (brave_ads_enabled) {
+      sources += [
+        "brave_ads/android/brave_ads_native_helper.cc",
+      ]
+
+      deps += [
+        "brave_ads/android:jni_headers",
+      ]
+    }
+
+    if (enable_brave_sync) {
+      sources += [
+        "android/brave_sync_worker.cc",
+        "android/brave_sync_worker.h",
+        "sync/brave_sync_devices_android.cc",
+        "sync/brave_sync_devices_android.h",
+      ]
+      deps += [
+        "//components/sync_device_info",
+      ]
+    }
+
+    deps += [
+      "//brave/browser/android/preferences",
+      "//brave/build/android:jni_headers",
+      "//chrome/android:jni_headers",
+      "//components/ntp_tiles",
+    ]
+  }
 }
 
 source_set("version_info") {
