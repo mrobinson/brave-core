@@ -1,3 +1,5 @@
+import("//brave/components/brave_webtorrent/browser/buildflags/buildflags.gni")
+
 source_set("browser") {
   # Remove when https://github.com/brave/brave-browser/issues/10649 is resolved
   check_includes = false
@@ -13,10 +15,15 @@ source_set("browser") {
     "//components/pref_registry",
     "//components/prefs",
     "//content/public/browser",
-    "//extensions/browser",
-    "//extensions/common",
     "//net",
   ]
+
+  if (enable_extensions) {
+    deps += [
+     "//extensions/browser",
+     "//extensions/common",
+    ]
+  }
 
   public_deps = [
     "buildflags",

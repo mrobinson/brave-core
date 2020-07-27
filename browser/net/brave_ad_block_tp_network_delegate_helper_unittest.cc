@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "brave/browser/net/url_context.h"
-#include "brave/common/network_constants.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 using brave::ResponseCallback;

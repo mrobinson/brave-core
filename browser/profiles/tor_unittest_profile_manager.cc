@@ -11,7 +11,6 @@
 #include "base/files/file_util.h"
 #include "base/threading/thread_task_runner_handle.h"
 #include "brave/browser/profiles/brave_profile_manager.h"
-#include "brave/browser/tor/tor_profile_service.h"
 #include "chrome/browser/prefs/browser_prefs.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/test/base/testing_profile.h"

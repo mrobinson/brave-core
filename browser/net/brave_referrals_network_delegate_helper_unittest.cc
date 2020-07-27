@@ -10,7 +10,6 @@
 
 #include "base/json/json_reader.h"
 #include "brave/browser/net/url_context.h"
-#include "brave/common/network_constants.h"
 #include "testing/gtest/include/gtest/gtest.h"
 #include "url/gurl.h"
 #include "url/url_constants.h"
@@ -19,8 +18,8 @@ using brave::ResponseCallback;
 
 namespace {
 const char kTestReferralHeaders[] = R"(
-  [  
-    {  
+  [
+    {
       "domains": [
          "marketwatch.com",
          "barrons.com"

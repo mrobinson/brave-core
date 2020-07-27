@@ -1,5 +1,5 @@
 diff --git a/components/translate/core/browser/BUILD.gn b/components/translate/core/browser/BUILD.gn
-index b2f8ae2081e9f3755a49ff269fff09d9831daf68..e973b37ef850f0d5d8256b082a867871dceb9a40 100644
+index b2f8ae2081e9f3755a49ff269fff09d9831daf68..70ad9cebeadc59af3327fcda0ccd82bc22e98a4b 100644
 --- a/components/translate/core/browser/BUILD.gn
 +++ b/components/translate/core/browser/BUILD.gn
 @@ -81,6 +81,7 @@ static_library("browser") {
@@ -10,3 +10,16 @@ index b2f8ae2081e9f3755a49ff269fff09d9831daf68..e973b37ef850f0d5d8256b082a867871
  }
  
  source_set("translate_pref_names") {
+@@ -104,6 +105,12 @@ source_set("unit_tests") {
+     "translate_ui_delegate_unittest.cc",
+     "translate_url_util_unittest.cc",
+   ]
++
++  # For brave test.
++  sources += [
++    "../../../brave/chromium_src/components/translate/core/browser/brave_translate_manager_unittest.cc",
++  ]
++
+   deps = [
+     ":browser",
+     ":test_support",

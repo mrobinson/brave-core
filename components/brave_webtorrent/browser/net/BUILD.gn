@@ -1,3 +1,5 @@
+import("//brave/components/brave_webtorrent/browser/buildflags/buildflags.gni")
+
 source_set("net") {
   # Remove when https://github.com/brave/brave-browser/issues/10645 is resolved
   check_includes = false
@@ -10,8 +12,13 @@ source_set("net") {
     "//base",
     "//brave/common",
     "//brave/components/brave_webtorrent/browser",
-    "//extensions/browser",
     "//net",
     "//third_party/blink/public/mojom:mojom_platform_headers",
   ]
+
+  if (enable_extensions) {
+    deps += [
+     "//extensions/browser",
+    ]
+  }
 }

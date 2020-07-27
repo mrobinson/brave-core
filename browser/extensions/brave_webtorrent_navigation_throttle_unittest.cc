@@ -9,8 +9,6 @@
 #include <utility>
 #include <vector>
 
-#include "brave/browser/profiles/brave_profile_manager.h"
-#include "brave/browser/profiles/profile_util.h"
 #include "brave/common/extensions/extension_constants.h"
 #include "brave/common/pref_names.h"
 #include "chrome/browser/extensions/extension_service.h"

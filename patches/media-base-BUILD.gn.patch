@@ -1,0 +1,17 @@
+diff --git a/media/base/BUILD.gn b/media/base/BUILD.gn
+index e5f3cb49ffd0364904262761f3359c37c6a2b865..797d80b8623e84bfa548b97d0dc21ca6ea77e750 100644
+--- a/media/base/BUILD.gn
++++ b/media/base/BUILD.gn
+@@ -460,6 +460,12 @@ static_library("test_support") {
+     "//media/formats:test_support",
+     "//media/video:test_support",
+   ]
++
++  # For brave test.
++  visibility += [
++    "//brave/test:brave_browser_tests",
++  ]
++
+   testonly = true
+   sources = [
+     "fake_audio_render_callback.cc",
