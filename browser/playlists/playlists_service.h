@@ -11,11 +11,6 @@
 #include "brave/components/playlists/browser/playlists_controller.h"
 #include "brave/components/playlists/browser/playlists_player.h"
 #include "components/keyed_service/core/keyed_service.h"
-#include "extensions/buildflags/buildflags.h"
-
-#if BUILDFLAG(ENABLE_EXTENSIONS)
-#include "brave/browser/extensions/api/playlist/brave_playlists_event_router.h"
-#endif
 
 namespace brave_playlists {
 
@@ -29,9 +24,6 @@ class PlaylistsService : public KeyedService {
  private:
   std::unique_ptr<PlaylistsController> controller_;
   std::unique_ptr<PlaylistsPlayer> playlists_player_;
-#if BUILDFLAG(ENABLE_EXTENSIONS)
-  std::unique_ptr<BravePlaylistsEventRouter> playlists_event_router_;
-#endif
 
   DISALLOW_COPY_AND_ASSIGN(PlaylistsService);
 };

@@ -8,17 +8,59 @@
 #include <memory>
 #include <utility>
 
+#include "base/lazy_instance.h"
+#include "brave/browser/playlists/playlists_service.h"
+#include "brave/browser/playlists/playlists_service_factory.h"
 #include "brave/common/extensions/api/brave_playlists.h"
-#include "extensions/browser/event_router.h"
+#include "brave/components/playlists/browser/playlists_controller.h"
+#include "chrome/browser/profiles/profile.h"
 
 namespace brave_playlists {
+
+namespace {
+
+PlaylistsController* GetPlaylistsController(content::BrowserContext* context) {
+  brave_playlists::PlaylistsService* service =
+      PlaylistsServiceFactory::GetInstance()
+          ->GetForProfile(Profile::FromBrowserContext(context));
+  return service ? service->controller() : nullptr;
+}
+
+}  // namespace
+
+static base::LazyInstance<extensions::BrowserContextKeyedAPIFactory<
+    BravePlaylistsEventRouter>>::DestructorAtExit
+    g_playlist_event_router = LAZY_INSTANCE_INITIALIZER;
+
+// static
+extensions::BrowserContextKeyedAPIFactory<BravePlaylistsEventRouter>*
+BravePlaylistsEventRouter::GetFactoryInstance() {
+  return g_playlist_event_router.Pointer();
+}
 
 BravePlaylistsEventRouter::BravePlaylistsEventRouter(
     content::BrowserContext* context)
     : context_(context) {
+  extensions::EventRouter::Get(context)->RegisterObserver(
+      this, extensions::api::brave_playlists::OnPlaylistsChanged::kEventName);
 }
 
 BravePlaylistsEventRouter::~BravePlaylistsEventRouter() = default;
+
+void BravePlaylistsEventRouter::Shutdown() {
+  if (auto* controller = GetPlaylistsController(context_))
+    controller->RemoveObserver(this);
+}
+
+void BravePlaylistsEventRouter::OnListenerAdded(
+    const extensions::EventListenerInfo& details) {
+  DCHECK_EQ(details.event_name,
+            extensions::api::brave_playlists::OnPlaylistsChanged::kEventName);
+  if (auto* controller = GetPlaylistsController(context_)) {
+    controller->AddObserver(this);
+    extensions::EventRouter::Get(context_)->UnregisterObserver(this);
+  }
+}
 
 void BravePlaylistsEventRouter::OnPlaylistsChanged(
     const PlaylistsChangeParams& params) {

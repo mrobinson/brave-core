@@ -1,5 +1,3 @@
-import("//extensions/buildflags/buildflags.gni")
-
 source_set("playlists") {
   sources = [
     "playlists_service.cc",
@@ -14,15 +12,7 @@ source_set("playlists") {
     "//components/keyed_service/content",
     "//components/keyed_service/core",
     "//content/public/browser",
-    "//extensions/buildflags",
   ]
-
-  if (enable_extensions) {
-    deps += [
-      "//brave/common/extensions/api",
-      "//extensions/browser",
-    ]
-  }
 
   if (!is_android) {
     sources += [

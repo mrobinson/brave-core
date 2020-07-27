@@ -9,6 +9,8 @@
 #include <string>
 
 #include "brave/components/playlists/browser/playlists_controller_observer.h"
+#include "extensions/browser/browser_context_keyed_api_factory.h"
+#include "extensions/browser/event_router.h"
 
 namespace content {
 class BrowserContext;
@@ -16,19 +18,35 @@ class BrowserContext;
 
 namespace brave_playlists {
 
-class BravePlaylistsEventRouter : public PlaylistsControllerObserver {
+class BravePlaylistsEventRouter : public extensions::BrowserContextKeyedAPI,
+                                  public extensions::EventRouter::Observer,
+                                  public PlaylistsControllerObserver {
  public:
-  explicit BravePlaylistsEventRouter(content::BrowserContext* context);
-  ~BravePlaylistsEventRouter() override;
+  // KeyedService implementation.
+  void Shutdown() override;
 
   BravePlaylistsEventRouter(const BravePlaylistsEventRouter&) = delete;
   BravePlaylistsEventRouter& operator=(
       const BravePlaylistsEventRouter&) = delete;
 
+  // extensions::BrowserContextKeyedAPI overrides:
+  static extensions::BrowserContextKeyedAPIFactory<BravePlaylistsEventRouter>*
+      GetFactoryInstance();
+  static const char* service_name() { return "PlaylistAPI"; }
+
+  // extensions::EventRouter::Observer overrides:
+  void OnListenerAdded(const extensions::EventListenerInfo& details) override;
+
   // PlaylistsControllerObserver overrides:
   void OnPlaylistsChanged(const PlaylistsChangeParams& params) override;
 
  private:
+  friend class extensions::BrowserContextKeyedAPIFactory<
+      BravePlaylistsEventRouter>;
+
+  explicit BravePlaylistsEventRouter(content::BrowserContext* context);
+  ~BravePlaylistsEventRouter() override;
+
   content::BrowserContext* context_;
 };
 

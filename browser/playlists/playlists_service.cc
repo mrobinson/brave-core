@@ -32,10 +32,6 @@ PlaylistsService::PlaylistsService(content::BrowserContext* context) {
             base::TaskPriority::BEST_EFFORT,
             base::TaskShutdownBehavior::SKIP_ON_SHUTDOWN });
   controller_.reset(new PlaylistsController(context, io_task_runner));
-#if BUILDFLAG(ENABLE_EXTENSIONS)
-  playlists_event_router_.reset(new BravePlaylistsEventRouter(context));
-  controller_->AddObserver(playlists_event_router_.get());
-#endif
 
 #if !defined(OS_ANDROID)
   playlists_player_.reset(
@@ -46,11 +42,6 @@ PlaylistsService::PlaylistsService(content::BrowserContext* context) {
 }
 
 PlaylistsService::~PlaylistsService() {
-#if BUILDFLAG(ENABLE_EXTENSIONS)
-  if (playlists_event_router_)
-    controller_->RemoveObserver(playlists_event_router_.get());
-#endif
-
   controller_->set_player(nullptr);
 }
 
