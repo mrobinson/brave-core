@@ -120,8 +120,8 @@ source_set("extensions") {
 
   if (enable_brave_playlists) {
     sources += [
-      "api/brave_playlists_api.cc",
-      "api/brave_playlists_api.h",
+      "api/playlist/brave_playlists_api.cc",
+      "api/playlist/brave_playlists_api.h",
       "api/playlist/brave_playlists_event_router.cc",
       "api/playlist/brave_playlists_event_router.h",
     ]

@@ -8,7 +8,7 @@
     "namespace": "bravePlaylists",
     "description": "Use the <code>chrome.bravePlaylists</code> API to get/set playlist",
     "compiler_options": {
-      "implemented_in": "brave/browser/extensions/api/brave_playlists_api.h"
+      "implemented_in": "brave/browser/extensions/api/playlist/brave_playlists_api.h"
     },
     "events": [
       {

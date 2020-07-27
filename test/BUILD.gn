@@ -717,7 +717,7 @@ test("brave_browser_tests") {
   if (enable_brave_playlists) {
      sources += [
       "//brave/browser/playlists/playlists_browsertest.cc",
-      "//brave/browser/extensions/api/brave_playlists_apitest.cc",
+      "//brave/browser/extensions/api/playlist/brave_playlists_apitest.cc",
     ]
   }
 

@@ -3,8 +3,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef BRAVE_BROWSER_EXTENSIONS_BRAVE_PLAYLISTS_EVENT_ROUTER_H_
-#define BRAVE_BROWSER_EXTENSIONS_BRAVE_PLAYLISTS_EVENT_ROUTER_H_
+#ifndef BRAVE_BROWSER_EXTENSIONS_API_PLAYLIST_BRAVE_PLAYLISTS_EVENT_ROUTER_H_
+#define BRAVE_BROWSER_EXTENSIONS_API_PLAYLIST_BRAVE_PLAYLISTS_EVENT_ROUTER_H_
 
 #include <string>
 
@@ -34,4 +34,4 @@ class BravePlaylistsEventRouter : public PlaylistsControllerObserver {
 
 }  // namespace brave_playlists
 
-#endif  // BRAVE_BROWSER_EXTENSIONS_BRAVE_PLAYLISTS_EVENT_ROUTER_H_
+#endif  // BRAVE_BROWSER_EXTENSIONS_API_PLAYLIST_BRAVE_PLAYLISTS_EVENT_ROUTER_H_
