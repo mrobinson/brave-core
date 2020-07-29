@@ -31,9 +31,9 @@ namespace {
 constexpr unsigned int kRetriesCountOnNetworkChange = 1;
 
 net::NetworkTrafficAnnotationTag GetNetworkTrafficAnnotationTagForURLLoad() {
-  return net::DefineNetworkTrafficAnnotation("playlists_controller", R"(
+  return net::DefineNetworkTrafficAnnotation("playlists_service", R"(
       semantics {
-        sender: "Brave Playlists Controller"
+        sender: "Brave Playlists Service"
         description:
           "Fetching media file for newly created playlist"
         trigger:

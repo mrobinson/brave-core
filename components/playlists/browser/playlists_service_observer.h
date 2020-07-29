@@ -3,8 +3,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef BRAVE_COMPONENTS_PLAYLISTS_BROWSER_PLAYLISTS_CONTROLLER_OBSERVER_H_
-#define BRAVE_COMPONENTS_PLAYLISTS_BROWSER_PLAYLISTS_CONTROLLER_OBSERVER_H_
+#ifndef BRAVE_COMPONENTS_PLAYLISTS_BROWSER_PLAYLISTS_SERVICE_OBSERVER_H_
+#define BRAVE_COMPONENTS_PLAYLISTS_BROWSER_PLAYLISTS_SERVICE_OBSERVER_H_
 
 #include <string>
 
@@ -13,15 +13,15 @@
 
 namespace brave_playlists {
 
-class PlaylistsControllerObserver : public base::CheckedObserver {
+class PlaylistsServiceObserver : public base::CheckedObserver {
  public:
   // |initialized| is false when init failed.
   virtual void OnPlaylistsChanged(const PlaylistsChangeParams& params) = 0;
 
  protected:
-  ~PlaylistsControllerObserver() override {}
+  ~PlaylistsServiceObserver() override {}
 };
 
 }  // namespace brave_playlists
 
-#endif  // BRAVE_COMPONENTS_PLAYLISTS_BROWSER_PLAYLISTS_CONTROLLER_OBSERVER_H_
+#endif  // BRAVE_COMPONENTS_PLAYLISTS_BROWSER_PLAYLISTS_SERVICE_OBSERVER_H_

@@ -29,18 +29,6 @@
         ]
       },
       {
-        "name": "onInitialized",
-        "type": "function",
-        "description": "Fired when playlists backend is initialized",
-        "parameters": [
-          {
-            "name": "initialized",
-            "type": "boolean",
-            "description": "If initialization failed, false is set"
-          }
-        ]
-      },
-      {
         "name": "onDownloadRequested",
         "type": "function",
         "description": "Fired when someone requests the playlists backend to download a URL and use information within the URL to create a playlist",

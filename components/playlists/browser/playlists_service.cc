@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "brave/components/playlists/browser/playlists_controller.h"
+#include "brave/components/playlists/browser/playlists_service.h"
 
 #include <algorithm>
 #include <utility>
@@ -19,7 +19,7 @@
 #include "base/task_runner_util.h"
 #include "base/token.h"
 #include "brave/components/playlists/browser/playlists_constants.h"
-#include "brave/components/playlists/browser/playlists_controller_observer.h"
+#include "brave/components/playlists/browser/playlists_service_observer.h"
 #include "brave/components/playlists/browser/playlists_player.h"
 #include "brave/components/playlists/common/pref_names.h"
 #include "components/prefs/pref_service.h"
@@ -137,7 +137,7 @@ std::vector<base::FilePath> GetOrphanedPaths(
 
 }  // namespace
 
-PlaylistsController::PlaylistsController(
+PlaylistsService::PlaylistsService(
     content::BrowserContext* context,
     scoped_refptr<base::SequencedTaskRunner> task_runner)
     : context_(context),
@@ -162,19 +162,23 @@ PlaylistsController::PlaylistsController(
   CleanUp();
 }
 
-PlaylistsController::~PlaylistsController() = default;
+PlaylistsService::~PlaylistsService() = default;
 
-void PlaylistsController::NotifyPlaylistChanged(
+void PlaylistsService::SetPlayer(std::unique_ptr<PlaylistsPlayer> player) {
+    player_ = std::move(player);
+}
+
+void PlaylistsService::NotifyPlaylistChanged(
     const PlaylistsChangeParams& params) {
   VLOG(2) << __func__ << ": params="
           << PlaylistsChangeParams::GetPlaylistsChangeTypeAsString(
                  params.change_type);
 
-  for (PlaylistsControllerObserver& obs : observers_)
+  for (PlaylistsServiceObserver& obs : observers_)
     obs.OnPlaylistsChanged(params);
 }
 
-void PlaylistsController::AddPlaylistToMediaFileGenerationQueue(
+void PlaylistsService::AddPlaylistToMediaFileGenerationQueue(
     const std::string& id) {
   const base::Value* playlist_info =
       prefs_->Get(kBravePlaylistItems)->FindDictKey(id);
@@ -196,7 +200,7 @@ void PlaylistsController::AddPlaylistToMediaFileGenerationQueue(
   }
 }
 
-void PlaylistsController::GenerateMediaFiles() {
+void PlaylistsService::GenerateMediaFiles() {
   DCHECK(!video_media_file_controller_->in_progress() &&
          !audio_media_file_controller_->in_progress());
   DCHECK(!pending_media_file_creation_jobs_.empty());
@@ -213,26 +217,26 @@ void PlaylistsController::GenerateMediaFiles() {
                                                         base_dir_);
 }
 
-base::FilePath PlaylistsController::GetPlaylistItemDirPath(
+base::FilePath PlaylistsService::GetPlaylistItemDirPath(
     const std::string& id) const {
   return base_dir_.Append(GetPlaylistIDDirName(id));
 }
 
-void PlaylistsController::UpdatePlaylistValue(const std::string& id,
-                                              base::Value&& value) {
+void PlaylistsService::UpdatePlaylistValue(const std::string& id,
+                                           base::Value&& value) {
   base::Value playlist_items = prefs_->Get(kBravePlaylistItems)->Clone();
   playlist_items.SetKey(id, std::move(value));
   prefs_->Set(kBravePlaylistItems, playlist_items);
 }
 
-void PlaylistsController::RemovePlaylist(const std::string& id) {
+void PlaylistsService::RemovePlaylist(const std::string& id) {
   base::Value playlist_items = prefs_->Get(kBravePlaylistItems)->Clone();
   playlist_items.RemoveKey(id);
   prefs_->Set(kBravePlaylistItems, playlist_items);
 }
 
 // TODO(simonhong): Add basic validation for |params|.
-void PlaylistsController::CreatePlaylist(const CreatePlaylistParams& params) {
+void PlaylistsService::CreatePlaylist(const CreatePlaylistParams& params) {
   VLOG(2) << __func__;
   const PlaylistInfo info = CreatePlaylistInfo(params);
   UpdatePlaylistValue(info.id, GetValueFromPlaylistInfo(info));
@@ -244,13 +248,13 @@ void PlaylistsController::CreatePlaylist(const CreatePlaylistParams& params) {
       io_task_runner(),
       FROM_HERE,
       base::BindOnce(&base::CreateDirectory, GetPlaylistItemDirPath(info.id)),
-      base::BindOnce(&PlaylistsController::OnPlaylistItemDirCreated,
+      base::BindOnce(&PlaylistsService::OnPlaylistItemDirCreated,
                      weak_factory_.GetWeakPtr(),
                      info.id));
 }
 
-void PlaylistsController::OnPlaylistItemDirCreated(const std::string& id,
-                                                   bool directory_ready) {
+void PlaylistsService::OnPlaylistItemDirCreated(const std::string& id,
+                                                bool directory_ready) {
   VLOG(2) << __func__;
   if (!directory_ready) {
     NotifyPlaylistChanged(
@@ -262,7 +266,7 @@ void PlaylistsController::OnPlaylistItemDirCreated(const std::string& id,
   AddPlaylistToMediaFileGenerationQueue(id);
 }
 
-void PlaylistsController::DownloadThumbnail(const std::string& id) {
+void PlaylistsService::DownloadThumbnail(const std::string& id) {
   const base::Value* item_value =
       prefs_->Get(kBravePlaylistItems)->FindDictKey(id);
   DCHECK(item_value);
@@ -291,17 +295,16 @@ void PlaylistsController::DownloadThumbnail(const std::string& id) {
       GetPlaylistItemDirPath(id).Append(kThumbnailFileName);
   iter->get()->DownloadToFile(
       url_loader_factory_.get(),
-      base::BindOnce(&PlaylistsController::OnThumbnailDownloaded,
+      base::BindOnce(&PlaylistsService::OnThumbnailDownloaded,
                      base::Unretained(this),
                      id,
                      std::move(iter)),
       thumbnail_path);
 }
 
-void PlaylistsController::OnThumbnailDownloaded(
-    const std::string& id,
-    SimpleURLLoaderList::iterator it,
-    base::FilePath path) {
+void PlaylistsService::OnThumbnailDownloaded(const std::string& id,
+                                             SimpleURLLoaderList::iterator it,
+                                             base::FilePath path) {
   // When delete all is requested during the thumbnail downloading, we should
   // just return. |url_loaders_| is cleared.
   if (url_loaders_.empty())
@@ -334,7 +337,7 @@ void PlaylistsController::OnThumbnailDownloaded(
   }
 }
 
-base::Value PlaylistsController::GetAllPlaylists() {
+base::Value PlaylistsService::GetAllPlaylists() {
   base::Value playlist(base::Value::Type::LIST);
   for (const auto& it: prefs_->Get(kBravePlaylistItems)->DictItems()) {
     base::Value item = it.second.Clone();
@@ -345,7 +348,7 @@ base::Value PlaylistsController::GetAllPlaylists() {
   return playlist;
 }
 
-base::Value PlaylistsController::GetPlaylist(const std::string& id) {
+base::Value PlaylistsService::GetPlaylist(const std::string& id) {
   const base::Value* item_value_ptr =
       prefs_->Get(kBravePlaylistItems)->FindDictKey(id);
   if (item_value_ptr) {
@@ -356,7 +359,7 @@ base::Value PlaylistsController::GetPlaylist(const std::string& id) {
   return {};
 }
 
-void PlaylistsController::RecoverPlaylist(const std::string& id) {
+void PlaylistsService::RecoverPlaylist(const std::string& id) {
   const base::Value* playlist_info =
       prefs_->Get(kBravePlaylistItems)->FindDictKey(id);
   if (!playlist_info) {
@@ -388,7 +391,7 @@ void PlaylistsController::RecoverPlaylist(const std::string& id) {
   }
 }
 
-void PlaylistsController::DeletePlaylist(const std::string& id) {
+void PlaylistsService::DeletePlaylist(const std::string& id) {
   // Cancel if currently downloading item is id.
   if (video_media_file_controller_->current_playlist_id() == id) {
     video_media_file_controller_->RequestCancelCurrentPlaylistGeneration();
@@ -405,7 +408,7 @@ void PlaylistsController::DeletePlaylist(const std::string& id) {
   audio_media_file_controller_->DeletePlaylist(GetPlaylistItemDirPath(id));
 }
 
-void PlaylistsController::DeleteAllPlaylists() {
+void PlaylistsService::DeleteAllPlaylists() {
   VLOG(2) << __func__;
 
   // Cancel currently generated playlist if needed and pending thumbnail
@@ -424,7 +427,7 @@ void PlaylistsController::DeleteAllPlaylists() {
   CleanUp();
 }
 
-void PlaylistsController::Play(const std::string& id) {
+void PlaylistsService::Play(const std::string& id) {
   const base::Value* playlist_info =
       prefs_->Get(kBravePlaylistItems)->FindDictKey(id);
   if (!playlist_info) {
@@ -443,17 +446,17 @@ void PlaylistsController::Play(const std::string& id) {
     player_->Play(GetPlaylistItemDirPath(id));
 }
 
-void PlaylistsController::AddObserver(PlaylistsControllerObserver* observer) {
+void PlaylistsService::AddObserver(PlaylistsServiceObserver* observer) {
   observers_.AddObserver(observer);
 }
 
-void PlaylistsController::RemoveObserver(
-    PlaylistsControllerObserver* observer) {
+void PlaylistsService::RemoveObserver(
+    PlaylistsServiceObserver* observer) {
   observers_.RemoveObserver(observer);
 }
 
-void PlaylistsController::OnMediaFileReady(base::Value&& playlist_value,
-                                           bool partial) {
+void PlaylistsService::OnMediaFileReady(base::Value&& playlist_value,
+                                        bool partial) {
   // TODO(simonhong): Revisit how |partial| handles.
   if (video_media_file_controller_->in_progress() ||
       audio_media_file_controller_->in_progress())
@@ -481,7 +484,7 @@ void PlaylistsController::OnMediaFileReady(base::Value&& playlist_value,
     GenerateMediaFiles();
 }
 
-void PlaylistsController::OnMediaFileGenerationFailed(
+void PlaylistsService::OnMediaFileGenerationFailed(
     base::Value&& playlist_value) {
   VLOG(2) << __func__ << ": "
           << *playlist_value.FindStringKey(kPlaylistsPlaylistNameKey);
@@ -497,7 +500,7 @@ void PlaylistsController::OnMediaFileGenerationFailed(
     GenerateMediaFiles();
 }
 
-void PlaylistsController::OnGetOrphanedPaths(
+void PlaylistsService::OnGetOrphanedPaths(
     const std::vector<base::FilePath> orphaned_paths) {
   if (orphaned_paths.empty()) {
     VLOG(2) << __func__ << ": No orphaned playlist";
@@ -511,7 +514,7 @@ void PlaylistsController::OnGetOrphanedPaths(
   }
 }
 
-void PlaylistsController::CleanUp() {
+void PlaylistsService::CleanUp() {
   base::Value playlists = GetAllPlaylists();
 
   base::flat_set<std::string> ids;
@@ -524,12 +527,12 @@ void PlaylistsController::CleanUp() {
   base::PostTaskAndReplyWithResult(
       io_task_runner(), FROM_HERE,
       base::BindOnce(&GetOrphanedPaths, base_dir_, ids),
-      base::BindOnce(&PlaylistsController::OnGetOrphanedPaths,
+      base::BindOnce(&PlaylistsService::OnGetOrphanedPaths,
                      weak_factory_.GetWeakPtr()));
 }
 
-bool PlaylistsController::GetThumbnailPath(const std::string& id,
-                                           base::FilePath* thumbnail_path) {
+bool PlaylistsService::GetThumbnailPath(const std::string& id,
+                                        base::FilePath* thumbnail_path) {
   *thumbnail_path = GetPlaylistItemDirPath(id).Append(kThumbnailFileName);
   if (thumbnail_path->ReferencesParent()) {
     thumbnail_path->clear();
@@ -538,7 +541,7 @@ bool PlaylistsController::GetThumbnailPath(const std::string& id,
   return true;
 }
 
-base::SequencedTaskRunner* PlaylistsController::io_task_runner() {
+base::SequencedTaskRunner* PlaylistsService::io_task_runner() {
   return io_task_runner_.get();
 }
 

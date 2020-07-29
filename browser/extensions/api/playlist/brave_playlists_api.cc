@@ -11,16 +11,15 @@
 #include <vector>
 
 #include "base/bind.h"
-#include "brave/browser/playlists/playlists_service.h"
 #include "brave/browser/playlists/playlists_service_factory.h"
 #include "brave/common/extensions/api/brave_playlists.h"
-#include "brave/components/playlists/browser/playlists_controller.h"
+#include "brave/components/playlists/browser/playlists_service.h"
 #include "brave/components/playlists/browser/playlists_types.h"
 #include "chrome/browser/profiles/profile.h"
 #include "extensions/browser/event_router.h"
 
 using brave_playlists::CreatePlaylistParams;
-using brave_playlists::PlaylistsController;
+using brave_playlists::PlaylistsService;
 using brave_playlists::PlaylistsServiceFactory;
 
 namespace CreatePlaylist = extensions::api::brave_playlists::CreatePlaylist;
@@ -35,11 +34,9 @@ namespace {
 constexpr char kNotExistPlaylistError[] = "Playlist does not exist";
 constexpr char kFeatureDisabled[] = "Playlist feature is disabled";
 
-PlaylistsController* GetPlaylistsController(content::BrowserContext* context) {
-  brave_playlists::PlaylistsService* service =
-      PlaylistsServiceFactory::GetInstance()
-          ->GetForProfile(Profile::FromBrowserContext(context));
-  return service ? service->controller() : nullptr;
+PlaylistsService* GetPlaylistsService(content::BrowserContext* context) {
+  return PlaylistsServiceFactory::GetInstance()->GetForProfile(
+      Profile::FromBrowserContext(context));
 }
 
 CreatePlaylistParams GetCreatePlaylistParamsFromCreateParams(
@@ -61,8 +58,8 @@ namespace extensions {
 namespace api {
 
 ExtensionFunction::ResponseAction BravePlaylistsCreatePlaylistFunction::Run() {
-  auto* controller = GetPlaylistsController(browser_context());
-  if (!controller) {
+  auto* service = GetPlaylistsService(browser_context());
+  if (!service) {
     return RespondNow(Error(kFeatureDisabled));
   }
 
@@ -70,25 +67,25 @@ ExtensionFunction::ResponseAction BravePlaylistsCreatePlaylistFunction::Run() {
       CreatePlaylist::Params::Create(*args_));
   EXTENSION_FUNCTION_VALIDATE(params.get());
 
-  controller->CreatePlaylist(
+  service->CreatePlaylist(
       GetCreatePlaylistParamsFromCreateParams(params->create_params));
   return RespondNow(NoArguments());
 }
 
 ExtensionFunction::ResponseAction BravePlaylistsGetAllPlaylistsFunction::Run() {
-  auto* controller = GetPlaylistsController(browser_context());
-  if (!controller) {
+  auto* service = GetPlaylistsService(browser_context());
+  if (!service) {
     return RespondNow(Error(kFeatureDisabled));
   }
 
-  base::Value playlists = controller->GetAllPlaylists();
+  base::Value playlists = service->GetAllPlaylists();
   return RespondNow(
       OneArgument(base::Value::ToUniquePtrValue(std::move(playlists))));
 }
 
 ExtensionFunction::ResponseAction BravePlaylistsGetPlaylistFunction::Run() {
-  auto* controller = GetPlaylistsController(browser_context());
-  if (!controller) {
+  auto* service = GetPlaylistsService(browser_context());
+  if (!service) {
     return RespondNow(Error(kFeatureDisabled));
   }
 
@@ -96,7 +93,7 @@ ExtensionFunction::ResponseAction BravePlaylistsGetPlaylistFunction::Run() {
       GetPlaylist::Params::Create(*args_));
   EXTENSION_FUNCTION_VALIDATE(params.get());
 
-  base::Value playlist = controller->GetPlaylist(params->id);
+  base::Value playlist = service->GetPlaylist(params->id);
   DCHECK(playlist.is_dict());
 
   if (playlist.DictEmpty())
@@ -107,8 +104,8 @@ ExtensionFunction::ResponseAction BravePlaylistsGetPlaylistFunction::Run() {
 }
 
 ExtensionFunction::ResponseAction BravePlaylistsRecoverPlaylistFunction::Run() {
-  auto* controller = GetPlaylistsController(browser_context());
-  if (!controller) {
+  auto* service = GetPlaylistsService(browser_context());
+  if (!service) {
     return RespondNow(Error(kFeatureDisabled));
   }
 
@@ -116,13 +113,13 @@ ExtensionFunction::ResponseAction BravePlaylistsRecoverPlaylistFunction::Run() {
       GetPlaylist::Params::Create(*args_));
   EXTENSION_FUNCTION_VALIDATE(params.get());
 
-  controller->RecoverPlaylist(params->id);
+  service->RecoverPlaylist(params->id);
   return RespondNow(NoArguments());
 }
 
 ExtensionFunction::ResponseAction BravePlaylistsDeletePlaylistFunction::Run() {
-  auto* controller = GetPlaylistsController(browser_context());
-  if (!controller) {
+  auto* service = GetPlaylistsService(browser_context());
+  if (!service) {
     return RespondNow(Error(kFeatureDisabled));
   }
 
@@ -130,26 +127,25 @@ ExtensionFunction::ResponseAction BravePlaylistsDeletePlaylistFunction::Run() {
       DeletePlaylist::Params::Create(*args_));
   EXTENSION_FUNCTION_VALIDATE(params.get());
 
-  controller->DeletePlaylist(params->id);
+  service->DeletePlaylist(params->id);
   return RespondNow(NoArguments());
 }
 
 // TODO(simonhong): This api doesn't need callback. Delete.
 ExtensionFunction::ResponseAction
 BravePlaylistsDeleteAllPlaylistsFunction::Run() {
-  auto* controller = GetPlaylistsController(browser_context());
-  if (!controller) {
+  auto* service = GetPlaylistsService(browser_context());
+  if (!service) {
     return RespondNow(Error(kFeatureDisabled));
   }
 
-  controller->DeleteAllPlaylists();
+  service->DeleteAllPlaylists();
   return RespondNow(NoArguments());
 }
 
-// TODO(simonhong): Fire event here direclty instead of asking to controller.
 ExtensionFunction::ResponseAction BravePlaylistsRequestDownloadFunction::Run() {
-  auto* controller = GetPlaylistsController(browser_context());
-  if (!controller) {
+  auto* service = GetPlaylistsService(browser_context());
+  if (!service) {
     return RespondNow(Error(kFeatureDisabled));
   }
 
@@ -170,8 +166,8 @@ ExtensionFunction::ResponseAction BravePlaylistsRequestDownloadFunction::Run() {
 }
 
 ExtensionFunction::ResponseAction BravePlaylistsPlayFunction::Run() {
-  auto* controller = GetPlaylistsController(browser_context());
-  if (!controller) {
+  auto* service = GetPlaylistsService(browser_context());
+  if (!service) {
     return RespondNow(Error(kFeatureDisabled));
   }
 
@@ -179,8 +175,8 @@ ExtensionFunction::ResponseAction BravePlaylistsPlayFunction::Run() {
       GetPlaylist::Params::Create(*args_));
   EXTENSION_FUNCTION_VALIDATE(params.get());
 
-  // TODO(simonhong): Use standalone player instead of asking to controller.
-  controller->Play(params->id);
+  // TODO(simonhong): Use standalone player instead of asking to service.
+  service->Play(params->id);
   return RespondNow(NoArguments());
 }
 

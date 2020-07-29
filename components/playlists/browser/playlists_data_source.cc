@@ -19,7 +19,7 @@
 #include "base/task/thread_pool/thread_pool_instance.h"
 #include "base/task_runner_util.h"
 #include "base/threading/thread_task_runner_handle.h"
-#include "brave/components/playlists/browser/playlists_controller.h"
+#include "brave/components/playlists/browser/playlists_service.h"
 #include "url/gurl.h"
 
 namespace brave_playlists {
@@ -41,8 +41,8 @@ void ThumbnailLoaded(content::URLDataSource::GotDataCallback got_data_callback,
 
 }  // namespace
 
-BravePlaylistsSource::BravePlaylistsSource(PlaylistsController* controller)
-    : controller_(controller) {
+BravePlaylistsSource::BravePlaylistsSource(PlaylistsService* service)
+    : service_(service) {
   task_runner_ = base::CreateSequencedTaskRunner(
       {base::ThreadPool(), base::MayBlock(), base::TaskPriority::USER_VISIBLE,
        base::TaskShutdownBehavior::SKIP_ON_SHUTDOWN});
@@ -58,13 +58,13 @@ void BravePlaylistsSource::StartDataRequest(
     const GURL& url,
     const content::WebContents::Getter& wc_getter,
     content::URLDataSource::GotDataCallback got_data_callback) {
-  if (!controller_) {
+  if (!service_) {
     std::move(got_data_callback).Run(nullptr);
     return;
   }
   base::FilePath thumbnail_path;
-  if (!controller_->GetThumbnailPath(URLDataSource::URLToRequestPath(url),
-                                     &thumbnail_path)) {
+  if (!service_->GetThumbnailPath(URLDataSource::URLToRequestPath(url),
+                                  &thumbnail_path)) {
     std::move(got_data_callback).Run(nullptr);
     return;
   }

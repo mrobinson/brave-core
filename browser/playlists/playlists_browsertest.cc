@@ -10,13 +10,12 @@
 #include "base/run_loop.h"
 #include "base/test/scoped_feature_list.h"
 #include "base/values.h"
-#include "brave/browser/playlists/playlists_service.h"
 #include "brave/browser/playlists/playlists_service_factory.h"
 #include "brave/components/playlists/browser/features.h"
 #include "brave/components/playlists/browser/playlists_constants.h"
-#include "brave/components/playlists/browser/playlists_controller.h"
-#include "brave/components/playlists/browser/playlists_controller_observer.h"
 #include "brave/components/playlists/browser/playlists_media_file_controller.h"
+#include "brave/components/playlists/browser/playlists_service.h"
+#include "brave/components/playlists/browser/playlists_service_observer.h"
 #include "brave/components/playlists/browser/playlists_types.h"
 #include "chrome/browser/ui/browser.h"
 #include "chrome/test/base/in_process_browser_test.h"
@@ -26,10 +25,9 @@
 #include "net/test/embedded_test_server/http_request.h"
 #include "net/test/embedded_test_server/http_response.h"
 
-using brave_playlists::PlaylistsControllerObserver;
+using brave_playlists::PlaylistsServiceObserver;
 using brave_playlists::PlaylistsChangeParams;
 using brave_playlists::CreatePlaylistParams;
-using brave_playlists::PlaylistsController;
 using brave_playlists::PlaylistsService;
 using brave_playlists::PlaylistsServiceFactory;
 using brave_playlists::kPlaylistsIDKey;
@@ -56,7 +54,7 @@ std::unique_ptr<net::test_server::HttpResponse> HandleRequest(
 }  // namespace
 
 class PlaylistsBrowserTest : public InProcessBrowserTest,
-                             public PlaylistsControllerObserver {
+                             public PlaylistsServiceObserver {
  public:
   PlaylistsBrowserTest() : weak_factory_(this) {
     scoped_feature_list_.InitAndEnableFeature(
@@ -77,13 +75,13 @@ class PlaylistsBrowserTest : public InProcessBrowserTest,
     https_server_->RegisterRequestHandler(base::BindRepeating(&HandleRequest));
     ASSERT_TRUE(https_server_->Start());
 
-    GetPlaylistsController()->AddObserver(this);
+    GetPlaylistsService()->AddObserver(this);
     ResetStatus();
   }
 
   void TearDownOnMainThread() override {
     InProcessBrowserTest::TearDownOnMainThread();
-    GetPlaylistsController()->RemoveObserver(this);
+    GetPlaylistsService()->RemoveObserver(this);
   }
 
   void SetUpCommandLine(base::CommandLine* command_line) override {
@@ -92,7 +90,7 @@ class PlaylistsBrowserTest : public InProcessBrowserTest,
     command_line->AppendSwitch(switches::kIgnoreCertificateErrors);
   }
 
-  // PlaylistsControllerObserver overrides:
+  // PlaylistsServiceObserver overrides:
   void OnPlaylistsChanged(const PlaylistsChangeParams& params) override {
     on_playlists_changed_called_count_++;
     change_params_ = params;
@@ -107,10 +105,6 @@ class PlaylistsBrowserTest : public InProcessBrowserTest,
         on_playlists_changed_called_target_count_) {
       run_loop()->Quit();
     }
-  }
-
-  PlaylistsController* GetPlaylistsController() {
-    return GetPlaylistsService()->controller();
   }
 
   PlaylistsService* GetPlaylistsService() {
@@ -211,11 +205,11 @@ class PlaylistsBrowserTest : public InProcessBrowserTest,
 };
 
 IN_PROC_BROWSER_TEST_F(PlaylistsBrowserTest, CreatePlaylist) {
-  auto* controller = GetPlaylistsController();
+  auto* service = GetPlaylistsService();
 
   // When a playlist is created and all goes well, we will receive 4
   // notifications: added, thumbnail ready, play ready partial, and play ready.
-  controller->CreatePlaylist(GetValidCreateParams());
+  service->CreatePlaylist(GetValidCreateParams());
   WaitForEvents(4);
   EXPECT_TRUE(IsPlaylistsChangeTypeCalled(
       PlaylistsChangeParams::ChangeType::CHANGE_TYPE_ADDED));
@@ -228,11 +222,11 @@ IN_PROC_BROWSER_TEST_F(PlaylistsBrowserTest, CreatePlaylist) {
 }
 
 IN_PROC_BROWSER_TEST_F(PlaylistsBrowserTest, CreatePlaylistWithSeparateAudio) {
-  auto* controller = GetPlaylistsController();
+  auto* service = GetPlaylistsService();
 
   // When a playlist is created and all goes well, we will receive 4
   // notifications: added, thumbnail ready, play ready partial, and play ready.
-  controller->CreatePlaylist(GetValidCreateParamsWithSeparateAudio());
+  service->CreatePlaylist(GetValidCreateParamsWithSeparateAudio());
   WaitForEvents(4);
   EXPECT_TRUE(IsPlaylistsChangeTypeCalled(
       PlaylistsChangeParams::ChangeType::CHANGE_TYPE_ADDED));
@@ -245,12 +239,12 @@ IN_PROC_BROWSER_TEST_F(PlaylistsBrowserTest, CreatePlaylistWithSeparateAudio) {
 }
 
 IN_PROC_BROWSER_TEST_F(PlaylistsBrowserTest, ThumbnailFailed) {
-  auto* controller = GetPlaylistsController();
+  auto* service = GetPlaylistsService();
 
   // When a playlist is created and the thumbnail can not be downloaded, we will
   // receive 4 notifications: added, thumbnail failed, play ready partial, and
   // aborted.
-  controller->CreatePlaylist(GetInvalidCreateParams());
+  service->CreatePlaylist(GetInvalidCreateParams());
   WaitForEvents(4);
   EXPECT_TRUE(IsPlaylistsChangeTypeCalled(
       PlaylistsChangeParams::ChangeType::CHANGE_TYPE_ADDED));
@@ -263,12 +257,12 @@ IN_PROC_BROWSER_TEST_F(PlaylistsBrowserTest, ThumbnailFailed) {
 }
 
 IN_PROC_BROWSER_TEST_F(PlaylistsBrowserTest, MediaDownloadFailed) {
-  auto* controller = GetPlaylistsController();
+  auto* service = GetPlaylistsService();
 
   // When a playlist is created and there are multiple media files to be
   // concatenated but one of the media files can not be downloaded, we will
   // receive 3 notifications: added, thumbnail ready, and play ready partial.
-  controller->CreatePlaylist(GetValidCreateParamsForPartialReady());
+  service->CreatePlaylist(GetValidCreateParamsForPartialReady());
   WaitForEvents(3);
   EXPECT_TRUE(IsPlaylistsChangeTypeCalled(
       PlaylistsChangeParams::ChangeType::CHANGE_TYPE_ADDED));
@@ -279,29 +273,29 @@ IN_PROC_BROWSER_TEST_F(PlaylistsBrowserTest, MediaDownloadFailed) {
 }
 
 IN_PROC_BROWSER_TEST_F(PlaylistsBrowserTest, ApiFunctions) {
-  auto* controller = GetPlaylistsController();
+  auto* service = GetPlaylistsService();
 
   // // create playlist 1
   ResetStatus();
-  controller->CreatePlaylist(GetValidCreateParams());
+  service->CreatePlaylist(GetValidCreateParams());
   WaitForEvents(4);
 
   // // create playlist 2
   ResetStatus();
-  controller->CreatePlaylist(GetValidCreateParams());
+  service->CreatePlaylist(GetValidCreateParams());
   WaitForEvents(4);
 
   // create playlist 3 (will need recovery)
   ResetStatus();
-  controller->CreatePlaylist(GetValidCreateParamsForPartialReady());
+  service->CreatePlaylist(GetValidCreateParamsForPartialReady());
   WaitForEvents(3);
 
   ResetStatus();
-  base::Value items = controller->GetAllPlaylists();
+  base::Value items = service->GetAllPlaylists();
   EXPECT_EQ(3UL, items.GetList().size());
 
   ResetStatus();
-  base::Value item = controller->GetPlaylist(lastly_added_playlist_id_);
+  base::Value item = service->GetPlaylist(lastly_added_playlist_id_);
   EXPECT_EQ(
       lastly_added_playlist_id_.compare(*item.FindStringKey(kPlaylistsIDKey)),
       0);
@@ -309,14 +303,14 @@ IN_PROC_BROWSER_TEST_F(PlaylistsBrowserTest, ApiFunctions) {
   // When a playlist is recovered, we should get 1 notification: partial ready.
   // The playlist added and thumbnail added events are not sent.
   ResetStatus();
-  controller->RecoverPlaylist(lastly_added_playlist_id_);
+  service->RecoverPlaylist(lastly_added_playlist_id_);
   WaitForEvents(1);
   EXPECT_TRUE(IsPlaylistsChangeTypeCalled(
       PlaylistsChangeParams::ChangeType::CHANGE_TYPE_PLAY_READY_PARTIAL));
 
   // When a playlist is deleted, we should get 1 notification: deleted.
   ResetStatus();
-  controller->DeletePlaylist(lastly_added_playlist_id_);
+  service->DeletePlaylist(lastly_added_playlist_id_);
   // WaitForEvents(1);
   EXPECT_EQ(1, on_playlists_changed_called_count_);
   EXPECT_TRUE(IsPlaylistsChangeTypeCalled(
@@ -325,18 +319,18 @@ IN_PROC_BROWSER_TEST_F(PlaylistsBrowserTest, ApiFunctions) {
   return;
   // After deleting one playlist, total playlists count should be 2.
   ResetStatus();
-  items = controller->GetAllPlaylists();
+  items = service->GetAllPlaylists();
   EXPECT_EQ(2UL, items.GetList().size());
 
   // When all playlists are deleted, we should get 1 notification: all deleted.
   ResetStatus();
-  controller->DeleteAllPlaylists();
+  service->DeleteAllPlaylists();
   EXPECT_EQ(1, on_playlists_changed_called_count_);
   EXPECT_TRUE(IsPlaylistsChangeTypeCalled(
       PlaylistsChangeParams::ChangeType::CHANGE_TYPE_ALL_DELETED));
 
   // After deleting all playlists, total playlists count should be 0.
   ResetStatus();
-  items = controller->GetAllPlaylists();
+  items = service->GetAllPlaylists();
   EXPECT_EQ(0UL, items.GetList().size());
 }

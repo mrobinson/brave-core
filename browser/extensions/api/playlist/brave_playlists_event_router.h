@@ -8,7 +8,7 @@
 
 #include <string>
 
-#include "brave/components/playlists/browser/playlists_controller_observer.h"
+#include "brave/components/playlists/browser/playlists_service_observer.h"
 #include "extensions/browser/browser_context_keyed_api_factory.h"
 #include "extensions/browser/event_router.h"
 
@@ -20,7 +20,7 @@ namespace brave_playlists {
 
 class BravePlaylistsEventRouter : public extensions::BrowserContextKeyedAPI,
                                   public extensions::EventRouter::Observer,
-                                  public PlaylistsControllerObserver {
+                                  public PlaylistsServiceObserver {
  public:
   // KeyedService implementation.
   void Shutdown() override;
@@ -37,7 +37,7 @@ class BravePlaylistsEventRouter : public extensions::BrowserContextKeyedAPI,
   // extensions::EventRouter::Observer overrides:
   void OnListenerAdded(const extensions::EventListenerInfo& details) override;
 
-  // PlaylistsControllerObserver overrides:
+  // PlaylistsServiceObserver overrides:
   void OnPlaylistsChanged(const PlaylistsChangeParams& params) override;
 
  private:

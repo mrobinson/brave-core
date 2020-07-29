@@ -9,21 +9,18 @@
 #include <utility>
 
 #include "base/lazy_instance.h"
-#include "brave/browser/playlists/playlists_service.h"
 #include "brave/browser/playlists/playlists_service_factory.h"
 #include "brave/common/extensions/api/brave_playlists.h"
-#include "brave/components/playlists/browser/playlists_controller.h"
+#include "brave/components/playlists/browser/playlists_service.h"
 #include "chrome/browser/profiles/profile.h"
 
 namespace brave_playlists {
 
 namespace {
 
-PlaylistsController* GetPlaylistsController(content::BrowserContext* context) {
-  brave_playlists::PlaylistsService* service =
-      PlaylistsServiceFactory::GetInstance()
-          ->GetForProfile(Profile::FromBrowserContext(context));
-  return service ? service->controller() : nullptr;
+PlaylistsService* GetPlaylistsService(content::BrowserContext* context) {
+  return PlaylistsServiceFactory::GetInstance()->GetForProfile(
+      Profile::FromBrowserContext(context));
 }
 
 }  // namespace
@@ -48,16 +45,16 @@ BravePlaylistsEventRouter::BravePlaylistsEventRouter(
 BravePlaylistsEventRouter::~BravePlaylistsEventRouter() = default;
 
 void BravePlaylistsEventRouter::Shutdown() {
-  if (auto* controller = GetPlaylistsController(context_))
-    controller->RemoveObserver(this);
+  if (auto* service = GetPlaylistsService(context_))
+    service->RemoveObserver(this);
 }
 
 void BravePlaylistsEventRouter::OnListenerAdded(
     const extensions::EventListenerInfo& details) {
   DCHECK_EQ(details.event_name,
             extensions::api::brave_playlists::OnPlaylistsChanged::kEventName);
-  if (auto* controller = GetPlaylistsController(context_)) {
-    controller->AddObserver(this);
+  if (auto* service = GetPlaylistsService(context_)) {
+    service->AddObserver(this);
     extensions::EventRouter::Get(context_)->UnregisterObserver(this);
   }
 }

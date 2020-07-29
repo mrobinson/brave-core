@@ -1,7 +1,5 @@
 source_set("playlists") {
   sources = [
-    "playlists_service.cc",
-    "playlists_service.h",
     "playlists_service_factory.cc",
     "playlists_service_factory.h",
   ]
@@ -10,7 +8,6 @@ source_set("playlists") {
     "//base",
     "//brave/components/playlists/browser",
     "//components/keyed_service/content",
-    "//components/keyed_service/core",
     "//content/public/browser",
   ]
 

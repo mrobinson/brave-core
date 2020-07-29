@@ -22,14 +22,14 @@ class SequencedTaskRunner;
 
 namespace brave_playlists {
 
-class PlaylistsController;
+class PlaylistsService;
 
 // A URL data source for chrome://playlists-image/<playlist-id>
 // resources, for use in webui pages that want to display downloaded
 // playlist thumbnail images
 class BravePlaylistsSource : public content::URLDataSource {
  public:
-  explicit BravePlaylistsSource(PlaylistsController* controller);
+  explicit BravePlaylistsSource(PlaylistsService* service);
 
   ~BravePlaylistsSource() override;
 
@@ -44,7 +44,7 @@ class BravePlaylistsSource : public content::URLDataSource {
   bool ShouldReplaceExistingSource() override;
 
  private:
-  PlaylistsController* controller_;
+  PlaylistsService* service_;
 
   void StartDataRequestAfterPathExists(
       const base::FilePath& thumbnail_path,
