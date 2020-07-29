@@ -44,17 +44,12 @@ BravePlaylistsEventRouter::BravePlaylistsEventRouter(
 
 BravePlaylistsEventRouter::~BravePlaylistsEventRouter() = default;
 
-void BravePlaylistsEventRouter::Shutdown() {
-  if (auto* service = GetPlaylistsService(context_))
-    service->RemoveObserver(this);
-}
-
 void BravePlaylistsEventRouter::OnListenerAdded(
     const extensions::EventListenerInfo& details) {
   DCHECK_EQ(details.event_name,
             extensions::api::brave_playlists::OnPlaylistsChanged::kEventName);
   if (auto* service = GetPlaylistsService(context_)) {
-    service->AddObserver(this);
+    observed_.Add(service);
     extensions::EventRouter::Get(context_)->UnregisterObserver(this);
   }
 }

@@ -75,7 +75,7 @@ class BravePlaylistsApiTest : public ExtensionApiTest {
     command_line->AppendSwitch(switches::kIgnoreCertificateErrors);
   }
 
-  void runTest(std::string js) {
+  void runTest(const std::string& js) {
     base::ScopedAllowBlockingForTesting allow_blocking;
     ResultCatcher catcher;
     const Extension* extension =

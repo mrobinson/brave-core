@@ -8,6 +8,8 @@
 
 #include <string>
 
+#include "base/scoped_observer.h"
+#include "brave/components/playlists/browser/playlists_service.h"
 #include "brave/components/playlists/browser/playlists_service_observer.h"
 #include "extensions/browser/browser_context_keyed_api_factory.h"
 #include "extensions/browser/event_router.h"
@@ -22,9 +24,6 @@ class BravePlaylistsEventRouter : public extensions::BrowserContextKeyedAPI,
                                   public extensions::EventRouter::Observer,
                                   public PlaylistsServiceObserver {
  public:
-  // KeyedService implementation.
-  void Shutdown() override;
-
   BravePlaylistsEventRouter(const BravePlaylistsEventRouter&) = delete;
   BravePlaylistsEventRouter& operator=(
       const BravePlaylistsEventRouter&) = delete;
@@ -48,6 +47,7 @@ class BravePlaylistsEventRouter : public extensions::BrowserContextKeyedAPI,
   ~BravePlaylistsEventRouter() override;
 
   content::BrowserContext* context_;
+  ScopedObserver<PlaylistsService, PlaylistsServiceObserver> observed_{this};
 };
 
 }  // namespace brave_playlists
