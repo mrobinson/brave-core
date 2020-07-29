@@ -7,14 +7,13 @@
 
 #include <memory>
 
+#include "base/feature_list.h"
 #include "base/task/post_task.h"
 #include "brave/components/playlists/browser/features.h"
-#include "brave/components/playlists/browser/playlists_data_source.h"
 #include "brave/components/playlists/browser/playlists_service.h"
 #include "chrome/browser/profiles/incognito_helpers.h"
 #include "chrome/browser/profiles/profile.h"
 #include "components/keyed_service/content/browser_context_dependency_manager.h"
-#include "content/public/browser/url_data_source.h"
 
 #if !defined(OS_ANDROID)
 #include "brave/browser/playlists/desktop_playlists_player.h"
@@ -52,9 +51,6 @@ KeyedService* PlaylistsServiceFactory::BuildServiceInstanceFor(
             base::TaskPriority::BEST_EFFORT,
             base::TaskShutdownBehavior::SKIP_ON_SHUTDOWN });
   auto* service = new PlaylistsService(context, io_task_runner);
-  content::URLDataSource::Add(
-      context,
-      std::make_unique<BravePlaylistsSource>(service));
 
 #if !defined(OS_ANDROID)
   std::unique_ptr<PlaylistsPlayer> playlists_player(

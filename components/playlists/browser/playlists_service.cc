@@ -19,6 +19,7 @@
 #include "base/task_runner_util.h"
 #include "base/token.h"
 #include "brave/components/playlists/browser/playlists_constants.h"
+#include "brave/components/playlists/browser/playlists_data_source.h"
 #include "brave/components/playlists/browser/playlists_service_observer.h"
 #include "brave/components/playlists/browser/playlists_player.h"
 #include "brave/components/playlists/common/pref_names.h"
@@ -148,6 +149,10 @@ PlaylistsService::PlaylistsService(
               ->GetURLLoaderFactoryForBrowserProcess()),
       prefs_(user_prefs::UserPrefs::Get(context)),
       weak_factory_(this) {
+  content::URLDataSource::Add(
+      context,
+      std::make_unique<PlaylistDataSource>(this));
+
   // TODO(pilgrim) dynamically set file extensions based on format
   // (may require changes to youtubedown parser)
   video_media_file_controller_.reset(new PlaylistsMediaFileController(

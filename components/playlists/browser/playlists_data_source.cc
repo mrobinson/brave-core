@@ -41,20 +41,20 @@ void ThumbnailLoaded(content::URLDataSource::GotDataCallback got_data_callback,
 
 }  // namespace
 
-BravePlaylistsSource::BravePlaylistsSource(PlaylistsService* service)
+PlaylistDataSource::PlaylistDataSource(PlaylistsService* service)
     : service_(service) {
   task_runner_ = base::CreateSequencedTaskRunner(
       {base::ThreadPool(), base::MayBlock(), base::TaskPriority::USER_VISIBLE,
        base::TaskShutdownBehavior::SKIP_ON_SHUTDOWN});
 }
 
-BravePlaylistsSource::~BravePlaylistsSource() {}
+PlaylistDataSource::~PlaylistDataSource() {}
 
-std::string BravePlaylistsSource::GetSource() {
+std::string PlaylistDataSource::GetSource() {
   return "playlists-image";
 }
 
-void BravePlaylistsSource::StartDataRequest(
+void PlaylistDataSource::StartDataRequest(
     const GURL& url,
     const content::WebContents::Getter& wc_getter,
     content::URLDataSource::GotDataCallback got_data_callback) {
@@ -72,12 +72,12 @@ void BravePlaylistsSource::StartDataRequest(
       FROM_HERE,
       {base::ThreadPool(), base::MayBlock(), base::TaskPriority::USER_VISIBLE},
       base::BindOnce(&base::PathExists, thumbnail_path),
-      base::BindOnce(&BravePlaylistsSource::StartDataRequestAfterPathExists,
+      base::BindOnce(&PlaylistDataSource::StartDataRequestAfterPathExists,
                      weak_factory_.GetWeakPtr(), thumbnail_path,
                      std::move(got_data_callback)));
 }
 
-void BravePlaylistsSource::StartDataRequestAfterPathExists(
+void PlaylistDataSource::StartDataRequestAfterPathExists(
     const base::FilePath& thumbnail_path,
     content::URLDataSource::GotDataCallback got_data_callback,
     bool path_exists) {
@@ -95,15 +95,15 @@ void BravePlaylistsSource::StartDataRequestAfterPathExists(
                      std::move(thumbnail_data)));
 }
 
-std::string BravePlaylistsSource::GetMimeType(const std::string&) {
+std::string PlaylistDataSource::GetMimeType(const std::string&) {
   return "image/jpg";
 }
 
-bool BravePlaylistsSource::AllowCaching() {
+bool PlaylistDataSource::AllowCaching() {
   return false;
 }
 
-bool BravePlaylistsSource::ShouldReplaceExistingSource() {
+bool PlaylistDataSource::ShouldReplaceExistingSource() {
   return false;
 }
 

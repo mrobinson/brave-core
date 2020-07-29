@@ -27,11 +27,11 @@ class PlaylistsService;
 // A URL data source for chrome://playlists-image/<playlist-id>
 // resources, for use in webui pages that want to display downloaded
 // playlist thumbnail images
-class BravePlaylistsSource : public content::URLDataSource {
+class PlaylistDataSource : public content::URLDataSource {
  public:
-  explicit BravePlaylistsSource(PlaylistsService* service);
+  explicit PlaylistDataSource(PlaylistsService* service);
 
-  ~BravePlaylistsSource() override;
+  ~PlaylistDataSource() override;
 
   // content::URLDataSource implementation.
   std::string GetSource() override;
@@ -53,9 +53,9 @@ class BravePlaylistsSource : public content::URLDataSource {
 
   scoped_refptr<base::SequencedTaskRunner> task_runner_;
 
-  base::WeakPtrFactory<BravePlaylistsSource> weak_factory_{this};
+  base::WeakPtrFactory<PlaylistDataSource> weak_factory_{this};
 
-  DISALLOW_COPY_AND_ASSIGN(BravePlaylistsSource);
+  DISALLOW_COPY_AND_ASSIGN(PlaylistDataSource);
 };
 
 }  // namespace brave_playlists
