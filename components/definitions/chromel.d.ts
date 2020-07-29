@@ -303,20 +303,20 @@ declare namespace chrome.bravePlaylist {
 
   type CreateParamsMediaItem = { url: string, title: string, thumb: string }
 
-  const onPlaylistChanged: {
+  const onPlaylistItemStatusChanged: {
     addListener: (callback: (changeType: PlaylistChangeType, id: string) => void) => void
   }
   const onDownloadRequested: {
     addListener: (callback: (url: string) => void) => void
   }
-  const createPlaylist: (createParams: { videoMediaFiles: CreateParamsMediaItem[], audioMediaFiles: CreateParamsMediaItem[], thumbnailUrl: string, playlistName: string }) => void
-  const getAllPlaylist: (callback: (playlist: PlaylistType[]) => void) => void
-  const getPlaylist: (id: string, callback: (playlist: PlaylistType) => void) => void
-  const recoverPlaylist: (id: string) => void
-  const deleteAllPlaylist: (callback: (deleted: boolean) => void) => void
-  const deletePlaylist: (id: string) => void
+  const createPlaylistItem: (createParams: { videoMediaFiles: CreateParamsMediaItem[], audioMediaFiles: CreateParamsMediaItem[], thumbnailUrl: string, playlistName: string }) => void
+  const getAllPlaylistItems: (callback: (playlist: PlaylistType[]) => void) => void
+  const getPlaylistItem: (id: string, callback: (playlist: PlaylistType) => void) => void
+  const recoverPlaylistItem: (id: string) => void
+  const deleteAllPlaylistItems: (callback: (deleted: boolean) => void) => void
+  const deletePlaylistItem: (id: string) => void
   const requestDownload: (url: string) => void
-  const play: (id: string) => void
+  const playItem: (id: string) => void
 }
 
 declare namespace chrome.braveTheme {

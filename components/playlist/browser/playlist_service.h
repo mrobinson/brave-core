@@ -56,14 +56,14 @@ class PlaylistService : public KeyedService,
 
   // False when |params| are not sufficient for new playlist.
   // brave_playlist.json explains in detail about below apis.
-  void CreatePlaylist(const CreatePlaylistParams& params);
-  base::Value GetAllPlaylist();
-  base::Value GetPlaylist(const std::string& id);
-  void RecoverPlaylist(const std::string& id);
-  void DeletePlaylist(const std::string& id);
-  void DeleteAllPlaylist();
+  void CreatePlaylistItem(const CreatePlaylistParams& params);
+  base::Value GetAllPlaylistItems();
+  base::Value GetPlaylistItem(const std::string& id);
+  void RecoverPlaylistItem(const std::string& id);
+  void DeletePlaylistItem(const std::string& id);
+  void DeleteAllPlaylistItems();
   // TODO(simonhong): Remove this. Client should handle play request.
-  void Play(const std::string& id);
+  void PlayItem(const std::string& id);
 
   void AddObserver(PlaylistServiceObserver* observer);
   void RemoveObserver(PlaylistServiceObserver* observer);
@@ -84,9 +84,6 @@ class PlaylistService : public KeyedService,
   void OnThumbnailDownloaded(const std::string& id,
                              SimpleURLLoaderList::iterator it,
                              base::FilePath path);
-  void OnPutPlayReadyPlaylist(base::Value&& playlist_value,
-                              bool partial,
-                              bool result);
   void AddPlaylistToMediaFileGenerationQueue(const std::string& id);
   void GenerateMediaFiles();
 

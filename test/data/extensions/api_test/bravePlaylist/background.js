@@ -17,9 +17,9 @@ function testHasAccess() {
 function testCreatePlaylistNoCrash() {
   chrome.test.runTests([
     function createPlaylistNoCrash() {
-      // Calling createPlaylist() API should not crash, even if all
+      // Calling createPlaylistItem() API should not crash, even if all
       // parameters are empty.
-      chrome.bravePlaylist.createPlaylist({
+      chrome.bravePlaylist.createPlaylistItem({
         thumbnailUrl: '',
         playlistName: '',
         videoMediaFiles: [],
@@ -32,7 +32,7 @@ function testCreatePlaylistNoCrash() {
 
 function createPlaylistAndWait(thumbnail_url, video_url, audio_url, expected_change_types, callback) {
   in_progress = true;
-  chrome.bravePlaylist.onPlaylistChanged.addListener(function(changeType, id) {
+  chrome.bravePlaylist.onPlaylistItemStatusChanged.addListener(function(changeType, id) {
     const found = expected_change_types.find(expectedType => expectedType === changeType)
     if (!found) {
       console.log('got changeType=' + changeType + ' but it is not included in expected types list');
@@ -54,7 +54,7 @@ function createPlaylistAndWait(thumbnail_url, video_url, audio_url, expected_cha
   } else {
     audio_media_files = [];
   }
-  chrome.bravePlaylist.createPlaylist({
+  chrome.bravePlaylist.createPlaylistItem({
     thumbnailUrl: thumbnail_url,
     playlistName: 'test',
     videoMediaFiles: video_media_files,

@@ -14,6 +14,9 @@
 #include "brave/components/playlist/browser/playlist_service.h"
 #include "chrome/browser/profiles/profile.h"
 
+namespace OnPlaylistItemStatusChanged =
+    extensions::api::brave_playlist::OnPlaylistItemStatusChanged;
+
 namespace playlist {
 
 namespace {
@@ -39,15 +42,14 @@ PlaylistEventRouter::PlaylistEventRouter(
     content::BrowserContext* context)
     : context_(context) {
   extensions::EventRouter::Get(context)->RegisterObserver(
-      this, extensions::api::brave_playlist::OnPlaylistChanged::kEventName);
+      this, OnPlaylistItemStatusChanged::kEventName);
 }
 
 PlaylistEventRouter::~PlaylistEventRouter() = default;
 
 void PlaylistEventRouter::OnListenerAdded(
     const extensions::EventListenerInfo& details) {
-  DCHECK_EQ(details.event_name,
-            extensions::api::brave_playlist::OnPlaylistChanged::kEventName);
+  DCHECK_EQ(details.event_name, OnPlaylistItemStatusChanged::kEventName);
   if (auto* service = GetPlaylistService(context_)) {
     observed_.Add(service);
     extensions::EventRouter::Get(context_)->UnregisterObserver(this);
@@ -57,9 +59,9 @@ void PlaylistEventRouter::OnListenerAdded(
 void PlaylistEventRouter::OnPlaylistItemStatusChanged(
     const PlaylistChangeParams& params) {
   auto event = std::make_unique<extensions::Event>(
-      extensions::events::BRAVE_PLAYLIST_ON_PLAYLIST_CHANGED,
-      extensions::api::brave_playlist::OnPlaylistChanged::kEventName,
-      extensions::api::brave_playlist::OnPlaylistChanged::Create(
+      extensions::events::BRAVE_PLAYLIST_ON_PLAYLIST_ITEM_STATUS_CHANGED,
+      OnPlaylistItemStatusChanged::kEventName,
+      OnPlaylistItemStatusChanged::Create(
           PlaylistChangeParams::GetPlaylistChangeTypeAsString(
               params.change_type),
           params.playlist_id),

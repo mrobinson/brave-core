@@ -36,13 +36,13 @@ export class PlaylistPage extends React.Component<Props, State> {
   }
 
   getPlaylist = () => {
-    chrome.bravePlaylist.getAllPlaylist(playlist => {
-      this.setState({ playlist })
+    chrome.bravePlaylist.getAllPlaylistItems(playlistItems => {
+      this.setState({ playlist: playlistItems })
     })
   }
 
   componentDidMount () {
-    chrome.bravePlaylist.onPlaylistChanged.addListener((changeType, id) => {
+    chrome.bravePlaylist.onPlaylistItemStatusChanged.addListener((changeType, id) => {
       this.getPlaylist()
     })
   }
@@ -106,12 +106,12 @@ export class PlaylistPage extends React.Component<Props, State> {
     })
   }
 
-  onClickPlayVideo = (playlistId: string) => {
-    chrome.bravePlaylist.play(playlistId)
+  onClickPlayVideo = (playlistItemId: string) => {
+    chrome.bravePlaylist.playItem(playlistItemId)
   }
 
-  onClickRemoveVideo = (playlistId: string) => {
-    chrome.bravePlaylist.deletePlaylist(playlistId)
+  onClickRemoveVideo = (playlistItemId: string) => {
+    chrome.bravePlaylist.deletePlaylistItem(playlistItemId)
   }
 
   get pageHasDownloadableVideo () {

@@ -241,7 +241,7 @@ void PlaylistService::RemovePlaylist(const std::string& id) {
 }
 
 // TODO(simonhong): Add basic validation for |params|.
-void PlaylistService::CreatePlaylist(const CreatePlaylistParams& params) {
+void PlaylistService::CreatePlaylistItem(const CreatePlaylistParams& params) {
   VLOG(2) << __func__;
   const PlaylistInfo info = CreatePlaylistInfo(params);
   UpdatePlaylistValue(info.id, GetValueFromPlaylistInfo(info));
@@ -342,7 +342,7 @@ void PlaylistService::OnThumbnailDownloaded(const std::string& id,
   }
 }
 
-base::Value PlaylistService::GetAllPlaylist() {
+base::Value PlaylistService::GetAllPlaylistItems() {
   base::Value playlist(base::Value::Type::LIST);
   for (const auto& it: prefs_->Get(kPlaylistItems)->DictItems()) {
     base::Value item = it.second.Clone();
@@ -353,7 +353,7 @@ base::Value PlaylistService::GetAllPlaylist() {
   return playlist;
 }
 
-base::Value PlaylistService::GetPlaylist(const std::string& id) {
+base::Value PlaylistService::GetPlaylistItem(const std::string& id) {
   const base::Value* item_value_ptr =
       prefs_->Get(kPlaylistItems)->FindDictKey(id);
   if (item_value_ptr) {
@@ -364,7 +364,7 @@ base::Value PlaylistService::GetPlaylist(const std::string& id) {
   return {};
 }
 
-void PlaylistService::RecoverPlaylist(const std::string& id) {
+void PlaylistService::RecoverPlaylistItem(const std::string& id) {
   const base::Value* playlist_info =
       prefs_->Get(kPlaylistItems)->FindDictKey(id);
   if (!playlist_info) {
@@ -396,7 +396,7 @@ void PlaylistService::RecoverPlaylist(const std::string& id) {
   }
 }
 
-void PlaylistService::DeletePlaylist(const std::string& id) {
+void PlaylistService::DeletePlaylistItem(const std::string& id) {
   // Cancel if currently downloading item is id.
   if (video_media_file_controller_->current_playlist_id() == id) {
     video_media_file_controller_->RequestCancelCurrentPlaylistGeneration();
@@ -413,7 +413,7 @@ void PlaylistService::DeletePlaylist(const std::string& id) {
   audio_media_file_controller_->DeletePlaylist(GetPlaylistItemDirPath(id));
 }
 
-void PlaylistService::DeleteAllPlaylist() {
+void PlaylistService::DeleteAllPlaylistItems() {
   VLOG(2) << __func__;
 
   // Cancel currently generated playlist if needed and pending thumbnail
@@ -432,7 +432,7 @@ void PlaylistService::DeleteAllPlaylist() {
   CleanUp();
 }
 
-void PlaylistService::Play(const std::string& id) {
+void PlaylistService::PlayItem(const std::string& id) {
   const base::Value* playlist_info =
       prefs_->Get(kPlaylistItems)->FindDictKey(id);
   if (!playlist_info) {
@@ -520,7 +520,7 @@ void PlaylistService::OnGetOrphanedPaths(
 }
 
 void PlaylistService::CleanUp() {
-  base::Value playlist = GetAllPlaylist();
+  base::Value playlist = GetAllPlaylistItems();
 
   base::flat_set<std::string> ids;
   for (const auto& item : playlist.GetList()) {

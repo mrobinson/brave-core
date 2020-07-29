@@ -12,19 +12,19 @@
     },
     "events": [
       {
-        "name": "onPlaylistChanged",
+        "name": "onPlaylistItemStatusChanged",
         "type": "function",
-        "description": "Fired when a playlist is changed",
+        "description": "Fired when a playlist item status is changed",
         "parameters": [
           {
             "name": "changeType",
             "type": "string",
-            "description": "Playlist change status(add, deleted, aborted, thumbnail_ready, thumbnail_failed, play_ready, play_ready_partial)"
+            "description": "Playlist item change status(add, deleted, aborted, thumbnail_ready, thumbnail_failed, play_ready, play_ready_partial)"
           },
           {
             "name": "id",
             "type": "string",
-            "description": "playlist id of added or deleted playlist"
+            "description": "playlist item id of added or deleted playlist"
           }
         ]
       },
@@ -43,7 +43,7 @@
     ],
     "types": [
       {
-        "id": "PlaylistInfo",
+        "id": "PlaylistItemInfo",
         "type": "object",
         "properties": {
           "id": {
@@ -82,7 +82,7 @@
     ],
     "functions": [
       {
-        "name": "createPlaylist",
+        "name": "createPlaylistItem",
         "type": "function",
         "description": "create new playlist",
         "parameters": [
@@ -151,21 +151,21 @@
         ]
       },
       {
-        "name": "getAllPlaylist",
+        "name": "getAllPlaylistItems",
         "type": "function",
-        "description": "Get all playlist",
+        "description": "Get all playlist items",
         "parameters": [
           {
             "name": "callback",
             "type": "function",
-            "description": "Function called when all playlists are fetched",
+            "description": "Function called when all playlist items are fetched",
             "parameters": [
               {
                 "type": "array",
-                "name": "playlists",
+                "name": "playlistItems",
                 "items": {
-                  "$ref": "PlaylistInfo",
-                  "description": "The list of playlist"
+                  "$ref": "PlaylistItemInfo",
+                  "description": "The list of playlist item"
                 }
               }
             ]
@@ -173,48 +173,48 @@
         ]
       },
       {
-        "name": "getPlaylist",
+        "name": "getPlaylistItem",
         "type": "function",
-        "description": "Get specific playlist",
+        "description": "Get specific playlist item",
         "parameters": [
           {
             "name": "id",
             "type": "string",
-            "description": "id for fetching a playlist"
+            "description": "id for fetching a playlist item"
           },
           {
             "name": "callback",
             "type": "function",
             "parameters": [
               {
-                "name": "playlist",
-                "$ref": "PlaylistInfo"
+                "name": "playlistItem",
+                "$ref": "PlaylistItemInfo"
               }
             ]
           }
         ]
       },
       {
-        "name": "recoverPlaylist",
+        "name": "recoverPlaylistItem",
         "type": "function",
-        "description": "Try to recover incomplete playlist that failed to fetch thumbnail or generate media file",
+        "description": "Try to recover incomplete playlist item that failed to fetch thumbnail or generate media file",
         "parameters": [
           {
             "name": "id",
             "type": "string",
-            "description": "id for recovering an already added playlist"
+            "description": "id for recovering an already added playlist item"
           }
         ]
       },
       {
-        "name": "deletePlaylist",
+        "name": "deletePlaylistItem",
         "type": "function",
-        "description": "Delete specific playlist and free all its data",
+        "description": "Delete specific playlist item and free all its data",
         "parameters": [
           {
             "name": "id",
             "type": "string",
-            "description": "id for deleting playlist"
+            "description": "id for deleting playlist item"
           },
           {
             "type": "function",
@@ -225,9 +225,9 @@
         ]
       },
       {
-        "name": "deleteAllPlaylist",
+        "name": "deleteAllPlaylistItems",
         "type": "function",
-        "description": "Delete all playlist",
+        "description": "Delete all playlist items",
         "parameters": [
           {
             "type": "function",
@@ -256,7 +256,7 @@
         ]
       },
       {
-        "name": "play",
+        "name": "playItem",
         "type": "function",
         "description": "displays platform-specific UI to play the given playlist",
         "parameters": [

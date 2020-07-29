@@ -25,13 +25,6 @@
 #include "net/test/embedded_test_server/http_request.h"
 #include "net/test/embedded_test_server/http_response.h"
 
-// using playlist::PlaylistServiceObserver;
-// using playlist::PlaylistChangeParams;
-// using playlist::CreatePlaylistParams;
-// using playlist::PlaylistService;
-// using playlist::PlaylistServiceFactory;
-// using playlist::kPlaylistIDKey;
-
 namespace playlist {
 
 namespace {
@@ -211,7 +204,7 @@ IN_PROC_BROWSER_TEST_F(PlaylistBrowserTest, CreatePlaylist) {
 
   // When a playlist is created and all goes well, we will receive 4
   // notifications: added, thumbnail ready, play ready partial, and play ready.
-  service->CreatePlaylist(GetValidCreateParams());
+  service->CreatePlaylistItem(GetValidCreateParams());
   WaitForEvents(4);
   EXPECT_TRUE(IsPlaylistChangeTypeCalled(
       PlaylistChangeParams::ChangeType::CHANGE_TYPE_ADDED));
@@ -228,7 +221,7 @@ IN_PROC_BROWSER_TEST_F(PlaylistBrowserTest, CreatePlaylistWithSeparateAudio) {
 
   // When a playlist is created and all goes well, we will receive 4
   // notifications: added, thumbnail ready, play ready partial, and play ready.
-  service->CreatePlaylist(GetValidCreateParamsWithSeparateAudio());
+  service->CreatePlaylistItem(GetValidCreateParamsWithSeparateAudio());
   WaitForEvents(4);
   EXPECT_TRUE(IsPlaylistChangeTypeCalled(
       PlaylistChangeParams::ChangeType::CHANGE_TYPE_ADDED));
@@ -246,7 +239,7 @@ IN_PROC_BROWSER_TEST_F(PlaylistBrowserTest, ThumbnailFailed) {
   // When a playlist is created and the thumbnail can not be downloaded, we will
   // receive 4 notifications: added, thumbnail failed, play ready partial, and
   // aborted.
-  service->CreatePlaylist(GetInvalidCreateParams());
+  service->CreatePlaylistItem(GetInvalidCreateParams());
   WaitForEvents(4);
   EXPECT_TRUE(IsPlaylistChangeTypeCalled(
       PlaylistChangeParams::ChangeType::CHANGE_TYPE_ADDED));
@@ -264,7 +257,7 @@ IN_PROC_BROWSER_TEST_F(PlaylistBrowserTest, MediaDownloadFailed) {
   // When a playlist is created and there are multiple media files to be
   // concatenated but one of the media files can not be downloaded, we will
   // receive 3 notifications: added, thumbnail ready, and play ready partial.
-  service->CreatePlaylist(GetValidCreateParamsForPartialReady());
+  service->CreatePlaylistItem(GetValidCreateParamsForPartialReady());
   WaitForEvents(3);
   EXPECT_TRUE(IsPlaylistChangeTypeCalled(
       PlaylistChangeParams::ChangeType::CHANGE_TYPE_ADDED));
@@ -279,25 +272,25 @@ IN_PROC_BROWSER_TEST_F(PlaylistBrowserTest, ApiFunctions) {
 
   // // create playlist 1
   ResetStatus();
-  service->CreatePlaylist(GetValidCreateParams());
+  service->CreatePlaylistItem(GetValidCreateParams());
   WaitForEvents(4);
 
   // // create playlist 2
   ResetStatus();
-  service->CreatePlaylist(GetValidCreateParams());
+  service->CreatePlaylistItem(GetValidCreateParams());
   WaitForEvents(4);
 
   // create playlist 3 (will need recovery)
   ResetStatus();
-  service->CreatePlaylist(GetValidCreateParamsForPartialReady());
+  service->CreatePlaylistItem(GetValidCreateParamsForPartialReady());
   WaitForEvents(3);
 
   ResetStatus();
-  base::Value items = service->GetAllPlaylist();
+  base::Value items = service->GetAllPlaylistItems();
   EXPECT_EQ(3UL, items.GetList().size());
 
   ResetStatus();
-  base::Value item = service->GetPlaylist(lastly_added_playlist_id_);
+  base::Value item = service->GetPlaylistItem(lastly_added_playlist_id_);
   EXPECT_EQ(
       lastly_added_playlist_id_.compare(*item.FindStringKey(kPlaylistIDKey)),
       0);
@@ -305,14 +298,14 @@ IN_PROC_BROWSER_TEST_F(PlaylistBrowserTest, ApiFunctions) {
   // When a playlist is recovered, we should get 1 notification: partial ready.
   // The playlist added and thumbnail added events are not sent.
   ResetStatus();
-  service->RecoverPlaylist(lastly_added_playlist_id_);
+  service->RecoverPlaylistItem(lastly_added_playlist_id_);
   WaitForEvents(1);
   EXPECT_TRUE(IsPlaylistChangeTypeCalled(
       PlaylistChangeParams::ChangeType::CHANGE_TYPE_PLAY_READY_PARTIAL));
 
   // When a playlist is deleted, we should get 1 notification: deleted.
   ResetStatus();
-  service->DeletePlaylist(lastly_added_playlist_id_);
+  service->DeletePlaylistItem(lastly_added_playlist_id_);
   // WaitForEvents(1);
   EXPECT_EQ(1, on_playlist_changed_called_count_);
   EXPECT_TRUE(IsPlaylistChangeTypeCalled(
@@ -321,19 +314,19 @@ IN_PROC_BROWSER_TEST_F(PlaylistBrowserTest, ApiFunctions) {
   return;
   // After deleting one playlist, total playlist count should be 2.
   ResetStatus();
-  items = service->GetAllPlaylist();
+  items = service->GetAllPlaylistItems();
   EXPECT_EQ(2UL, items.GetList().size());
 
   // When all playlist are deleted, we should get 1 notification: all deleted.
   ResetStatus();
-  service->DeleteAllPlaylist();
+  service->DeleteAllPlaylistItems();
   EXPECT_EQ(1, on_playlist_changed_called_count_);
   EXPECT_TRUE(IsPlaylistChangeTypeCalled(
       PlaylistChangeParams::ChangeType::CHANGE_TYPE_ALL_DELETED));
 
   // After deleting all playlist, total playlist count should be 0.
   ResetStatus();
-  items = service->GetAllPlaylist();
+  items = service->GetAllPlaylistItems();
   EXPECT_EQ(0UL, items.GetList().size());
 }
 

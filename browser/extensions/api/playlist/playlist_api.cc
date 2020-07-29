@@ -22,9 +22,15 @@ using playlist::CreatePlaylistParams;
 using playlist::PlaylistService;
 using playlist::PlaylistServiceFactory;
 
-namespace CreatePlaylist = extensions::api::brave_playlist::CreatePlaylist;
-namespace GetPlaylist = extensions::api::brave_playlist::GetPlaylist;
-namespace DeletePlaylist = extensions::api::brave_playlist::DeletePlaylist;
+namespace CreatePlaylistItem =
+    extensions::api::brave_playlist::CreatePlaylistItem;
+namespace GetPlaylistItem =
+    extensions::api::brave_playlist::GetPlaylistItem;
+namespace DeletePlaylistItem =
+    extensions::api::brave_playlist::DeletePlaylistItem;
+namespace RecoverPlaylistItem =
+    extensions::api::brave_playlist::RecoverPlaylistItem;
+namespace PlayItem = extensions::api::brave_playlist::PlayItem;
 namespace RequestDownload = extensions::api::brave_playlist::RequestDownload;
 namespace OnDownloadRequested =
     extensions::api::brave_playlist::OnDownloadRequested;
@@ -40,7 +46,7 @@ PlaylistService* GetPlaylistService(content::BrowserContext* context) {
 }
 
 CreatePlaylistParams GetCreatePlaylistParamsFromCreateParams(
-    const CreatePlaylist::Params::CreateParams& params) {
+    const CreatePlaylistItem::Params::CreateParams& params) {
   CreatePlaylistParams p;
   p.playlist_name = params.playlist_name;
   p.playlist_thumbnail_url = params.thumbnail_url;
@@ -57,43 +63,45 @@ CreatePlaylistParams GetCreatePlaylistParamsFromCreateParams(
 namespace extensions {
 namespace api {
 
-ExtensionFunction::ResponseAction BravePlaylistCreatePlaylistFunction::Run() {
+ExtensionFunction::ResponseAction
+BravePlaylistCreatePlaylistItemFunction::Run() {
   auto* service = GetPlaylistService(browser_context());
   if (!service) {
     return RespondNow(Error(kFeatureDisabled));
   }
 
-  std::unique_ptr<CreatePlaylist::Params> params(
-      CreatePlaylist::Params::Create(*args_));
+  std::unique_ptr<CreatePlaylistItem::Params> params(
+      CreatePlaylistItem::Params::Create(*args_));
   EXTENSION_FUNCTION_VALIDATE(params.get());
 
-  service->CreatePlaylist(
+  service->CreatePlaylistItem(
       GetCreatePlaylistParamsFromCreateParams(params->create_params));
   return RespondNow(NoArguments());
 }
 
-ExtensionFunction::ResponseAction BravePlaylistGetAllPlaylistFunction::Run() {
+ExtensionFunction::ResponseAction
+BravePlaylistGetAllPlaylistItemsFunction::Run() {
   auto* service = GetPlaylistService(browser_context());
   if (!service) {
     return RespondNow(Error(kFeatureDisabled));
   }
 
-  base::Value playlist = service->GetAllPlaylist();
+  base::Value playlist = service->GetAllPlaylistItems();
   return RespondNow(
       OneArgument(base::Value::ToUniquePtrValue(std::move(playlist))));
 }
 
-ExtensionFunction::ResponseAction BravePlaylistGetPlaylistFunction::Run() {
+ExtensionFunction::ResponseAction BravePlaylistGetPlaylistItemFunction::Run() {
   auto* service = GetPlaylistService(browser_context());
   if (!service) {
     return RespondNow(Error(kFeatureDisabled));
   }
 
-  std::unique_ptr<GetPlaylist::Params> params(
-      GetPlaylist::Params::Create(*args_));
+  std::unique_ptr<GetPlaylistItem::Params> params(
+      GetPlaylistItem::Params::Create(*args_));
   EXTENSION_FUNCTION_VALIDATE(params.get());
 
-  base::Value playlist = service->GetPlaylist(params->id);
+  base::Value playlist = service->GetPlaylistItem(params->id);
   DCHECK(playlist.is_dict());
 
   if (playlist.DictEmpty())
@@ -103,42 +111,44 @@ ExtensionFunction::ResponseAction BravePlaylistGetPlaylistFunction::Run() {
                                     std::move(playlist))));
 }
 
-ExtensionFunction::ResponseAction BravePlaylistRecoverPlaylistFunction::Run() {
+ExtensionFunction::ResponseAction
+BravePlaylistRecoverPlaylistItemFunction::Run() {
   auto* service = GetPlaylistService(browser_context());
   if (!service) {
     return RespondNow(Error(kFeatureDisabled));
   }
 
-  std::unique_ptr<GetPlaylist::Params> params(
-      GetPlaylist::Params::Create(*args_));
+  std::unique_ptr<RecoverPlaylistItem::Params> params(
+      RecoverPlaylistItem::Params::Create(*args_));
   EXTENSION_FUNCTION_VALIDATE(params.get());
 
-  service->RecoverPlaylist(params->id);
-  return RespondNow(NoArguments());
-}
-
-ExtensionFunction::ResponseAction BravePlaylistDeletePlaylistFunction::Run() {
-  auto* service = GetPlaylistService(browser_context());
-  if (!service) {
-    return RespondNow(Error(kFeatureDisabled));
-  }
-
-  std::unique_ptr<DeletePlaylist::Params> params(
-      DeletePlaylist::Params::Create(*args_));
-  EXTENSION_FUNCTION_VALIDATE(params.get());
-
-  service->DeletePlaylist(params->id);
+  service->RecoverPlaylistItem(params->id);
   return RespondNow(NoArguments());
 }
 
 ExtensionFunction::ResponseAction
-BravePlaylistDeleteAllPlaylistFunction::Run() {
+BravePlaylistDeletePlaylistItemFunction::Run() {
   auto* service = GetPlaylistService(browser_context());
   if (!service) {
     return RespondNow(Error(kFeatureDisabled));
   }
 
-  service->DeleteAllPlaylist();
+  std::unique_ptr<DeletePlaylistItem::Params> params(
+      DeletePlaylistItem::Params::Create(*args_));
+  EXTENSION_FUNCTION_VALIDATE(params.get());
+
+  service->DeletePlaylistItem(params->id);
+  return RespondNow(NoArguments());
+}
+
+ExtensionFunction::ResponseAction
+BravePlaylistDeleteAllPlaylistItemsFunction::Run() {
+  auto* service = GetPlaylistService(browser_context());
+  if (!service) {
+    return RespondNow(Error(kFeatureDisabled));
+  }
+
+  service->DeleteAllPlaylistItems();
   return RespondNow(NoArguments());
 }
 
@@ -164,18 +174,17 @@ ExtensionFunction::ResponseAction BravePlaylistRequestDownloadFunction::Run() {
   return RespondNow(NoArguments());
 }
 
-ExtensionFunction::ResponseAction BravePlaylistPlayFunction::Run() {
+ExtensionFunction::ResponseAction BravePlaylistPlayItemFunction::Run() {
   auto* service = GetPlaylistService(browser_context());
   if (!service) {
     return RespondNow(Error(kFeatureDisabled));
   }
 
-  std::unique_ptr<GetPlaylist::Params> params(
-      GetPlaylist::Params::Create(*args_));
+  std::unique_ptr<PlayItem::Params> params(PlayItem::Params::Create(*args_));
   EXTENSION_FUNCTION_VALIDATE(params.get());
 
   // TODO(simonhong): Use standalone player instead of asking to service.
-  service->Play(params->id);
+  service->PlayItem(params->id);
   return RespondNow(NoArguments());
 }
 
