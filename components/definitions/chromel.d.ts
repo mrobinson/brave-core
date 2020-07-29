@@ -306,14 +306,9 @@ declare namespace chrome.bravePlaylists {
   const onPlaylistsChanged: {
     addListener: (callback: (changeType: PlaylistsChangeType, id: string) => void) => void
   }
-  const onInitialized: {
-    addListener: (callback: (initialized: boolean) => void) => void
-  }
   const onDownloadRequested: {
     addListener: (callback: (url: string) => void) => void
   }
-  const isInitialized: (callback: (initialized: boolean) => void) => void
-  const initialize: () => void
   const createPlaylist: (createParams: { videoMediaFiles: CreateParamsMediaItem[], audioMediaFiles: CreateParamsMediaItem[], thumbnailUrl: string, playlistName: string }) => void
   const getAllPlaylists: (callback: (playlists: PlaylistType[]) => void) => void
   const getPlaylist: (id: string, callback: (playlist: PlaylistType) => void) => void
