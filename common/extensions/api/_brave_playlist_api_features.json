@@ -16,8 +16,7 @@
     "contexts": ["webui"],
     "matches": [
         "chrome://newtab/*",
-        "chrome://playlists/*",
-        "brave://playlists/*"
+        "chrome://playlist/*"
     ]
   }]
 }

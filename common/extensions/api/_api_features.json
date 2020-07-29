@@ -120,7 +120,7 @@
       "chrome://webcompat/*",
       "chrome://wallet/*",
       "chrome://adblock/*",
-      "chrome://playlists/*"
+      "chrome://playlist/*"
     ]
   }]
 }
