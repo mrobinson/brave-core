@@ -8,8 +8,6 @@
 
 #include <string>
 
-#include "base/memory/scoped_refptr.h"
-
 class Profile;
 
 namespace base {

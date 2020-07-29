@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "brave/components/playlist/browser/playlist_media_file_controller.h"
+#include "brave/components/playlist/browser/playlist_media_file_downloader.h"
 
 #include <algorithm>
 #include <utility>
@@ -171,7 +171,7 @@ base::FilePath::StringType GetPlaylistIDDirName(
 #endif
 }
 
-PlaylistMediaFileController::PlaylistMediaFileController(
+PlaylistMediaFileDownloader::PlaylistMediaFileDownloader(
     Client* client,
     content::BrowserContext* context,
     base::FilePath::StringType source_media_files_dir,
@@ -188,23 +188,23 @@ PlaylistMediaFileController::PlaylistMediaFileController(
       create_params_path_key_(create_params_path_key),
       weak_factory_(this) {}
 
-PlaylistMediaFileController::~PlaylistMediaFileController() {}
+PlaylistMediaFileDownloader::~PlaylistMediaFileDownloader() {}
 
-void PlaylistMediaFileController::NotifyFail() {
+void PlaylistMediaFileDownloader::NotifyFail() {
   ResetStatus();
   client_->OnMediaFileGenerationFailed(std::move(current_playlist_));
 }
 
-void PlaylistMediaFileController::NotifySucceed(bool partial) {
+void PlaylistMediaFileDownloader::NotifySucceed(bool partial) {
   ResetStatus();
   client_->OnMediaFileReady(std::move(current_playlist_), partial);
 }
 
-void PlaylistMediaFileController::DeletePlaylist(const base::FilePath& path) {
+void PlaylistMediaFileDownloader::DeletePlaylist(const base::FilePath& path) {
   io_task_runner()->PostTask(FROM_HERE, base::BindOnce(&DeleteDir, path));
 }
 
-void PlaylistMediaFileController::GenerateSingleMediaFile(
+void PlaylistMediaFileDownloader::GenerateSingleMediaFile(
     base::Value&& playlist_value,
     const base::FilePath& base_dir) {
   DCHECK(!in_progress_);
@@ -227,17 +227,17 @@ void PlaylistMediaFileController::GenerateSingleMediaFile(
   CreateSourceFilesDirThenDownloads();
 }
 
-void PlaylistMediaFileController::CreateSourceFilesDirThenDownloads() {
+void PlaylistMediaFileDownloader::CreateSourceFilesDirThenDownloads() {
   const base::FilePath source_files_dir =
       playlist_dir_path_.Append(source_media_files_dir_);
   base::PostTaskAndReplyWithResult(
       io_task_runner(), FROM_HERE,
       base::BindOnce(&base::CreateDirectory, source_files_dir),
-      base::BindOnce(&PlaylistMediaFileController::OnSourceFilesDirCreated,
+      base::BindOnce(&PlaylistMediaFileDownloader::OnSourceFilesDirCreated,
                      weak_factory_.GetWeakPtr()));
 }
 
-void PlaylistMediaFileController::OnSourceFilesDirCreated(bool success) {
+void PlaylistMediaFileDownloader::OnSourceFilesDirCreated(bool success) {
   if (!success) {
     NotifyFail();
     return;
@@ -246,14 +246,14 @@ void PlaylistMediaFileController::OnSourceFilesDirCreated(bool success) {
   DownloadAllMediaFileSources();
 }
 
-int PlaylistMediaFileController::GetNumberOfMediaFileSources() {
+int PlaylistMediaFileDownloader::GetNumberOfMediaFileSources() {
   DCHECK(in_progress_);
   base::Value* media_files =
       current_playlist_.FindPath(create_params_path_key_);
   return media_files->GetList().size();
 }
 
-void PlaylistMediaFileController::DownloadAllMediaFileSources() {
+void PlaylistMediaFileDownloader::DownloadAllMediaFileSources() {
   base::Value* media_files =
       current_playlist_.FindPath(create_params_path_key_);
   for (int i = 0; i < media_file_source_files_count_; ++i) {
@@ -269,7 +269,7 @@ void PlaylistMediaFileController::DownloadAllMediaFileSources() {
   }
 }
 
-void PlaylistMediaFileController::DownloadMediaFile(const GURL& url,
+void PlaylistMediaFileDownloader::DownloadMediaFile(const GURL& url,
                                                      int index) {
   VLOG(2) << __func__ << ": " << url.spec() << " at: " << index;
 
@@ -289,12 +289,12 @@ void PlaylistMediaFileController::DownloadMediaFile(const GURL& url,
           .Append(GetFileNameStringFromIndex(index));
   iter->get()->DownloadToFile(
       url_loader_factory_.get(),
-      base::BindOnce(&PlaylistMediaFileController::OnMediaFileDownloaded,
+      base::BindOnce(&PlaylistMediaFileDownloader::OnMediaFileDownloaded,
                      base::Unretained(this), std::move(iter), index),
       file_path);
 }
 
-void PlaylistMediaFileController::OnMediaFileDownloaded(
+void PlaylistMediaFileDownloader::OnMediaFileDownloaded(
     SimpleURLLoaderList::iterator iter,
     int index,
     base::FilePath path) {
@@ -318,22 +318,22 @@ void PlaylistMediaFileController::OnMediaFileDownloaded(
     StartSingleMediaFileGeneration();
 }
 
-void PlaylistMediaFileController::RequestCancelCurrentPlaylistGeneration() {
+void PlaylistMediaFileDownloader::RequestCancelCurrentPlaylistGeneration() {
   cancelled_ = true;
   url_loaders_.clear();
 }
 
-void PlaylistMediaFileController::StartSingleMediaFileGeneration() {
+void PlaylistMediaFileDownloader::StartSingleMediaFileGeneration() {
   base::PostTaskAndReplyWithResult(
       io_task_runner(), FROM_HERE,
       base::BindOnce(&DoGenerateSingleMediaFileOnIOThread, playlist_dir_path_,
                      source_media_files_dir_, unified_media_file_name_,
                      media_file_source_files_count_),
-      base::BindOnce(&PlaylistMediaFileController::OnSingleMediaFileGenerated,
+      base::BindOnce(&PlaylistMediaFileDownloader::OnSingleMediaFileGenerated,
                      weak_factory_.GetWeakPtr()));
 }
 
-void PlaylistMediaFileController::OnSingleMediaFileGenerated(int result) {
+void PlaylistMediaFileDownloader::OnSingleMediaFileGenerated(int result) {
   if (cancelled_) {
     ResetStatus();
     return;
@@ -359,7 +359,7 @@ void PlaylistMediaFileController::OnSingleMediaFileGenerated(int result) {
   }
 }
 
-base::SequencedTaskRunner* PlaylistMediaFileController::io_task_runner() {
+base::SequencedTaskRunner* PlaylistMediaFileDownloader::io_task_runner() {
   if (!io_task_runner_) {
     io_task_runner_ = base::CreateSequencedTaskRunner(
         {base::ThreadPool(), base::MayBlock(), base::TaskPriority::BEST_EFFORT,
@@ -368,14 +368,14 @@ base::SequencedTaskRunner* PlaylistMediaFileController::io_task_runner() {
   return io_task_runner_.get();
 }
 
-void PlaylistMediaFileController::ResetStatus() {
+void PlaylistMediaFileDownloader::ResetStatus() {
   in_progress_ = false;
   cancelled_ = false;
   current_playlist_id_.clear();
   url_loaders_.clear();
 }
 
-bool PlaylistMediaFileController::IsDownloadFinished() {
+bool PlaylistMediaFileDownloader::IsDownloadFinished() {
   return remained_download_files_ == 0;
 }
 

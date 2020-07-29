@@ -3,8 +3,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef BRAVE_COMPONENTS_PLAYLIST_BROWSER_PLAYLIST_MEDIA_FILE_CONTROLLER_H_
-#define BRAVE_COMPONENTS_PLAYLIST_BROWSER_PLAYLIST_MEDIA_FILE_CONTROLLER_H_
+#ifndef BRAVE_COMPONENTS_PLAYLIST_BROWSER_PLAYLIST_MEDIA_FILE_DOWNLOADER_H_
+#define BRAVE_COMPONENTS_PLAYLIST_BROWSER_PLAYLIST_MEDIA_FILE_DOWNLOADER_H_
 
 #include <list>
 #include <memory>
@@ -35,7 +35,7 @@ class GURL;
 namespace playlist {
 
 // Handle one Playlist at once.
-class PlaylistMediaFileController {
+class PlaylistMediaFileDownloader {
  public:
   class Client {
    public:
@@ -49,14 +49,14 @@ class PlaylistMediaFileController {
     virtual ~Client() {}
   };
 
-  PlaylistMediaFileController(
+  PlaylistMediaFileDownloader(
       Client* client,
       content::BrowserContext* context,
       base::FilePath::StringType source_media_files_dir,
       base::FilePath::StringType unified_media_file_name,
       std::string media_file_path_key,
       std::string create_params_path_key);
-  virtual ~PlaylistMediaFileController();
+  virtual ~PlaylistMediaFileDownloader();
 
   void GenerateSingleMediaFile(base::Value&& playlist_value,
                                const base::FilePath& base_dir);
@@ -124,13 +124,13 @@ class PlaylistMediaFileController {
 
   SimpleURLLoaderList url_loaders_;
 
-  base::WeakPtrFactory<PlaylistMediaFileController> weak_factory_;
+  base::WeakPtrFactory<PlaylistMediaFileDownloader> weak_factory_;
 
-  DISALLOW_COPY_AND_ASSIGN(PlaylistMediaFileController);
+  DISALLOW_COPY_AND_ASSIGN(PlaylistMediaFileDownloader);
 };
 
 base::FilePath::StringType GetPlaylistIDDirName(const std::string& playlist_id);
 
 }  // namespace playlist
 
-#endif  // BRAVE_COMPONENTS_PLAYLIST_BROWSER_PLAYLIST_MEDIA_FILE_CONTROLLER_H_
+#endif  // BRAVE_COMPONENTS_PLAYLIST_BROWSER_PLAYLIST_MEDIA_FILE_DOWNLOADER_H_

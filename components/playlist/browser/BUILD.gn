@@ -11,8 +11,8 @@ source_set("browser") {
     "playlist_service_observer.h",
     "playlist_data_source.cc",
     "playlist_data_source.h",
-    "playlist_media_file_controller.cc",
-    "playlist_media_file_controller.h",
+    "playlist_media_file_downloader.cc",
+    "playlist_media_file_downloader.h",
     "playlist_types.cc",
     "playlist_types.h",
   ]

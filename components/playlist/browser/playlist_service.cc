@@ -173,11 +173,11 @@ PlaylistService::PlaylistService(content::BrowserContext* context)
 
   // TODO(pilgrim) dynamically set file extensions based on format
   // (may require changes to youtubedown parser)
-  video_media_file_controller_.reset(new PlaylistMediaFileController(
+  video_media_file_downloader_.reset(new PlaylistMediaFileDownloader(
       this, context_, FILE_PATH_LITERAL("video_source_files"),
       FILE_PATH_LITERAL("video_file.mp4"), kPlaylistVideoMediaFilePathKey,
       kPlaylistCreateParamsVideoMediaFilesPathKey));
-  audio_media_file_controller_.reset(new PlaylistMediaFileController(
+  audio_media_file_downloader_.reset(new PlaylistMediaFileDownloader(
       this, context_, FILE_PATH_LITERAL("audio_source_files"),
       FILE_PATH_LITERAL("audio_file.m4a"), kPlaylistAudioMediaFilePathKey,
       kPlaylistCreateParamsAudioMediaFilesPathKey));
@@ -213,15 +213,15 @@ void PlaylistService::AddPlaylistToMediaFileGenerationQueue(
   // If either media file controller is generating a playlist media file,
   // delay the next playlist generation. It will be triggered when the current
   // one is finished.
-  if (!video_media_file_controller_->in_progress() &&
-      !audio_media_file_controller_->in_progress()) {
+  if (!video_media_file_downloader_->in_progress() &&
+      !audio_media_file_downloader_->in_progress()) {
     GenerateMediaFiles();
   }
 }
 
 void PlaylistService::GenerateMediaFiles() {
-  DCHECK(!video_media_file_controller_->in_progress() &&
-         !audio_media_file_controller_->in_progress());
+  DCHECK(!video_media_file_downloader_->in_progress() &&
+         !audio_media_file_downloader_->in_progress());
   DCHECK(!pending_media_file_creation_jobs_.empty());
 
   base::Value video_value(std::move(pending_media_file_creation_jobs_.front()));
@@ -230,9 +230,9 @@ void PlaylistService::GenerateMediaFiles() {
   VLOG(2) << __func__ << ": "
           << *video_value.FindStringKey(kPlaylistPlaylistNameKey);
 
-  video_media_file_controller_->GenerateSingleMediaFile(std::move(video_value),
+  video_media_file_downloader_->GenerateSingleMediaFile(std::move(video_value),
                                                         base_dir_);
-  audio_media_file_controller_->GenerateSingleMediaFile(std::move(audio_value),
+  audio_media_file_downloader_->GenerateSingleMediaFile(std::move(audio_value),
                                                         base_dir_);
 }
 
@@ -412,9 +412,9 @@ void PlaylistService::RecoverPlaylistItem(const std::string& id) {
 
 void PlaylistService::DeletePlaylistItem(const std::string& id) {
   // Cancel if currently downloading item is id.
-  if (video_media_file_controller_->current_playlist_id() == id) {
-    video_media_file_controller_->RequestCancelCurrentPlaylistGeneration();
-    audio_media_file_controller_->RequestCancelCurrentPlaylistGeneration();
+  if (video_media_file_downloader_->current_playlist_id() == id) {
+    video_media_file_downloader_->RequestCancelCurrentPlaylistGeneration();
+    audio_media_file_downloader_->RequestCancelCurrentPlaylistGeneration();
   }
 
   RemovePlaylist(id);
@@ -423,8 +423,8 @@ void PlaylistService::DeletePlaylistItem(const std::string& id) {
       {PlaylistChangeParams::ChangeType::CHANGE_TYPE_DELETED, id});
 
   // Delete assets from filesystem after updating db.
-  video_media_file_controller_->DeletePlaylist(GetPlaylistItemDirPath(id));
-  audio_media_file_controller_->DeletePlaylist(GetPlaylistItemDirPath(id));
+  video_media_file_downloader_->DeletePlaylist(GetPlaylistItemDirPath(id));
+  audio_media_file_downloader_->DeletePlaylist(GetPlaylistItemDirPath(id));
 }
 
 void PlaylistService::DeleteAllPlaylistItems() {
@@ -432,8 +432,8 @@ void PlaylistService::DeleteAllPlaylistItems() {
 
   // Cancel currently generated playlist if needed and pending thumbnail
   // download jobs.
-  video_media_file_controller_->RequestCancelCurrentPlaylistGeneration();
-  audio_media_file_controller_->RequestCancelCurrentPlaylistGeneration();
+  video_media_file_downloader_->RequestCancelCurrentPlaylistGeneration();
+  audio_media_file_downloader_->RequestCancelCurrentPlaylistGeneration();
   url_loaders_.clear();
   base::queue<base::Value> empty_queue;
   std::swap(pending_media_file_creation_jobs_, empty_queue);
@@ -458,8 +458,8 @@ void PlaylistService::RemoveObserver(
 void PlaylistService::OnMediaFileReady(base::Value&& playlist_value,
                                        bool partial) {
   // TODO(simonhong): Revisit how |partial| handles.
-  if (video_media_file_controller_->in_progress() ||
-      audio_media_file_controller_->in_progress())
+  if (video_media_file_downloader_->in_progress() ||
+      audio_media_file_downloader_->in_progress())
     partial = true;
   VLOG(2) << __func__ << ": "
           << *playlist_value.FindStringKey(kPlaylistPlaylistNameKey) << " "
@@ -491,8 +491,8 @@ void PlaylistService::OnMediaFileGenerationFailed(
   VLOG(2) << __func__ << ": "
           << *playlist_value.FindStringKey(kPlaylistPlaylistNameKey);
 
-  video_media_file_controller_->RequestCancelCurrentPlaylistGeneration();
-  audio_media_file_controller_->RequestCancelCurrentPlaylistGeneration();
+  video_media_file_downloader_->RequestCancelCurrentPlaylistGeneration();
+  audio_media_file_downloader_->RequestCancelCurrentPlaylistGeneration();
   const std::string playlist_id =
       *playlist_value.FindStringKey(kPlaylistIDKey);
   NotifyPlaylistChanged(
@@ -511,8 +511,8 @@ void PlaylistService::OnGetOrphanedPaths(
 
   for (const auto& path : orphaned_paths) {
     VLOG(2) << __func__ << ": " << path << " is orphaned";
-    video_media_file_controller_->DeletePlaylist(path);
-    audio_media_file_controller_->DeletePlaylist(path);
+    video_media_file_downloader_->DeletePlaylist(path);
+    audio_media_file_downloader_->DeletePlaylist(path);
   }
 }
 

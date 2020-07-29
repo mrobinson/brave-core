@@ -18,7 +18,7 @@
 #include "base/memory/weak_ptr.h"
 #include "base/observer_list.h"
 #include "base/values.h"
-#include "brave/components/playlist/browser/playlist_media_file_controller.h"
+#include "brave/components/playlist/browser/playlist_media_file_downloader.h"
 #include "brave/components/playlist/browser/playlist_types.h"
 #include "components/keyed_service/core/keyed_service.h"
 
@@ -41,10 +41,9 @@ class PrefService;
 namespace playlist {
 
 class PlaylistServiceObserver;
-class PlaylistDBController;
 
 class PlaylistService : public KeyedService,
-                        public PlaylistMediaFileController::Client {
+                        public PlaylistMediaFileDownloader::Client {
  public:
   explicit PlaylistService(content::BrowserContext* context);
 
@@ -115,8 +114,8 @@ class PlaylistService : public KeyedService,
   base::queue<base::Value> pending_media_file_creation_jobs_;
   base::ObserverList<PlaylistServiceObserver> observers_;
 
-  std::unique_ptr<PlaylistMediaFileController> video_media_file_controller_;
-  std::unique_ptr<PlaylistMediaFileController> audio_media_file_controller_;
+  std::unique_ptr<PlaylistMediaFileDownloader> video_media_file_downloader_;
+  std::unique_ptr<PlaylistMediaFileDownloader> audio_media_file_downloader_;
 
   scoped_refptr<base::SequencedTaskRunner> io_task_runner_;
 

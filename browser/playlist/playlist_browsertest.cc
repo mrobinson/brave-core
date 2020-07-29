@@ -13,7 +13,6 @@
 #include "brave/browser/playlist/playlist_service_factory.h"
 #include "brave/components/playlist/browser/features.h"
 #include "brave/components/playlist/browser/playlist_constants.h"
-#include "brave/components/playlist/browser/playlist_media_file_controller.h"
 #include "brave/components/playlist/browser/playlist_service.h"
 #include "brave/components/playlist/browser/playlist_service_observer.h"
 #include "brave/components/playlist/browser/playlist_types.h"
