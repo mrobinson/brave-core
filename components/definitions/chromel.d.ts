@@ -287,7 +287,7 @@ declare namespace chrome.test {
   const sendMessage: (message: string) => {}
 }
 
-declare namespace chrome.bravePlaylists {
+declare namespace chrome.bravePlaylist {
   type PlaylistType = { id: string, playlistName: string, titles: string[], thumbnailPath: string, videoMediaFilePath: string, audioMediaFilePath: string, partialReady: boolean }
   type PlaylistsChangeType = 'added' | 'deleted' | 'all_deleted' | 'aborted' | 'thumbnail_ready' | 'thumbnail_failed' | 'play_ready' | 'play_ready_partial'
 
@@ -303,17 +303,17 @@ declare namespace chrome.bravePlaylists {
 
   type CreateParamsMediaItem = { url: string, title: string, thumb: string }
 
-  const onPlaylistsChanged: {
-    addListener: (callback: (changeType: PlaylistsChangeType, id: string) => void) => void
+  const onPlaylistChanged: {
+    addListener: (callback: (changeType: PlaylistChangeType, id: string) => void) => void
   }
   const onDownloadRequested: {
     addListener: (callback: (url: string) => void) => void
   }
   const createPlaylist: (createParams: { videoMediaFiles: CreateParamsMediaItem[], audioMediaFiles: CreateParamsMediaItem[], thumbnailUrl: string, playlistName: string }) => void
-  const getAllPlaylists: (callback: (playlists: PlaylistType[]) => void) => void
+  const getAllPlaylist: (callback: (playlist: PlaylistType[]) => void) => void
   const getPlaylist: (id: string, callback: (playlist: PlaylistType) => void) => void
   const recoverPlaylist: (id: string) => void
-  const deleteAllPlaylists: (callback: (deleted: boolean) => void) => void
+  const deleteAllPlaylist: (callback: (deleted: boolean) => void) => void
   const deletePlaylist: (id: string) => void
   const requestDownload: (url: string) => void
   const play: (id: string) => void

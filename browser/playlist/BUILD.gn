@@ -1,0 +1,20 @@
+source_set("playlist") {
+  sources = [
+    "playlist_service_factory.cc",
+    "playlist_service_factory.h",
+  ]
+
+  deps = [
+    "//base",
+    "//brave/components/playlist/browser",
+    "//components/keyed_service/content",
+    "//content/public/browser",
+  ]
+
+  if (!is_android) {
+    sources += [
+      "desktop_playlist_player.cc",
+      "desktop_playlist_player.h",
+    ]
+  }
+}

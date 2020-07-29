@@ -2,7 +2,7 @@ import("//brave/components/binance/browser/buildflags/buildflags.gni")
 import("//brave/components/gemini/browser/buildflags/buildflags.gni")
 import("//brave/components/brave_wallet/browser/buildflags/buildflags.gni")
 import("//brave/components/brave_together/buildflags/buildflags.gni")
-import("//brave/components/playlists/browser/buildflags/buildflags.gni")
+import("//brave/components/playlist/browser/buildflags/buildflags.gni")
 import("//tools/grit/grit_rule.gni")
 import("//tools/json_schema_compiler/json_features.gni")
 import("//tools/json_schema_compiler/json_schema_api.gni")
@@ -31,8 +31,8 @@ json_features("api_features") {
     sources += [ "_brave_together_api_features.json" ]
   }
 
-  if (enable_brave_playlists) {
-    sources += [ "_brave_playlists_api_features.json" ]
+  if (enable_playlist) {
+    sources += [ "_brave_playlist_api_features.json" ]
   }
 }
 
@@ -87,8 +87,8 @@ if (brave_together_enabled) {
   brave_extensions_api_schema_sources += [ "brave_together.json" ]
 }
 
-if (enable_brave_playlists) {
-  brave_extensions_api_schema_sources += [ "brave_playlists.json" ]
+if (enable_playlist) {
+  brave_extensions_api_schema_sources += [ "brave_playlist.json" ]
 }
 
 brave_extensions_api_uncompiled_sources = []

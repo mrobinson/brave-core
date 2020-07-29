@@ -12,6 +12,7 @@
 #include "brave/components/brave_shields/common/features.h"
 #include "brave/components/brave_sync/buildflags/buildflags.h"
 #include "brave/components/ntp_background_images/browser/features.h"
+#include "brave/components/playlist/browser/buildflags/buildflags.h"
 #include "brave/components/speedreader/buildflags.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/profiles/profile_manager.h"
@@ -22,17 +23,17 @@ using ntp_background_images::features::kBraveNTPBrandedWallpaper;
 using ntp_background_images::features::kBraveNTPBrandedWallpaperDemo;
 using ntp_background_images::features::kBraveNTPSuperReferralWallpaper;
 
-#if defined(OS_ANDROID)
-#define BRAVE_PLAYLISTS_FEATURE_ENTRIES
-#else
-#include "brave/components/playlists/browser/features.h"
+#if BUILDFLAG(ENABLE_PLAYLIST)
+#include "brave/components/playlist/browser/features.h"
 
-#define BRAVE_PLAYLISTS_FEATURE_ENTRIES \
-    {"brave-playlists",                                                    \
-     flag_descriptions::kBravePlaylistsName,                               \
-     flag_descriptions::kBravePlaylistsDescription,                        \
+#define PLAYLIST_FEATURE_ENTRIES \
+    {"playlist",                                                           \
+     flag_descriptions::kPlaylistName,                                     \
+     flag_descriptions::kPlaylistDescription,                              \
      flags_ui::kOsMac | flags_ui::kOsWin | flags_ui::kOsLinux,             \
-     FEATURE_VALUE_TYPE(brave_playlists::features::kBravePlaylists)},
+     FEATURE_VALUE_TYPE(playlist::features::kPlaylist)},
+#else
+#define PLAYLIST_FEATURE_ENTRIES
 #endif
 
 #if BUILDFLAG(ENABLE_SPEEDREADER)
@@ -84,7 +85,7 @@ using ntp_background_images::features::kBraveNTPSuperReferralWallpaper;
      flag_descriptions::kBraveSuperReferralDescription,                    \
      flags_ui::kOsMac | flags_ui::kOsWin | flags_ui::kOsAndroid,           \
      FEATURE_VALUE_TYPE(kBraveNTPSuperReferralWallpaper)},                 \
-    BRAVE_PLAYLISTS_FEATURE_ENTRIES                                        \
+    PLAYLIST_FEATURE_ENTRIES                                               \
 
 #define SetFeatureEntryEnabled SetFeatureEntryEnabled_ChromiumImpl
 #include "../../../../chrome/browser/about_flags.cc"  // NOLINT

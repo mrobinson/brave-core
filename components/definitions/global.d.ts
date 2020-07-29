@@ -42,7 +42,7 @@ declare global {
     brave_adblock: {
       initialize: () => void
     }
-    brave_playlists: {
+    playlist: {
       initialize: () => void
     }
     brave_new_tab: {

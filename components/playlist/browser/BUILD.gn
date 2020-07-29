@@ -1,0 +1,35 @@
+import("//brave/build/config.gni")
+
+source_set("browser") {
+  sources = [
+    "features.cc",
+    "features.h",
+    "playlist_constants.cc",
+    "playlist_constants.h",
+    "playlist_service.cc",
+    "playlist_service.h",
+    "playlist_service_observer.h",
+    "playlist_data_source.cc",
+    "playlist_data_source.h",
+    "playlist_media_file_controller.cc",
+    "playlist_media_file_controller.h",
+    "playlist_player.h",
+    "playlist_types.cc",
+    "playlist_types.h",
+  ]
+
+  deps = [
+    "//base",
+    "//brave/components/playlist/common",
+    "//components/keyed_service/core",
+    "//components/prefs",
+    "//components/user_prefs",
+    "//content/public/browser",
+    "//services/network/public/cpp",
+    "//url",
+  ]
+
+  public_deps = [
+    "buildflags"
+  ]
+}

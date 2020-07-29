@@ -7,7 +7,7 @@ import("//brave/components/brave_wayback_machine/buildflags/buildflags.gni")
 import("//brave/components/brave_webtorrent/browser/buildflags/buildflags.gni")
 import("//brave/components/brave_together/buildflags/buildflags.gni")
 import("//brave/components/ntp_widget_utils/browser/buildflags/buildflags.gni")
-import("//brave/components/playlists/browser/buildflags/buildflags.gni")
+import("//brave/components/playlist/browser/buildflags/buildflags.gni")
 import("//build/config/features.gni")
 import("//components/gcm_driver/config.gni")
 
@@ -118,16 +118,16 @@ source_set("extensions") {
     ]
   }
 
-  if (enable_brave_playlists) {
+  if (enable_playlist) {
     sources += [
-      "api/playlist/brave_playlists_api.cc",
-      "api/playlist/brave_playlists_api.h",
-      "api/playlist/brave_playlists_event_router.cc",
-      "api/playlist/brave_playlists_event_router.h",
+      "api/playlist/playlist_api.cc",
+      "api/playlist/playlist_api.h",
+      "api/playlist/playlist_event_router.cc",
+      "api/playlist/playlist_event_router.h",
     ]
     deps += [
-      "//brave/browser/playlists",
-      "//brave/components/playlists/browser",
+      "//brave/browser/playlist",
+      "//brave/components/playlist/browser",
     ]
   }
 

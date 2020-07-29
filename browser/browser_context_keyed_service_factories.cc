@@ -18,7 +18,7 @@
 #include "extensions/buildflags/buildflags.h"
 
 #if BUILDFLAG(ENABLE_EXTENSIONS)
-#include "brave/browser/extensions/api/playlist/brave_playlists_event_router.h"
+#include "brave/browser/extensions/api/playlist/playlist_event_router.h"
 #endif
 
 #if BUILDFLAG(ENABLE_GREASELION)
@@ -57,7 +57,7 @@ void EnsureBrowserContextKeyedServiceFactoriesBuilt() {
 #endif
 
 #if BUILDFLAG(ENABLE_EXTENSIONS)
-  brave_playlists::BravePlaylistsEventRouter::GetFactoryInstance();
+  playlist::PlaylistEventRouter::GetFactoryInstance();
 #endif
 
 #if BUILDFLAG(BRAVE_WALLET_ENABLED)

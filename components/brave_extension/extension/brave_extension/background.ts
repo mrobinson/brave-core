@@ -43,13 +43,13 @@ if (chrome.test) {
 }
 
 function createPlaylist (url: string) {
-  const ytdItems: chrome.bravePlaylists.YTDMediaItem[] = window.youtubedown_urls(url)
+  const ytdItems: chrome.bravePlaylist.YTDMediaItem[] = window.youtubedown_urls(url)
   if (ytdItems.length === 0) {
     console.log(' ##### got nothing from youtubedown_urls #####')
     return
   }
-  const videoMediaFiles: chrome.bravePlaylists.CreateParamsMediaItem[] = makeMediaItems(ytdItems[0])
-  let audioMediaFiles: chrome.bravePlaylists.CreateParamsMediaItem[] = []
+  const videoMediaFiles: chrome.bravePlaylist.CreateParamsMediaItem[] = makeMediaItems(ytdItems[0])
+  let audioMediaFiles: chrome.bravePlaylist.CreateParamsMediaItem[] = []
 
   if (ytdItems.length > 1) {
     // Video is only available as separate video and audio files.
@@ -60,7 +60,7 @@ function createPlaylist (url: string) {
   const thumbnailUrl = audioMediaFiles && audioMediaFiles[0].thumb || videoMediaFiles && videoMediaFiles[0].thumb
   const playlistName = getCleanPlaylistName(audioMediaFiles[0].title) || getCleanPlaylistName(videoMediaFiles[0].title)
 
-  chrome.bravePlaylists.createPlaylist({
+  chrome.bravePlaylist.createPlaylist({
     thumbnailUrl,
     playlistName,
     videoMediaFiles,
@@ -72,8 +72,8 @@ function getCleanPlaylistName (fileName: string) {
   return fileName && fileName.replace(/\[.*$/,'')
 }
 
-function makeMediaItems (item: chrome.bravePlaylists.YTDMediaItem) {
-  let mediaFiles: chrome.bravePlaylists.CreateParamsMediaItem[]
+function makeMediaItems (item: chrome.bravePlaylist.YTDMediaItem) {
+  let mediaFiles: chrome.bravePlaylist.CreateParamsMediaItem[]
   if (typeof item.url === 'string') {
     // Video is all in one file, but we'll pretend it's an array of 1 segment
     mediaFiles = [{ url: item.url, title: item.file, thumb: item.thumb }]
@@ -84,6 +84,6 @@ function makeMediaItems (item: chrome.bravePlaylists.YTDMediaItem) {
   return mediaFiles
 }
 
-chrome.bravePlaylists.onDownloadRequested.addListener((url) => {
+chrome.bravePlaylist.onDownloadRequested.addListener((url) => {
   createPlaylist(url)
 })
