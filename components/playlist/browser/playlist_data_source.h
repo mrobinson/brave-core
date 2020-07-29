@@ -9,15 +9,14 @@
 #include <string>
 
 #include "base/macros.h"
-#include "base/memory/scoped_refptr.h"
 #include "base/memory/weak_ptr.h"
+#include "base/optional.h"
 #include "content/public/browser/url_data_source.h"
 
 class GURL;
 
 namespace base {
 class FilePath;
-class SequencedTaskRunner;
 }  // namespace base
 
 namespace playlist {
@@ -37,21 +36,17 @@ class PlaylistDataSource : public content::URLDataSource {
   std::string GetSource() override;
   void StartDataRequest(const GURL& url,
                         const content::WebContents::Getter& wc_getter,
-                        content::URLDataSource::GotDataCallback
-                            got_data_callback) override;
+                        GotDataCallback got_data_callback) override;
   std::string GetMimeType(const std::string&) override;
   bool AllowCaching() override;
-  bool ShouldReplaceExistingSource() override;
 
  private:
   PlaylistService* service_;
 
-  void StartDataRequestAfterPathExists(
-      const base::FilePath& thumbnail_path,
-      content::URLDataSource::GotDataCallback got_data_callback,
-      bool path_exists);
-
-  scoped_refptr<base::SequencedTaskRunner> task_runner_;
+  void GetThumbnailImageFile(const base::FilePath& image_file_path,
+                             GotDataCallback got_data_callback);
+  void OnGotThumbnailImageFile(GotDataCallback got_data_callback,
+                               base::Optional<std::string> input);
 
   base::WeakPtrFactory<PlaylistDataSource> weak_factory_{this};
 
