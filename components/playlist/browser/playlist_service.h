@@ -42,17 +42,13 @@ namespace playlist {
 
 class PlaylistServiceObserver;
 class PlaylistDBController;
-class PlaylistPlayer;
 
 class PlaylistService : public KeyedService,
                         public PlaylistMediaFileController::Client {
  public:
-  PlaylistService(content::BrowserContext* context,
-                  scoped_refptr<base::SequencedTaskRunner> task_runner);
+  explicit PlaylistService(content::BrowserContext* context);
 
   ~PlaylistService() override;
-
-  void SetPlayer(std::unique_ptr<PlaylistPlayer> player);
 
   // False when |params| are not sufficient for new playlist.
   // brave_playlist.json explains in detail about below apis.
@@ -62,13 +58,13 @@ class PlaylistService : public KeyedService,
   void RecoverPlaylistItem(const std::string& id);
   void DeletePlaylistItem(const std::string& id);
   void DeleteAllPlaylistItems();
-  // TODO(simonhong): Remove this. Client should handle play request.
-  void PlayItem(const std::string& id);
 
   void AddObserver(PlaylistServiceObserver* observer);
   void RemoveObserver(PlaylistServiceObserver* observer);
 
   bool GetThumbnailPath(const std::string& id, base::FilePath* thumbnail_path);
+
+  base::FilePath GetPlaylistItemDirPath(const std::string& id) const;
 
  private:
   using SimpleURLLoaderList =
@@ -97,10 +93,11 @@ class PlaylistService : public KeyedService,
 
   void NotifyPlaylistChanged(const PlaylistChangeParams& params);
 
-  base::FilePath GetPlaylistItemDirPath(const std::string& id) const;
-
   void UpdatePlaylistValue(const std::string& id, base::Value&& value);
   void RemovePlaylist(const std::string& id);
+
+  void GenerateIndexHTMLFile(const base::FilePath& playlist_path);
+  void OnHTMLFileGenerated(int error_code);
 
   // Playlist creation can be ready to play two steps.
   // Step 1. When creation is requested, requested info is put to db and
@@ -126,7 +123,6 @@ class PlaylistService : public KeyedService,
   scoped_refptr<network::SharedURLLoaderFactory> url_loader_factory_;
   SimpleURLLoaderList url_loaders_;
 
-  std::unique_ptr<PlaylistPlayer> player_;
   PrefService* prefs_;
 
   base::WeakPtrFactory<PlaylistService> weak_factory_;

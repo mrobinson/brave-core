@@ -7,8 +7,8 @@
 
 #include "base/files/file_path.h"
 #include "base/files/file_util.h"
-#include "base/task/post_task.h"
-#include "base/task_runner_util.h"
+#include "brave/browser/playlist/playlist_service_factory.h"
+#include "brave/components/playlist/browser/playlist_service.h"
 #include "chrome/browser/ui/browser.h"
 #include "chrome/browser/ui/scoped_tabbed_browser_displayer.h"
 #include "content/public/browser/page_navigator.h"
@@ -16,60 +16,20 @@
 
 namespace playlist {
 
-namespace {
-
-const char kHTMLTemplate[] =
-    "<video id='v' controls autoplay "
-    "onplay='a=document.getElementById(\"a\");a.currentTime=this.currentTime;a."
-    "play();' "
-    "onpause='a=document.getElementById(\"a\");a.pause()'><source "
-    "src='video_file.mp4' type='video/mp4' /></video> <video id='a' autoplay "
-    "style='display:none'><source src='audio_file.m4a' type='audio/mp4' "
-    "/></video>";
-
-int DoGenerateHTMLFileOnIOThread(const base::FilePath& html_file_path) {
-  if (base::PathExists(html_file_path))
-    base::DeleteFile(html_file_path, false);
-
-  base::File html_file(html_file_path,
-                       base::File::FLAG_CREATE | base::File::FLAG_WRITE);
-  if (!html_file.IsValid())
-    return -1;
-
-  html_file.WriteAtCurrentPos(kHTMLTemplate, 322 /*kHTMLTemplate.length()*/);
-  return 0;
-}
-
-}  // namespace
-
-DesktopPlaylistPlayer::DesktopPlaylistPlayer(
-    Profile* profile,
-    scoped_refptr<base::SequencedTaskRunner> task_runner)
-    : profile_(profile),
-      io_task_runner_(task_runner),
-      weak_factory_(this) {}
+DesktopPlaylistPlayer::DesktopPlaylistPlayer(Profile* profile)
+    : profile_(profile) {}
 
 DesktopPlaylistPlayer::~DesktopPlaylistPlayer() {
 }
 
-void DesktopPlaylistPlayer::Play(const base::FilePath& playlist_path) {
-  auto html_file_path = playlist_path.Append(FILE_PATH_LITERAL("index.html"));
-  base::PostTaskAndReplyWithResult(
-      io_task_runner_.get(), FROM_HERE,
-      base::BindOnce(&DoGenerateHTMLFileOnIOThread, html_file_path),
-      base::BindOnce(&DesktopPlaylistPlayer::OnHTMLFileGenerated,
-                     weak_factory_.GetWeakPtr(),
-                     html_file_path));
-}
-
-void DesktopPlaylistPlayer::OnHTMLFileGenerated(
-    const base::FilePath& html_file_path,
-    int error_code) {
-  if (error_code) {
-    LOG(ERROR) << "couldn't create HTML file for player";
+void DesktopPlaylistPlayer::Play(const std::string& id) {
+  auto* service =
+      PlaylistServiceFactory::GetInstance()->GetForProfile(profile_);
+  if (!service)
     return;
-  }
 
+  auto html_file_path = service->GetPlaylistItemDirPath(id).Append(
+      FILE_PATH_LITERAL("index.html"));
   GURL html_file_url = net::FilePathToFileURL(html_file_path);
   chrome::ScopedTabbedBrowserDisplayer browser_displayer(profile_);
   content::OpenURLParams open_url_params(

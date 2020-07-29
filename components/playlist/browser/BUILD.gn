@@ -13,7 +13,6 @@ source_set("browser") {
     "playlist_data_source.h",
     "playlist_media_file_controller.cc",
     "playlist_media_file_controller.h",
-    "playlist_player.h",
     "playlist_types.cc",
     "playlist_types.h",
   ]

@@ -8,17 +8,11 @@
 #include <memory>
 
 #include "base/feature_list.h"
-#include "base/task/post_task.h"
 #include "brave/components/playlist/browser/features.h"
 #include "brave/components/playlist/browser/playlist_service.h"
 #include "chrome/browser/profiles/incognito_helpers.h"
 #include "chrome/browser/profiles/profile.h"
 #include "components/keyed_service/content/browser_context_dependency_manager.h"
-
-#if !defined(OS_ANDROID)
-#include "brave/browser/playlist/desktop_playlist_player.h"
-#include "chrome/browser/profiles/profile.h"
-#endif
 
 namespace playlist {
 
@@ -45,21 +39,7 @@ PlaylistServiceFactory::~PlaylistServiceFactory() {}
 
 KeyedService* PlaylistServiceFactory::BuildServiceInstanceFor(
     content::BrowserContext* context) const {
-  scoped_refptr<base::SequencedTaskRunner> io_task_runner =
-      base::CreateSequencedTaskRunner(
-          { base::ThreadPool(), base::MayBlock(),
-            base::TaskPriority::BEST_EFFORT,
-            base::TaskShutdownBehavior::SKIP_ON_SHUTDOWN });
-  auto* service = new PlaylistService(context, io_task_runner);
-
-#if !defined(OS_ANDROID)
-  std::unique_ptr<PlaylistPlayer> playlist_player(
-      new DesktopPlaylistPlayer(Profile::FromBrowserContext(context),
-                                 io_task_runner));
-  service->SetPlayer(std::move(playlist_player));
-#endif
-
-  return service;
+  return new PlaylistService(context);
 }
 
 content::BrowserContext* PlaylistServiceFactory::GetBrowserContextToUse(

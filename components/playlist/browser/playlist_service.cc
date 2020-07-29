@@ -21,7 +21,6 @@
 #include "brave/components/playlist/browser/playlist_constants.h"
 #include "brave/components/playlist/browser/playlist_data_source.h"
 #include "brave/components/playlist/browser/playlist_service_observer.h"
-#include "brave/components/playlist/browser/playlist_player.h"
 #include "brave/components/playlist/common/pref_names.h"
 #include "components/prefs/pref_service.h"
 #include "components/user_prefs/user_prefs.h"
@@ -136,14 +135,33 @@ std::vector<base::FilePath> GetOrphanedPaths(
   return orphaned_paths;
 }
 
+const char kHTMLTemplate[] =
+    "<video id='v' controls autoplay "
+    "onplay='a=document.getElementById(\"a\");a.currentTime=this.currentTime;a."
+    "play();' "
+    "onpause='a=document.getElementById(\"a\");a.pause()'><source "
+    "src='video_file.mp4' type='video/mp4' /></video> <video id='a' autoplay "
+    "style='display:none'><source src='audio_file.m4a' type='audio/mp4' "
+    "/></video>";
+
+int DoGenerateHTMLFileOnIOThread(const base::FilePath& html_file_path) {
+  if (base::PathExists(html_file_path))
+    base::DeleteFile(html_file_path, false);
+
+  base::File html_file(html_file_path,
+                       base::File::FLAG_CREATE | base::File::FLAG_WRITE);
+  if (!html_file.IsValid())
+    return -1;
+
+  html_file.WriteAtCurrentPos(kHTMLTemplate, 322 /*kHTMLTemplate.length()*/);
+  return 0;
+}
+
 }  // namespace
 
-PlaylistService::PlaylistService(
-    content::BrowserContext* context,
-    scoped_refptr<base::SequencedTaskRunner> task_runner)
+PlaylistService::PlaylistService(content::BrowserContext* context)
     : context_(context),
       base_dir_(context->GetPath().Append(kBaseDirName)),
-      io_task_runner_(task_runner),
       url_loader_factory_(
           content::BrowserContext::GetDefaultStoragePartition(context)
               ->GetURLLoaderFactoryForBrowserProcess()),
@@ -168,10 +186,6 @@ PlaylistService::PlaylistService(
 }
 
 PlaylistService::~PlaylistService() = default;
-
-void PlaylistService::SetPlayer(std::unique_ptr<PlaylistPlayer> player) {
-    player_ = std::move(player);
-}
 
 void PlaylistService::NotifyPlaylistChanged(
     const PlaylistChangeParams& params) {
@@ -432,25 +446,6 @@ void PlaylistService::DeleteAllPlaylistItems() {
   CleanUp();
 }
 
-void PlaylistService::PlayItem(const std::string& id) {
-  const base::Value* playlist_info =
-      prefs_->Get(kPlaylistItems)->FindDictKey(id);
-  if (!playlist_info) {
-    LOG(ERROR) << __func__ << ": Invalid playlist id for play: " << id;
-    return;
-  }
-
-  base::Optional<bool> partial_ready =
-      playlist_info->FindBoolPath(kPlaylistPartialReadyKey);
-  if (!partial_ready && partial_ready.value()) {
-    LOG(ERROR) << __func__ << ": Playlist is not ready to play: " << id;
-    return;
-  }
-
-  if (player_)
-    player_->Play(GetPlaylistItemDirPath(id));
-}
-
 void PlaylistService::AddObserver(PlaylistServiceObserver* observer) {
   observers_.AddObserver(observer);
 }
@@ -484,6 +479,8 @@ void PlaylistService::OnMediaFileReady(base::Value&& playlist_value,
   // If partial is true here, one of video or audio media files are not ready.
   if (partial)
     return;
+
+  GenerateIndexHTMLFile(GetPlaylistItemDirPath(playlist_id));
 
   if (!pending_media_file_creation_jobs_.empty())
     GenerateMediaFiles();
@@ -546,7 +543,28 @@ bool PlaylistService::GetThumbnailPath(const std::string& id,
   return true;
 }
 
+void PlaylistService::GenerateIndexHTMLFile(
+    const base::FilePath& playlist_path) {
+  auto html_file_path = playlist_path.Append(FILE_PATH_LITERAL("index.html"));
+  base::PostTaskAndReplyWithResult(
+      io_task_runner(), FROM_HERE,
+      base::BindOnce(&DoGenerateHTMLFileOnIOThread, html_file_path),
+      base::BindOnce(&PlaylistService::OnHTMLFileGenerated,
+                     weak_factory_.GetWeakPtr()));
+}
+
+void PlaylistService::OnHTMLFileGenerated(int error_code) {
+  if (error_code)
+    LOG(ERROR) << "couldn't create HTML file for play";
+}
+
 base::SequencedTaskRunner* PlaylistService::io_task_runner() {
+  if (!io_task_runner_) {
+    io_task_runner_ = base::CreateSequencedTaskRunner(
+        { base::ThreadPool(), base::MayBlock(),
+          base::TaskPriority::BEST_EFFORT,
+          base::TaskShutdownBehavior::SKIP_ON_SHUTDOWN });
+  }
   return io_task_runner_.get();
 }
 

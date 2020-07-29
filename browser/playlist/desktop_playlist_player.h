@@ -6,40 +6,31 @@
 #ifndef BRAVE_BROWSER_PLAYLISTS_DESKTOP_PLAYLIST_PLAYER_H_
 #define BRAVE_BROWSER_PLAYLISTS_DESKTOP_PLAYLIST_PLAYER_H_
 
-#include "brave/components/playlist/browser/playlist_player.h"
+#include <string>
+
 #include "base/memory/scoped_refptr.h"
-#include "base/memory/weak_ptr.h"
 
 class Profile;
 
 namespace base {
 class FilePath;
-class SequencedTaskRunner;
 }  // namespace base
 
 namespace playlist {
 
 // Demo purpose player on desktop.
-class DesktopPlaylistPlayer : public PlaylistPlayer {
+class DesktopPlaylistPlayer {
  public:
-  DesktopPlaylistPlayer(Profile* profile,
-                         scoped_refptr<base::SequencedTaskRunner> task_runner);
-  ~DesktopPlaylistPlayer() override;
+  explicit DesktopPlaylistPlayer(Profile* profile);
+  ~DesktopPlaylistPlayer();
 
   DesktopPlaylistPlayer(const DesktopPlaylistPlayer&) = delete;
   DesktopPlaylistPlayer& operator=(const DesktopPlaylistPlayer&) = delete;
 
-  // PlaylistPlayer overrides:
-  void Play(const base::FilePath& playlist_path) override;
+  void Play(const std::string& id);
 
  private:
-  void OnHTMLFileGenerated(const base::FilePath& html_file_path,
-                           int error_code);
-
   Profile* profile_;
-  scoped_refptr<base::SequencedTaskRunner> io_task_runner_;
-
-  base::WeakPtrFactory<DesktopPlaylistPlayer> weak_factory_;
 };
 
 }  // namespace playlist

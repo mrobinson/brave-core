@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "base/bind.h"
+#include "brave/browser/playlist/desktop_playlist_player.h"
 #include "brave/browser/playlist/playlist_service_factory.h"
 #include "brave/common/extensions/api/brave_playlist.h"
 #include "brave/components/playlist/browser/playlist_service.h"
@@ -183,8 +184,9 @@ ExtensionFunction::ResponseAction BravePlaylistPlayItemFunction::Run() {
   std::unique_ptr<PlayItem::Params> params(PlayItem::Params::Create(*args_));
   EXTENSION_FUNCTION_VALIDATE(params.get());
 
-  // TODO(simonhong): Use standalone player instead of asking to service.
-  service->PlayItem(params->id);
+  playlist::DesktopPlaylistPlayer player(
+      Profile::FromBrowserContext(browser_context()));
+  player.Play(params->id);
   return RespondNow(NoArguments());
 }
 

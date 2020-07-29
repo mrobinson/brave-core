@@ -73,7 +73,6 @@ void PlaylistDataSource::GetThumbnailImageFile(
 void PlaylistDataSource::OnGotThumbnailImageFile(
     GotDataCallback got_data_callback,
     base::Optional<std::string> input) {
-  LOG(ERROR) << __func__;
   if (!input) {
     std::move(got_data_callback).Run(nullptr);
     return;
