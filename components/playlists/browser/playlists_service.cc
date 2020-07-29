@@ -175,7 +175,7 @@ void PlaylistsService::NotifyPlaylistChanged(
                  params.change_type);
 
   for (PlaylistsServiceObserver& obs : observers_)
-    obs.OnPlaylistsChanged(params);
+    obs.OnPlaylistItemStatusChanged(params);
 }
 
 void PlaylistsService::AddPlaylistToMediaFileGenerationQueue(

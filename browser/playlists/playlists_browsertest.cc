@@ -91,7 +91,8 @@ class PlaylistsBrowserTest : public InProcessBrowserTest,
   }
 
   // PlaylistsServiceObserver overrides:
-  void OnPlaylistsChanged(const PlaylistsChangeParams& params) override {
+  void OnPlaylistItemStatusChanged(
+      const PlaylistsChangeParams& params) override {
     on_playlists_changed_called_count_++;
     change_params_ = params;
     called_change_types_.insert(change_params_.change_type);

@@ -15,8 +15,8 @@ namespace brave_playlists {
 
 class PlaylistsServiceObserver : public base::CheckedObserver {
  public:
-  // |initialized| is false when init failed.
-  virtual void OnPlaylistsChanged(const PlaylistsChangeParams& params) = 0;
+  virtual void OnPlaylistItemStatusChanged(
+      const PlaylistsChangeParams& params) = 0;
 
  protected:
   ~PlaylistsServiceObserver() override {}

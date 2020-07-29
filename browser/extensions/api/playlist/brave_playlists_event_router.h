@@ -37,7 +37,8 @@ class BravePlaylistsEventRouter : public extensions::BrowserContextKeyedAPI,
   void OnListenerAdded(const extensions::EventListenerInfo& details) override;
 
   // PlaylistsServiceObserver overrides:
-  void OnPlaylistsChanged(const PlaylistsChangeParams& params) override;
+  void OnPlaylistItemStatusChanged(
+      const PlaylistsChangeParams& params) override;
 
  private:
   friend class extensions::BrowserContextKeyedAPIFactory<

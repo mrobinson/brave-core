@@ -54,7 +54,7 @@ void BravePlaylistsEventRouter::OnListenerAdded(
   }
 }
 
-void BravePlaylistsEventRouter::OnPlaylistsChanged(
+void BravePlaylistsEventRouter::OnPlaylistItemStatusChanged(
     const PlaylistsChangeParams& params) {
   auto event = std::make_unique<extensions::Event>(
       extensions::events::BRAVE_PLAYLISTS_ON_PLAYLISTS_CHANGED,
