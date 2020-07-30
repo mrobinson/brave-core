@@ -48,10 +48,10 @@ void ShowBraveWallet(Browser* browser) {
       browser, GetSingletonTabNavigateParams(browser, GURL(kBraveUIWalletURL)));
 }
 
-void ShowBravePlaylists(Browser* browser) {
+void ShowPlaylist(Browser* browser) {
   ShowSingletonTabOverwritingNTP(
       browser,
-      GetSingletonTabNavigateParams(browser, GURL(kBraveUIPlaylistsURL)));
+      GetSingletonTabNavigateParams(browser, GURL(kBraveUIPlaylistURL)));
 }
 
 void ShowExtensionSettings(Browser* browser) {

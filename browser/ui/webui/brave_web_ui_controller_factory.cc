@@ -71,7 +71,7 @@ WebUIController* NewWebUI<BasicUI>(WebUI* web_ui, const GURL& url) {
     return new BraveWalletUI(web_ui, url.host());
 #endif  // BUILDFLAG(BRAVE_WALLET_ENABLED)
 #if BUILDFLAG(ENABLE_PLAYLIST)
-  } else if (host == kPlaylistsHost) {
+  } else if (host == kPlaylistHost) {
     if (base::FeatureList::IsEnabled(playlist::features::kPlaylist)) {
       return new playlist::PlaylistUI(web_ui, url.host());
     }
@@ -113,7 +113,7 @@ WebUIFactoryFunction GetWebUIFactoryFunction(WebUI* web_ui, const GURL& url) {
       url.host_piece() == kTipHost ||
 #endif
 #if BUILDFLAG(ENABLE_PLAYLIST)
-      url.host_piece() == kPlaylistsHost ||
+      url.host_piece() == kPlaylistHost ||
 #endif
       url.host_piece() == kWelcomeHost ||
       url.host_piece() == chrome::kChromeUIWelcomeURL ||
