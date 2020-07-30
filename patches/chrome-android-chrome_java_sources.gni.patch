@@ -1,8 +1,8 @@
 diff --git a/chrome/android/chrome_java_sources.gni b/chrome/android/chrome_java_sources.gni
-index 1031b522994973a87c07127034e4742f1033f7e8..f8ecc8b44f75dcea8b8172b77f2fc712fdb021ba 100644
+index a85690c8c0b8b461462f5e852cbbdb87875cb458..149008a663b8d298a46c12e605f9ec65a3646e8b 100644
 --- a/chrome/android/chrome_java_sources.gni
 +++ b/chrome/android/chrome_java_sources.gni
-@@ -1765,3 +1765,4 @@ chrome_java_sources = [
+@@ -1749,3 +1749,4 @@ chrome_java_sources = [
    "java/src/org/chromium/chrome/browser/widget/DateDividedAdapter.java",
    "java/src/org/chromium/chrome/browser/widget/ScrimView.java",
  ]
