@@ -3,9 +3,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
- import '../../third_party/youtubedown/youtubedown'
+import '../../third_party/youtubedown/youtubedown'
 
- function createPlaylist (url: string) {
+function createPlaylist (url: string) {
   const ytdItems: chrome.bravePlaylist.YTDMediaItem[] = window.youtubedown_urls(url)
   if (ytdItems.length === 0) {
     console.log(' ##### got nothing from youtubedown_urls #####')

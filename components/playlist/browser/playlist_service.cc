@@ -358,7 +358,7 @@ void PlaylistService::OnThumbnailDownloaded(const std::string& id,
 
 base::Value PlaylistService::GetAllPlaylistItems() {
   base::Value playlist(base::Value::Type::LIST);
-  for (const auto& it: prefs_->Get(kPlaylistItems)->DictItems()) {
+  for (const auto& it : prefs_->Get(kPlaylistItems)->DictItems()) {
     base::Value item = it.second.Clone();
     item.RemoveKey(kPlaylistCreateParamsKey);
     playlist.Append(std::move(item));

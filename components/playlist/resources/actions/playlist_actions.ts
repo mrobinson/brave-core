@@ -7,5 +7,5 @@ import { action } from 'typesafe-actions'
 // Constants
 import { types } from '../constants/playlist_types'
 
-export const playlistItemStatusChanged= (id: string) =>
+export const playlistItemStatusChanged = (id: string) =>
   action(types.PLAYLIST_ITEM_STATUS_CHANGED, { id })

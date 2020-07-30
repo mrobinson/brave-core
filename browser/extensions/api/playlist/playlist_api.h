@@ -103,4 +103,4 @@ class BravePlaylistPlayItemFunction : public ExtensionFunction {
 }  // namespace api
 }  // namespace extensions
 
-#endif  // BRAVE_BROWSER_EXTENSIONS_API_PLAYLIST_PLAYLISTS_API_H_
+#endif  // BRAVE_BROWSER_EXTENSIONS_API_PLAYLIST_PLAYLIST_API_H_
