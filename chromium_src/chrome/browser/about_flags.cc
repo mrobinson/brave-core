@@ -12,7 +12,7 @@
 #include "brave/components/brave_shields/common/features.h"
 #include "brave/components/brave_sync/buildflags/buildflags.h"
 #include "brave/components/ntp_background_images/browser/features.h"
-#include "brave/components/playlist/browser/buildflags/buildflags.h"
+#include "brave/components/playlist/browser/features.h"
 #include "brave/components/speedreader/buildflags.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/profiles/profile_manager.h"
@@ -23,18 +23,13 @@ using ntp_background_images::features::kBraveNTPBrandedWallpaper;
 using ntp_background_images::features::kBraveNTPBrandedWallpaperDemo;
 using ntp_background_images::features::kBraveNTPSuperReferralWallpaper;
 
-#if BUILDFLAG(ENABLE_PLAYLIST)
-#include "brave/components/playlist/browser/features.h"
-
-#define PLAYLIST_FEATURE_ENTRIES \
-    {"playlist",                                                           \
-     flag_descriptions::kPlaylistName,                                     \
-     flag_descriptions::kPlaylistDescription,                              \
-     flags_ui::kOsMac | flags_ui::kOsWin | flags_ui::kOsLinux,             \
-     FEATURE_VALUE_TYPE(playlist::features::kPlaylist)},
-#else
-#define PLAYLIST_FEATURE_ENTRIES
-#endif
+#define BRAVE_SKIP_CONDITIONAL_FEATURE_ENTRY                               \
+  if (!strcmp("playlist", entry.internal_name) &&                          \
+      channel != version_info::Channel::DEV &&                             \
+      channel != version_info::Channel::CANARY &&                          \
+      channel != version_info::Channel::UNKNOWN) {                         \
+    return true;                                                           \
+  }
 
 #if BUILDFLAG(ENABLE_SPEEDREADER)
 #include "brave/components/speedreader/features.h"
@@ -85,12 +80,17 @@ using ntp_background_images::features::kBraveNTPSuperReferralWallpaper;
      flag_descriptions::kBraveSuperReferralDescription,                    \
      flags_ui::kOsMac | flags_ui::kOsWin | flags_ui::kOsAndroid,           \
      FEATURE_VALUE_TYPE(kBraveNTPSuperReferralWallpaper)},                 \
-    PLAYLIST_FEATURE_ENTRIES                                               \
+    {"playlist",                                                           \
+     flag_descriptions::kPlaylistName,                                     \
+     flag_descriptions::kPlaylistDescription,                              \
+     flags_ui::kOsMac | flags_ui::kOsWin | flags_ui::kOsLinux,             \
+     FEATURE_VALUE_TYPE(playlist::features::kPlaylist)},                   \
 
 #define SetFeatureEntryEnabled SetFeatureEntryEnabled_ChromiumImpl
 #include "../../../../chrome/browser/about_flags.cc"  // NOLINT
 #undef SetFeatureEntryEnabled
 #undef BRAVE_FEATURE_ENTRIES
+#undef BRAVE_SKIP_CONDITIONAL_FEATURE_ENTRY
 
 namespace about_flags {
 
