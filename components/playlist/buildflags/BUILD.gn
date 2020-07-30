@@ -1,5 +1,5 @@
 import("//build/buildflag_header.gni")
-import("//brave/components/playlist/browser/buildflags/buildflags.gni")
+import("//brave/components/playlist/buildflags/buildflags.gni")
 
 buildflag_header("buildflags") {
   header = "buildflags.h"
