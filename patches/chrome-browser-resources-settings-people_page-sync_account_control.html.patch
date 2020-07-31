@@ -1,0 +1,16 @@
+diff --git a/chrome/browser/resources/settings/people_page/sync_account_control.html b/chrome/browser/resources/settings/people_page/sync_account_control.html
+index d133680a4893e12c4ef979d3328daa16f3dfc651..a393b12e59a09c8b3c2f5a27e1a0213f758ce790 100644
+--- a/chrome/browser/resources/settings/people_page/sync_account_control.html
++++ b/chrome/browser/resources/settings/people_page/sync_account_control.html
+@@ -138,9 +138,9 @@
+     </style>
+     <!-- TODO(jamescook): Show the promo on Chrome OS if the user is signed-in
+          but has sync disabled. -->
+-    <div id="banner" hidden="[[syncStatus.signedIn]]" part="banner"></div>
++    <div id="banner" hidden="true" part="banner"></div>
+     <div class="cr-row first"
+-        id="promo-header" hidden="[[syncStatus.signedIn]]">
++        id="promo-header" hidden="true">
+       <div class="flex cr-padded-text">
+         <div id="promo-title" part="title">
+           [[getLabel_(promoLabelWithAccount,

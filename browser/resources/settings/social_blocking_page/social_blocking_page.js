@@ -7,5 +7,34 @@
  * social blocking options
  */
 Polymer({
-  is: 'settings-social-blocking-page'
+  is: 'settings-social-blocking-page',
+
+  properties: {},
+
+  /** @private {?settings.SocialBlockingPageProxy} */
+  browserProxy_: null,
+
+  /** @override */
+  created: function() {
+    this.browserProxy_ = settings.SocialBlockingPageProxyImpl.getInstance();
+  },
+
+  /** @override */
+  ready: function() {
+    this.setGoogleLoginEnabled_ = this.setGoogleLoginEnabled_.bind(this)
+    this.restartBrowser_ = this.restartBrowser_.bind(this)
+  },
+
+  setGoogleLoginEnabled_: function() {
+    this.browserProxy_.setGoogleLoginEnabled(this.$.googleLoginControlType.checked)
+  },
+
+  shouldShowRestart_: function(enabled) {
+    return enabled != this.browserProxy_.wasGoogleLoginEnabledAtStartup();
+  },
+
+  restartBrowser_: function(e) {
+    e.stopPropagation();
+    window.open("chrome://restart", "_self");
+  },
 });

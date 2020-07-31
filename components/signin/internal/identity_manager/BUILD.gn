@@ -1,0 +1,13 @@
+import("//components/signin/features.gni")
+
+source_set("identity_manager") {
+  sources = [
+    "brave_mutable_profile_oauth2_token_service_delegate.cc",
+    "brave_mutable_profile_oauth2_token_service_delegate.h",
+  ]
+
+  deps = [
+    "//components/signin/internal/identity_manager:identity_manager",
+    "//components/signin/public/webdata:webdata",
+  ]
+}

@@ -11,6 +11,7 @@
 #include "brave/browser/ui/webui/settings/brave_privacy_handler.h"
 #include "brave/browser/version_info.h"
 #include "chrome/browser/ui/webui/webui_util.h"
+#include "brave/browser/ui/webui/settings/brave_social_blocking_handler.h"
 
 namespace settings {
 void BraveAddLocalizedStrings(content::WebUIDataSource*, Profile*);
@@ -42,6 +43,9 @@ const char kBraveBuildInstructionsUrl[] =
 const char kBraveLicenseUrl[] = "https://mozilla.org/MPL/2.0/";
 const char kBraveReleaseTagPrefix[] =
     "https://github.com/brave/brave-browser/releases/tag/v";
+const char kGoogleLoginLearnMoreURL[] =
+    "https://github.com/brave/brave-browser/wiki/"
+    "Social-Blocking:-Allow-Google-login";
 
 void BraveAddCommonStrings(content::WebUIDataSource* html_source,
                            Profile* profile) {
@@ -298,6 +302,8 @@ void BraveAddCommonStrings(content::WebUIDataSource* html_source,
   AddLocalizedStringsBulk(html_source, localized_strings);
   html_source->AddString("webRTCLearnMoreURL",
                          base::ASCIIToUTF16(kWebRTCLearnMoreURL));
+  html_source->AddString("googleLoginLearnMoreURL",
+                        base::ASCIIToUTF16(kGoogleLoginLearnMoreURL));
   html_source->AddString(
       "getMoreExtensionsUrl",
       base::ASCIIToUTF16(
@@ -330,6 +336,7 @@ void BraveAddLocalizedStrings(content::WebUIDataSource* html_source,
   BraveAddResources(html_source, profile);
   BraveAddAboutStrings(html_source, profile);
   BravePrivacyHandler::AddLoadTimeData(html_source, profile);
+  BraveSocialBlockingHandler::AddLoadTimeData(html_source, profile);
 }
 
 }  // namespace settings

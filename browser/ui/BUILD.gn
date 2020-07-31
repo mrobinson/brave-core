@@ -84,6 +84,8 @@ source_set("ui") {
       "webui/settings/brave_import_data_handler.h",
       "webui/settings/brave_privacy_handler.cc",
       "webui/settings/brave_privacy_handler.h",
+      "webui/settings/brave_social_blocking_handler.cc",
+      "webui/settings/brave_social_blocking_handler.h",
       "webui/settings/brave_sync_handler.cc",
       "webui/settings/brave_sync_handler.h",
       "webui/settings/default_brave_shields_handler.cc",
