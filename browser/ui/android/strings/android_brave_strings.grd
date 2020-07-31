@@ -1275,6 +1275,9 @@ until they verify, or until 90 days have passed.
       <message name="IDS_NOTIFICATION_BRAVE_STATS_TIME" desc="Rewards notification text">
         Nice! You've saved 10 Mins of loading time with Brave browser.
       </message>
+      <message name="IDS_BRAVE_UI_REFRESH_PUBLISHER_STATUS" desc="A button that allows to refresh publisher status">
+        Refresh Status
+      </message>
     </messages>
   </release>
 </grit>
