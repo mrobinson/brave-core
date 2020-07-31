@@ -1,5 +1,5 @@
 diff --git a/third_party/blink/renderer/modules/peerconnection/rtc_peer_connection.cc b/third_party/blink/renderer/modules/peerconnection/rtc_peer_connection.cc
-index 6b8552b5baf878f4397eba97ba1c7143c2b9a690..4c17103f8e9a576a5058231b58151f76944989f6 100644
+index 6053ac602de2b72ed0c405efafffae17868e7735..1c5f0a92e6d6717bb2beba78110483380de2c0c2 100644
 --- a/third_party/blink/renderer/modules/peerconnection/rtc_peer_connection.cc
 +++ b/third_party/blink/renderer/modules/peerconnection/rtc_peer_connection.cc
 @@ -842,6 +842,7 @@ void RTCPeerConnection::Dispose() {
