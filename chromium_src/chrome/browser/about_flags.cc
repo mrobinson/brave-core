@@ -47,7 +47,7 @@ using ntp_background_images::features::kBraveNTPSuperReferralWallpaper;
 #define BRAVE_SYNC_FEATURE_ENTRIES
 #endif
 
-#if !defined(OS_ANDROID)
+#if defined(OS_CHROMEOS)
   #define BRAVE_FEATURE_ENTRIES_COMMA ,
 #else
   #define BRAVE_FEATURE_ENTRIES_COMMA
