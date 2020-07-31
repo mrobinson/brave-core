@@ -30,6 +30,15 @@
 
 using download::DownloadItem;
 
+enum class DownloadItemView::Mode {
+  kNormal,             // Showing download item.
+  kDangerous,          // Displaying the dangerous download warning.
+  kMalicious,          // Displaying the malicious download warning.
+  kMixedContentWarn,   // Displaying the mixed-content download warning.
+  kMixedContentBlock,  // Displaying the mixed-content download block error.
+  kDeepScanning,       // Displaying in-progress deep scanning information.
+};
+
 namespace {
 
 constexpr int kTextWidth = 140;
@@ -54,6 +63,23 @@ constexpr SkColor kDownloadUnlockIconColor = SkColorSetRGB(0xC6, 0x36, 0x26);
 
 // Decrement of lock icon height from font baseline
 constexpr int kDownloadUnlockIconHeightDecr = 1;
+
+// Whether we are warning about a dangerous/malicious download.
+bool is_download_warning(DownloadItemView::Mode mode) {
+  return (mode == DownloadItemView::Mode::kDangerous) ||
+         (mode == DownloadItemView::Mode::kMalicious);
+}
+
+// Whether we are in the mixed content mode.
+bool is_mixed_content(DownloadItemView::Mode mode) {
+  return (mode == DownloadItemView::Mode::kMixedContentWarn) ||
+         (mode == DownloadItemView::Mode::kMixedContentBlock);
+}
+
+// Whether a warning label is visible.
+bool has_warning_label(DownloadItemView::Mode mode) {
+  return is_download_warning(mode) || is_mixed_content(mode);
+}
 
 }  // namespace
 
@@ -223,7 +249,20 @@ gfx::ImageSkia BraveDownloadItemView::GetLockIcon(int height) {
 
 // Update accessible name with origin URL.
 void BraveDownloadItemView::UpdateAccessibleName() {
-  DownloadItemView::UpdateAccessibleName();
+  base::string16 new_name;
+  if (has_warning_label(mode_)) {
+    new_name = warning_label_->GetText();
+  } else {
+    new_name = status_label_->GetText() + base::char16(' ') +
+               model_->GetFileNameToReportUser().LossyDisplayName();
+  }
+
+  // Do not fire text changed notifications. Screen readers are notified of
+  // status changes via the accessible alert notifications, and text change
+  // notifications would be redundant.
+  accessible_name_ = new_name;
+  open_button_->SetAccessibleName(new_name);
+
   if (IsShowingWarningDialog())
     return;
 
