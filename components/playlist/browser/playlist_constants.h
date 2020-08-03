@@ -8,25 +8,28 @@
 
 namespace playlist {
 
-extern const char kPlaylistMediaFileUrlKey[];
-extern const char kPlaylistMediaFileTitleKey[];
+constexpr char kPlaylistMediaFileUrlKey[] = "mediaFileUrl";
+constexpr char kPlaylistMediaFileTitleKey[] = "mediaFileTitle";
 
-extern const char kPlaylistPlaylistNameKey[];
-extern const char kPlaylistPlaylistThumbnailUrlKey[];
-extern const char kPlaylistVideoMediaFilesKey[];
-extern const char kPlaylistAudioMediaFilesKey[];
+constexpr char kPlaylistPlaylistNameKey[] = "playlistName";
+constexpr char kPlaylistPlaylistThumbnailUrlKey[] = "playlistThumbnailUrl";
+constexpr char kPlaylistVideoMediaFilesKey[] = "videoMediaFiles";
+constexpr char kPlaylistAudioMediaFilesKey[] = "audioMediaFiles";
 
-extern const char kPlaylistIDKey[];
-extern const char kPlaylistThumbnailPathKey[];
-extern const char kPlaylistVideoMediaFilePathKey[];
-extern const char kPlaylistAudioMediaFilePathKey[];
-extern const char kPlaylistPartialReadyKey[];
-extern const char kPlaylistTitlesKey[];
-extern const char kPlaylistCreateParamsKey[];
+constexpr char kPlaylistIDKey[] = "id";
+constexpr char kPlaylistThumbnailPathKey[] = "thumbnailPath";
+constexpr char kPlaylistVideoMediaFilePathKey[] = "videoMediaFilePath";
+constexpr char kPlaylistAudioMediaFilePathKey[] = "audioMediaFilePath";
+constexpr char kPlaylistPartialReadyKey[] = "partialReady";
+constexpr char kPlaylistTitlesKey[] = "titles";
+constexpr char kPlaylistCreateParamsKey[] = "createParams";
 
-extern const char kPlaylistCreateParamsThumbnailUrlPathKey[];
-extern const char kPlaylistCreateParamsVideoMediaFilesPathKey[];
-extern const char kPlaylistCreateParamsAudioMediaFilesPathKey[];
+constexpr char kPlaylistCreateParamsThumbnailUrlPathKey[] =
+    "createParams.playlistThumbnailUrl";
+constexpr char kPlaylistCreateParamsVideoMediaFilesPathKey[] =
+    "createParams.videoMediaFiles";
+constexpr char kPlaylistCreateParamsAudioMediaFilesPathKey[] =
+    "createParams.audioMediaFiles";
 
 }  // namespace playlist
 

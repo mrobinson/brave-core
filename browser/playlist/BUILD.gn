@@ -16,5 +16,7 @@ source_set("playlist") {
       "desktop_playlist_player.cc",
       "desktop_playlist_player.h",
     ]
+
+    deps += [ "//net" ]
   }
 }

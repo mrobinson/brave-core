@@ -47,10 +47,6 @@ net::NetworkTrafficAnnotationTag GetNetworkTrafficAnnotationTagForURLLoad() {
       })");
 }
 
-void DeleteDir(const base::FilePath& path) {
-  base::DeleteFile(path, true);
-}
-
 base::FilePath::StringType GetFileNameStringFromIndex(int index) {
 #if defined(OS_WIN)
   return base::NumberToString16(index);
@@ -152,7 +148,7 @@ int DoGenerateSingleMediaFileOnIOThread(
   DCHECK(base::PathExists(unified_media_file_path));
 
   // Delete empty source files dir.
-  DeleteDir(source_files_dir);
+  base::DeleteFile(source_files_dir, true);
 
   if (unified_media_file.GetLength() == 0)
     return -1;
@@ -198,10 +194,6 @@ void PlaylistMediaFileDownloader::NotifyFail() {
 void PlaylistMediaFileDownloader::NotifySucceed(bool partial) {
   ResetStatus();
   client_->OnMediaFileReady(std::move(current_playlist_), partial);
-}
-
-void PlaylistMediaFileDownloader::DeletePlaylist(const base::FilePath& path) {
-  io_task_runner()->PostTask(FROM_HERE, base::BindOnce(&DeleteDir, path));
 }
 
 void PlaylistMediaFileDownloader::GenerateSingleMediaFile(

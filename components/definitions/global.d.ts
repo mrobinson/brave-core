@@ -75,7 +75,6 @@ declare global {
     }
     alreadyInserted: boolean
     web3: any
-    youtubedown_playlist_urls: any
     youtubedown_urls: any
   }
 }

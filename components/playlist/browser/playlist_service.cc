@@ -39,6 +39,10 @@ constexpr unsigned int kRetriesCountOnNetworkChange = 1;
 const base::FilePath::StringType kThumbnailFileName(
     FILE_PATH_LITERAL("thumbnail"));
 
+void DeleteDir(const base::FilePath& path) {
+  base::DeleteFile(path, true);
+}
+
 PlaylistInfo CreatePlaylistInfo(const CreatePlaylistParams& params) {
   PlaylistInfo p;
   p.id = base::Token::CreateRandom().ToString();
@@ -423,8 +427,9 @@ void PlaylistService::DeletePlaylistItem(const std::string& id) {
       {PlaylistChangeParams::ChangeType::CHANGE_TYPE_DELETED, id});
 
   // Delete assets from filesystem after updating db.
-  video_media_file_downloader_->DeletePlaylist(GetPlaylistItemDirPath(id));
-  audio_media_file_downloader_->DeletePlaylist(GetPlaylistItemDirPath(id));
+  io_task_runner()->PostTask(
+      FROM_HERE,
+      base::BindOnce(&DeleteDir, GetPlaylistItemDirPath(id)));
 }
 
 void PlaylistService::DeleteAllPlaylistItems() {
@@ -511,8 +516,7 @@ void PlaylistService::OnGetOrphanedPaths(
 
   for (const auto& path : orphaned_paths) {
     VLOG(2) << __func__ << ": " << path << " is orphaned";
-    video_media_file_downloader_->DeletePlaylist(path);
-    audio_media_file_downloader_->DeletePlaylist(path);
+    io_task_runner()->PostTask(FROM_HERE, base::BindOnce(&DeleteDir, path));
   }
 }
 

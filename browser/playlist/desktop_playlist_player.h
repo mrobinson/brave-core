@@ -10,10 +10,6 @@
 
 class Profile;
 
-namespace base {
-class FilePath;
-}  // namespace base
-
 namespace playlist {
 
 // Demo purpose player on desktop.

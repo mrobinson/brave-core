@@ -39,6 +39,7 @@ grit("static_resources") {
 
   defines = [
     "enable_brave_perf_predictor=$enable_brave_perf_predictor",
+    "enable_playlist=$enable_playlist",
     "enable_speedreader=$enable_speedreader",
   ]
 

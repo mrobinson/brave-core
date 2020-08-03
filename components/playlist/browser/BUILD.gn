@@ -4,15 +4,14 @@ source_set("browser") {
   sources = [
     "features.cc",
     "features.h",
-    "playlist_constants.cc",
     "playlist_constants.h",
-    "playlist_service.cc",
-    "playlist_service.h",
-    "playlist_service_observer.h",
     "playlist_data_source.cc",
     "playlist_data_source.h",
     "playlist_media_file_downloader.cc",
     "playlist_media_file_downloader.h",
+    "playlist_service.cc",
+    "playlist_service.h",
+    "playlist_service_observer.h",
     "playlist_types.cc",
     "playlist_types.h",
   ]
@@ -28,7 +27,5 @@ source_set("browser") {
     "//url",
   ]
 
-  public_deps = [
-    "../buildflags"
-  ]
+  public_deps = [ "../buildflags" ]
 }

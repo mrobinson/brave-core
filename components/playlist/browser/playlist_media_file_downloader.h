@@ -61,8 +61,6 @@ class PlaylistMediaFileDownloader {
   void GenerateSingleMediaFile(base::Value&& playlist_value,
                                const base::FilePath& base_dir);
 
-  void DeletePlaylist(const base::FilePath& path);
-
   void RequestCancelCurrentPlaylistGeneration();
 
   bool in_progress() const { return in_progress_; }
