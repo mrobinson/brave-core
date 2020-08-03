@@ -165,6 +165,9 @@ Config.prototype.buildArgs = function () {
   const chrome_version_parts = this.chromeVersion.split('.')
 
   let args = {
+    is_asan: true,
+    enable_full_stack_frames_for_profiling: true,
+    v8_enable_verify_heap: true,
     fieldtrial_testing_like_official_build: true,
     safe_browsing_mode: 1,
     brave_services_key: this.braveServicesKey,
@@ -180,7 +183,7 @@ Config.prototype.buildArgs = function () {
     enable_widevine: true,
     target_cpu: this.targetArch,
     is_official_build: this.isOfficialBuild(),
-    is_debug: this.isDebug(),
+    is_debug: false,
     dcheck_always_on: this.isDcheckAlwaysOn(),
     brave_channel: this.channel,
     brave_google_api_key: this.braveGoogleApiKey,
