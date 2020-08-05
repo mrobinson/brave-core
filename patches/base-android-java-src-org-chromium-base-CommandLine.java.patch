@@ -1,0 +1,20 @@
+diff --git a/base/android/java/src/org/chromium/base/CommandLine.java b/base/android/java/src/org/chromium/base/CommandLine.java
+index 646a4f6dd560c44237f0e661c21e28df3f559777..89d5c8f81bc301e54beb7cffa263110a3dfc2725 100644
+--- a/base/android/java/src/org/chromium/base/CommandLine.java
++++ b/base/android/java/src/org/chromium/base/CommandLine.java
+@@ -12,6 +12,7 @@ import androidx.annotation.VisibleForTesting;
+ 
+ import org.chromium.base.annotations.MainDex;
+ import org.chromium.base.annotations.NativeMethods;
++import org.chromium.base.BraveCommandLine;
+ 
+ import java.io.File;
+ import java.io.FileReader;
+@@ -149,6 +150,7 @@ public abstract class CommandLine {
+      */
+     public static void initFromFile(String file) {
+         char[] buffer = readFileAsUtf8(file);
++        buffer = BraveCommandLine.getInitialCommandLine();
+         init(buffer == null ? null : tokenizeQuotedArguments(buffer));
+     }
+ 
