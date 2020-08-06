@@ -310,12 +310,12 @@ public abstract class BraveActivity<C extends ChromeActivityComponent> extends C
                 OnboardingPrefManager.getInstance().setFromNotification(true);
                 getTabCreator(false).launchUrl(UrlConstants.NTP_URL, TabLaunchType.FROM_CHROME_UI);
             } else {
-                showOnboarding();
+                showOnboarding(false);
             }
         }
     }
 
-    public void showOnboarding() {
+    public void showOnboarding(boolean fromStats) {
         OnboardingPrefManager.getInstance().setNewOnboardingShown(true);
         FragmentManager fm = getSupportFragmentManager();
         HighlightDialogFragment fragment = (HighlightDialogFragment) fm
@@ -327,6 +327,9 @@ public abstract class BraveActivity<C extends ChromeActivityComponent> extends C
         }
 
         fragment = new HighlightDialogFragment();
+        Bundle fragmentBundle = new Bundle();
+        fragmentBundle.putBoolean(OnboardingPrefManager.FROM_STATS, fromStats);
+        fragment.setArguments(fragmentBundle);
         transaction.add(fragment, HighlightDialogFragment.TAG_FRAGMENT);
         transaction.commit();
     }
