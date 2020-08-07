@@ -28,6 +28,7 @@ class DatabaseInitialize;
 class DatabaseActivityInfo;
 class DatabaseBalanceReport;
 class DatabaseCredsBatch;
+class DatabaseEventLog;
 class DatabaseContributionInfo;
 class DatabaseContributionQueue;
 class DatabaseMediaPublisherInfo;
@@ -191,6 +192,13 @@ class Database {
   void GetCredsBatchesByTriggers(
       const std::vector<std::string>& trigger_ids,
       ledger::GetCredsBatchListCallback callback);
+
+  /**
+   * EVENT LOG
+   */
+  void SaveEventLog(const std::string& key, const std::string& value);
+
+  void GetAllEventLogs(ledger::GetEventLogsCallback callback);
 
   /**
    * MEDIA PUBLISHER INFO
@@ -422,6 +430,7 @@ class Database {
   std::unique_ptr<DatabaseContributionInfo> contribution_info_;
   std::unique_ptr<DatabaseContributionQueue> contribution_queue_;
   std::unique_ptr<DatabaseCredsBatch> creds_batch_;
+  std::unique_ptr<DatabaseEventLog> event_log_;
   std::unique_ptr<DatabasePendingContribution> pending_contribution_;
   std::unique_ptr<DatabaseProcessedPublisher> processed_publisher_;
   std::unique_ptr<DatabasePromotion> promotion_;

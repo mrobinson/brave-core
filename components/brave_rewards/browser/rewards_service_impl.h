@@ -318,6 +318,8 @@ class RewardsServiceImpl : public RewardsService,
 
   void GetAllPromotions(GetAllPromotionsCallback callback) override;
 
+  void GetEventLogs(GetEventLogsCallback callback) override;
+
   // Testing methods
   void SetLedgerEnvForTesting();
   void PrepareLedgerEnvForTesting();
@@ -701,6 +703,10 @@ class RewardsServiceImpl : public RewardsService,
       base::flat_map<std::string, ledger::PromotionPtr> promotions);
 
   void OnCompleteReset(SuccessCallback callback, const bool success);
+
+  void OnGetEventLogs(
+      GetEventLogsCallback callback,
+      ledger::EventLogs logs);
 
 #if defined(OS_ANDROID)
   ledger::Environment GetServerEnvironmentForAndroid();

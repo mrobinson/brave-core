@@ -13,6 +13,7 @@
 #include "bat/ledger/internal/bat_util.h"
 #include "bat/ledger/internal/common/time_util.h"
 #include "bat/ledger/internal/ledger_impl.h"
+#include "bat/ledger/internal/logging/event_log_keys.h"
 #include "bat/ledger/internal/response/response_uphold.h"
 #include "bat/ledger/internal/uphold/uphold.h"
 #include "bat/ledger/internal/uphold/uphold_authorization.h"
@@ -208,6 +209,10 @@ void Uphold::DisconnectWallet() {
     BLOG(0, "Wallet is null");
     return;
   }
+
+  ledger_->database()->SaveEventLog(
+      ledger::log::kWalletDisconnected,
+      static_cast<std::string>(ledger::kWalletUphold) + "/" + wallet->address);
 
   wallet = braveledger_wallet::ResetWallet(std::move(wallet));
 

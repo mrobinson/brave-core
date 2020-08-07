@@ -47,6 +47,7 @@
 #include "brave/components/brave_rewards/browser/balance_report.h"
 #include "brave/components/brave_rewards/browser/content_site.h"
 #include "brave/components/brave_rewards/browser/contribution_info.h"
+#include "brave/components/brave_rewards/browser/event_log.h"
 #include "brave/components/brave_rewards/browser/file_util.h"
 #include "brave/components/brave_rewards/browser/logging.h"
 #include "brave/components/brave_rewards/browser/logging_util.h"
@@ -3755,6 +3756,32 @@ void RewardsServiceImpl::OnCompleteReset(
 
 void RewardsServiceImpl::WalletDisconnected(const std::string& wallet_type) {
   OnDisconnectWallet(wallet_type, ledger::Result::LEDGER_OK);
+}
+
+void RewardsServiceImpl::GetEventLogs(GetEventLogsCallback callback) {
+  if (!Connected()) {
+    return;
+  }
+
+  bat_ledger_->GetEventLogs(
+      base::BindOnce(&RewardsServiceImpl::OnGetEventLogs,
+          AsWeakPtr(),
+          std::move(callback)));
+}
+
+void RewardsServiceImpl::OnGetEventLogs(
+    GetEventLogsCallback callback,
+    ledger::EventLogs logs) {
+  std::vector<brave_rewards::EventLog> event_logs;
+  for (const auto& log : logs) {
+    brave_rewards::EventLog properties;
+    properties.event_log_id = log->event_log_id;
+    properties.key = log->key;
+    properties.value = log->value;
+    properties.created_at = log->created_at;
+    event_logs.push_back(properties);
+  }
+  std::move(callback).Run(std::move(event_logs));
 }
 
 }  // namespace brave_rewards
