@@ -204,7 +204,6 @@ AdsServiceImpl::AdsServiceImpl(Profile* profile) :
            base::TaskPriority::BEST_EFFORT,
             base::TaskShutdownBehavior::BLOCK_SHUTDOWN})),
     base_path_(profile_->GetPath().AppendASCII("ads_service")),
-    database_(new ads::Database(base_path_.AppendASCII("database.sqlite"))),
     last_idle_state_(ui::IdleState::IDLE_STATE_ACTIVE),
     display_service_(NotificationDisplayService::GetForProfile(profile_)),
     rewards_service_(brave_rewards::RewardsServiceFactory::GetForProfile(
@@ -545,7 +544,15 @@ void AdsServiceImpl::OnInitialize(
 }
 
 void AdsServiceImpl::ShutdownBatAds() {
+  if (!connected()) {
+    return;
+  }
+
   VLOG(1) << "Shutting down ads";
+
+  const bool success = file_task_runner_->DeleteSoon(FROM_HERE,
+      database_.release());
+  VLOG_IF(1, !success) << "Failed to release database";
 
   bat_ads_->Shutdown(base::BindOnce(&AdsServiceImpl::OnShutdownBatAds,
       AsWeakPtr()));
@@ -626,18 +633,51 @@ void AdsServiceImpl::Start() {
 }
 
 void AdsServiceImpl::Stop() {
-  if (!connected()) {
-    return;
-  }
-
   ShutdownBatAds();
 }
 
-void AdsServiceImpl::ResetAllState() {
+void AdsServiceImpl::ResetState() {
+  VLOG(1) << "Resetting ads state";
+
+  profile_->GetPrefs()->ClearPrefsWithPrefixSilently("brave.brave_ads");
+
   base::PostTaskAndReplyWithResult(
       file_task_runner_.get(), FROM_HERE,
       base::BindOnce(&ResetOnFileTaskRunner, base_path_),
       base::BindOnce(&AdsServiceImpl::OnResetAllState, AsWeakPtr()));
+}
+
+void AdsServiceImpl::ResetAllState(
+    const bool should_shutdown) {
+  if (!should_shutdown) {
+    ResetState();
+    return;
+  }
+
+  VLOG(1) << "Shutting down and resetting ads state";
+
+  const bool success = file_task_runner_->DeleteSoon(FROM_HERE,
+      database_.release());
+  VLOG_IF(1, !success) << "Failed to release database";
+
+  bat_ads_->Shutdown(base::BindOnce(&AdsServiceImpl::OnShutdownAndResetBatAds,
+      AsWeakPtr()));
+}
+
+void AdsServiceImpl::OnShutdownAndResetBatAds(
+    const int32_t result) {
+  DCHECK(is_initialized_);
+
+  if (result != ads::Result::SUCCESS) {
+    VLOG(0) << "Failed to shutdown and reset ads state";
+    return;
+  }
+
+  Shutdown();
+
+  VLOG(1) << "Successfully shutdown ads";
+
+  ResetState();
 }
 
 void AdsServiceImpl::OnResetAllState(
@@ -646,8 +686,6 @@ void AdsServiceImpl::OnResetAllState(
     VLOG(0) << "Failed to reset ads state";
     return;
   }
-
-  profile_->GetPrefs()->ClearPrefsWithPrefixSilently("brave.brave_ads");
 
   VLOG(1) << "Successfully reset ads state";
 }
@@ -673,6 +711,9 @@ void AdsServiceImpl::OnEnsureBaseDirectoryExists(
       bat_ads_client_receiver_.BindNewEndpointAndPassRemote(),
       bat_ads_.BindNewEndpointAndPassReceiver(),
       base::BindOnce(&AdsServiceImpl::OnCreate, AsWeakPtr()));
+
+  database_ = std::make_unique<ads::Database>(
+      base_path_.AppendASCII("database.sqlite"));
 
   const std::string locale = GetLocale();
   RegisterUserModelComponentsForLocale(locale);
@@ -824,10 +865,14 @@ void AdsServiceImpl::OnViewAdNotification(
   ads::AdNotificationInfo notification;
   notification.FromJson(json);
 
+  OpenNewTabWithUrl(notification.target_url);
+
+  if (!connected()) {
+    return;
+  }
+
   bat_ads_->OnAdNotificationEvent(notification.uuid,
       ads::AdNotificationEventType::kClicked);
-
-  OpenNewTabWithUrl(notification.target_url);
 }
 
 void AdsServiceImpl::RetryViewingAdNotification(
@@ -852,6 +897,10 @@ void AdsServiceImpl::ClearAdsServiceForNotificationHandler() {
 
 void AdsServiceImpl::OpenNewTabWithUrl(
     const std::string& url) {
+  if (g_brave_browser_process->IsShuttingDown()) {
+    return;
+  }
+
   GURL gurl(url);
   if (!gurl.is_valid()) {
     VLOG(0) << "Failed to open new tab due to invalid URL: " << url;
@@ -2008,6 +2057,8 @@ std::string AdsServiceImpl::LoadResourceForId(
 ads::DBCommandResponsePtr RunDBTransactionOnFileTaskRunner(
     ads::DBTransactionPtr transaction,
     ads::Database* database) {
+  DCHECK(database);
+
   auto response = ads::DBCommandResponse::New();
 
   if (!database) {

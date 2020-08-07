@@ -212,12 +212,11 @@ bool BraveSyncWorker::ResetSync(
     const base::android::JavaParamRef<jobject>& jcaller) {
   syncer::SyncService* sync_service = GetSyncService();
 
-  if (!sync_service ||
-      !sync_service->GetUserSettings()->IsFirstSetupComplete()) {
-    VLOG(1) << __func__
-            << " sync service is not available or first setup isn't complete, "
-               "cannot reset sync now";
-    return false;
+  // Do not send self deleted commit if engine is not up and running
+  if (!sync_service || sync_service->GetTransportState() !=
+      syncer::SyncService::TransportState::ACTIVE) {
+    OnSelfDeleted();
+    return true;
   }
 
   syncer::DeviceInfoTracker* tracker = GetDeviceInfoTracker();
@@ -235,6 +234,32 @@ bool BraveSyncWorker::ResetSync(
                                            weak_ptr_factory_.GetWeakPtr()));
 
   return true;
+}
+
+bool BraveSyncWorker::GetSyncV1WasEnabled(
+    JNIEnv* env,
+    const base::android::JavaParamRef<jobject>& jcaller) {
+  brave_sync::Prefs brave_sync_prefs(profile_->GetPrefs());
+  bool sync_v1_was_enabled = brave_sync_prefs.IsSyncV1Enabled();
+  return sync_v1_was_enabled;
+}
+
+bool BraveSyncWorker::GetSyncV2MigrateNoticeDismissed(
+    JNIEnv* env,
+    const base::android::JavaParamRef<jobject>& jcaller) {
+  brave_sync::Prefs brave_sync_prefs(profile_->GetPrefs());
+  bool sync_v2_migration_notice_dismissed =
+      brave_sync_prefs.IsSyncMigrateNoticeDismissed();
+  return sync_v2_migration_notice_dismissed;
+}
+
+void BraveSyncWorker::SetSyncV2MigrateNoticeDismissed(
+    JNIEnv* env,
+    const base::android::JavaParamRef<jobject>& jcaller,
+    bool sync_v2_migration_notice_dismissed) {
+  brave_sync::Prefs brave_sync_prefs(profile_->GetPrefs());
+  brave_sync_prefs.SetDismissSyncMigrateNotice(
+      sync_v2_migration_notice_dismissed);
 }
 
 void BraveSyncWorker::OnSelfDeleted() {
