@@ -8,7 +8,7 @@
 #include "base/base64.h"
 #include "base/json/json_reader.h"
 #include "base/strings/stringprintf.h"
-#include "bat/ledger/internal/logging.h"
+#include "bat/ledger/internal/logging/logging.h"
 #include "net/http/http_status_code.h"
 
 namespace braveledger_response_util {
