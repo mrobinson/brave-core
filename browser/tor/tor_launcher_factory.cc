@@ -27,6 +27,7 @@ TorLauncherFactory::TorLauncherFactory()
     : is_starting_(false),
       tor_pid_(-1),
       control_(tor::TorControl::Create()) {
+  DCHECK_CURRENTLY_ON(BrowserThread::UI);
   if (g_prevent_tor_launch_for_tests) {
     tor_pid_ = 1234;
     VLOG(1) << "Skipping the tor process launch in tests.";
@@ -34,9 +35,11 @@ TorLauncherFactory::TorLauncherFactory()
   }
 
   Init();
+  control_->AddObserver(this);
 }
 
 void TorLauncherFactory::Init() {
+  DCHECK_CURRENTLY_ON(BrowserThread::UI);
   content::ServiceManagerConnection::GetForProcess()->GetConnector()->Connect(
       tor::mojom::kServiceName, tor_launcher_.BindNewPipeAndPassReceiver());
 
@@ -46,7 +49,6 @@ void TorLauncherFactory::Init() {
   tor_launcher_->SetCrashHandler(base::Bind(
                         &TorLauncherFactory::OnTorCrashed,
                         base::Unretained(this)));
-  control_->AddObserver(this);
 }
 
 TorLauncherFactory::~TorLauncherFactory() {}
