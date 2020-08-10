@@ -21,6 +21,10 @@
 #include "ui/base/l10n/l10n_util_mac.h"
 #include "ui/base/resource/resource_bundle.h"
 
+#import "brave/vendor/brave-ios/components/Bookmarks.h"
+#import "base/i18n/icu_util.h"
+#import "base/ios/ios_util.h"
+
 //#include "ios/chrome/browser/browser_state/browser_state_keyed_service_factories.h"
 //#include "ios/chrome/browser/browser_state/chrome_browser_state.h"
 //#include "ios/chrome/browser/browser_state/chrome_browser_state_manager.h"
@@ -50,6 +54,12 @@ void BraveWebMainParts::PreMainMessageLoopStart() {
   // base::PathService::Get(ios::FILE_RESOURCES_PACK, &resources_pack_path);
   // ui::ResourceBundle::GetSharedInstance().AddDataPackFromPath(
   //     resources_pack_path, ui::SCALE_FACTOR_100P);
+    
+    const auto pathToICUDTL = [[NSBundle bundleForClass:[BookmarksAPI class]] pathForResource:@"icudtl" ofType:@"dat"];
+    base::ios::OverridePathOfEmbeddedICU(pathToICUDTL.UTF8String);
+    if (!base::i18n::InitializeICU()) {
+      //BLOG(0, @"Failed to initialize ICU data");
+    }
 }
 
 void BraveWebMainParts::PreCreateThreads() {
@@ -85,15 +95,16 @@ void BraveWebMainParts::PreMainMessageLoopRun() {
 //  ChromeBrowserState* last_used_browser_state =
 //        browser_state_manager->GetLastUsedBrowserState();
     
+    fprintf(stderr, "PRE MAIN MESSAGE LOOP RUN -> BraveWebMainParts\n");
   ios::BookmarkModelFactory::GetInstance();
   ios::BookmarkUndoServiceFactory::GetInstance();
   ios::StartupTaskRunnerServiceFactory::GetInstance();
 }
 
 void BraveWebMainParts::PostMainMessageLoopRun() {
-    //application_context_->StartTearDown();
+    application_context_->StartTearDown();
 }
 
 void BraveWebMainParts::PostDestroyThreads() {
-    //application_context_->PostDestroyThreads();
+    application_context_->PostDestroyThreads();
 }
