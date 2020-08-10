@@ -938,6 +938,7 @@
         Autoplay media
       </message>
       <part file="speedreader_strings.grdp" />
+      <part file="ipfs_strings.grdp" />
     </messages>
   </release>
 </grit>
