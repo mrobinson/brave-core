@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "base/bind.h"
+#include "base/notreached.h"
 #include "brave/browser/playlist/desktop_playlist_player.h"
 #include "brave/browser/playlist/playlist_service_factory.h"
 #include "brave/common/extensions/api/brave_playlist.h"

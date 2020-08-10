@@ -5,7 +5,8 @@
 
 #include "brave/components/playlist/browser/playlist_types.h"
 
-#include <base/logging.h>
+#include "base/logging.h"
+#include "base/notreached.h"
 
 namespace playlist {
 
