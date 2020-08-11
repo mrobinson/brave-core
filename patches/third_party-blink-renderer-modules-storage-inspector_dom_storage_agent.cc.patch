@@ -1,0 +1,35 @@
+diff --git a/third_party/blink/renderer/modules/storage/inspector_dom_storage_agent.cc b/third_party/blink/renderer/modules/storage/inspector_dom_storage_agent.cc
+index 2d7519d0d888aa492e27456f01c08cfb95085f77..821a598e619a70cbb5fc2dd98a252dbd537a4047 100644
+--- a/third_party/blink/renderer/modules/storage/inspector_dom_storage_agent.cc
++++ b/third_party/blink/renderer/modules/storage/inspector_dom_storage_agent.cc
+@@ -79,8 +79,8 @@ void InspectorDOMStorageAgent::Restore() {
+ 
+ void InspectorDOMStorageAgent::InnerEnable() {
+   StorageController::GetInstance()->AddLocalStorageInspectorStorageAgent(this);
+-  StorageNamespace* ns =
+-      StorageNamespace::From(inspected_frames_->Root()->GetPage());
++  StorageNamespace* ns = StorageNamespace::From(
++      inspected_frames_->Root()->GetPage(), inspected_frames_->Root());
+   if (ns)
+     ns->AddInspectorStorageAgent(this);
+ }
+@@ -99,8 +99,8 @@ Response InspectorDOMStorageAgent::disable() {
+   enabled_.Set(false);
+   StorageController::GetInstance()->RemoveLocalStorageInspectorStorageAgent(
+       this);
+-  StorageNamespace* ns =
+-      StorageNamespace::From(inspected_frames_->Root()->GetPage());
++  StorageNamespace* ns = StorageNamespace::From(
++      inspected_frames_->Root()->GetPage(), inspected_frames_->Root());
+   if (ns)
+     ns->RemoveInspectorStorageAgent(this);
+   return Response::Success();
+@@ -237,7 +237,7 @@ Response InspectorDOMStorageAgent::FindStorageArea(
+         "Security origin cannot access session storage");
+   }
+   StorageNamespace* session_namespace =
+-      StorageNamespace::From(frame->GetPage());
++      StorageNamespace::From(frame->GetPage(), frame);
+   if (!session_namespace)
+     return Response::ServerError("SessionStorage is not supported");
+   DCHECK(session_namespace->IsSessionStorage());

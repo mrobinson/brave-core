@@ -1,0 +1,16 @@
+diff --git a/content/browser/web_contents/web_contents_impl.cc b/content/browser/web_contents/web_contents_impl.cc
+index 9917f0595f8131e3acc328dcf005b1e8685d9f36..650d6e82154f644e8944e5d617199cbe1acc0c0d 100644
+--- a/content/browser/web_contents/web_contents_impl.cc
++++ b/content/browser/web_contents/web_contents_impl.cc
+@@ -856,6 +856,11 @@ WebContentsImpl::~WebContentsImpl() {
+       GetOuterWebContents()->OnAudioStateChanged();
+   }
+ 
++  if (this == GetOutermostWebContents()) {
++    BrowserContext::DeleteEphemeralStorageIfNecessary(GetBrowserContext(),
++                                                      GetRenderViewHost());
++  }
++
+   for (auto& observer : observers_)
+     observer.FrameDeleted(root->current_frame_host());
+ 

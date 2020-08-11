@@ -1,8 +1,17 @@
 diff --git a/content/browser/frame_host/navigation_request.cc b/content/browser/frame_host/navigation_request.cc
-index 6f13dd3aded702faa63bd8c092b3541349c538c0..58de3118d1a51c4c83c11d8d5e3f3faf70b9ef49 100644
+index 6f13dd3aded702faa63bd8c092b3541349c538c0..9beaa5c776c5e313c75a574e1df8be9372e91bfd 100644
 --- a/content/browser/frame_host/navigation_request.cc
 +++ b/content/browser/frame_host/navigation_request.cc
-@@ -2783,6 +2783,7 @@ void NavigationRequest::OnStartChecksComplete(
+@@ -2688,6 +2688,8 @@ void NavigationRequest::OnStartChecksComplete(
+       browser_context, navigating_frame_host->GetSiteInstance());
+   DCHECK(partition);
+ 
++  BRAVE_ONSTARTCHECKSCOMPLETE_REPLACESTORAGEPARTITION
++
+   // |loader_| should not exist if the service worker handle and app cache
+   // handles will be destroyed, since it holds raw pointers to them. See the
+   // comment in the header for |loader_|.
+@@ -2783,6 +2785,7 @@ void NavigationRequest::OnStartChecksComplete(
    headers.MergeFrom(TakeModifiedRequestHeaders());
    begin_params_->headers = headers.ToString();
  

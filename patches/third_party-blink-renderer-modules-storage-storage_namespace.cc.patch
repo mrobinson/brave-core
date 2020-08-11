@@ -1,0 +1,91 @@
+diff --git a/third_party/blink/renderer/modules/storage/storage_namespace.cc b/third_party/blink/renderer/modules/storage/storage_namespace.cc
+index 0f53d5fae71a8c88c344a7d170518e28af59473c..a58fb8e1b70f48ef30cbf64c7bf1b9d2d5c592d0 100644
+--- a/third_party/blink/renderer/modules/storage/storage_namespace.cc
++++ b/third_party/blink/renderer/modules/storage/storage_namespace.cc
+@@ -44,6 +44,30 @@
+ 
+ namespace blink {
+ 
++class SessionStorageNamespaceIdSupplement
++    : public GarbageCollected<SessionStorageNamespaceIdSupplement>,
++      public Supplement<Page> {
++  USING_GARBAGE_COLLECTED_MIXIN(SessionStorageNamespaceIdSupplement);
++
++ public:
++  static const char kSupplementName[];
++  SessionStorageNamespaceIdSupplement(WebViewClient* client)
++      : id(client->GetSessionStorageNamespaceId()) {}
++
++  static base::StringPiece* From(Page* page) {
++    auto* supplement =
++        Supplement<Page>::From<SessionStorageNamespaceIdSupplement>(page);
++    if (!supplement)
++      return nullptr;
++    return &supplement->id;
++  }
++
++ private:
++  base::StringPiece id;
++};
++const char SessionStorageNamespaceIdSupplement::kSupplementName[] =
++    "SessionStorageNamespaceId";
++
+ const char StorageNamespace::kSupplementName[] = "SessionStorageNamespace";
+ 
+ StorageNamespace::StorageNamespace(StorageController* controller)
+@@ -55,17 +79,34 @@ StorageNamespace::StorageNamespace(StorageController* controller,
+ // static
+ void StorageNamespace::ProvideSessionStorageNamespaceTo(Page& page,
+                                                         WebViewClient* client) {
+-  if (client) {
+-    if (client->GetSessionStorageNamespaceId().empty())
+-      return;
+-    auto* ss_namespace =
+-        StorageController::GetInstance()->CreateSessionStorageNamespace(
+-            String(client->GetSessionStorageNamespaceId().data(),
+-                   client->GetSessionStorageNamespaceId().size()));
+-    if (!ss_namespace)
+-      return;
+-    ProvideTo(page, ss_namespace);
+-  }
++  if (!client)
++    return;
++  if (client->GetSessionStorageNamespaceId().empty())
++    return;
++
++  SessionStorageNamespaceIdSupplement::ProvideTo(
++      page, MakeGarbageCollected<SessionStorageNamespaceIdSupplement>(client));
++}
++
++// static
++StorageNamespace* StorageNamespace::From(Page* page, LocalFrame* local_frame) {
++  if (auto* supplement =
++          Supplement<LocalFrame>::From<StorageNamespace>(local_frame))
++    return supplement;
++
++  base::StringPiece* namespace_id =
++      SessionStorageNamespaceIdSupplement::From(page);
++  if (!namespace_id)
++    return nullptr;
++
++  auto& controller = StorageController::From(*local_frame);
++  auto* ss_namespace = controller.CreateSessionStorageNamespace(
++      String(namespace_id->data(), namespace_id->size()));
++  if (!ss_namespace)
++    return nullptr;
++
++  ProvideTo(*local_frame, ss_namespace);
++  return ss_namespace;
+ }
+ 
+ scoped_refptr<CachedStorageArea> StorageNamespace::GetCachedArea(
+@@ -173,7 +214,8 @@ void StorageNamespace::RemoveInspectorStorageAgent(
+ void StorageNamespace::Trace(Visitor* visitor) const {
+   visitor->Trace(inspector_agents_);
+   visitor->Trace(namespace_);
+-  Supplement<Page>::Trace(visitor);
++  visitor->Trace(controller_);
++  Supplement<LocalFrame>::Trace(visitor);
+ }
+ 
+ void StorageNamespace::DidDispatchStorageEvent(const SecurityOrigin* origin,

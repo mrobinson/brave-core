@@ -37,6 +37,10 @@ bool BraveIsAllowedThirdParty(
     const GURL& url,
     const GURL& site_for_cookies,
     const base::Optional<url::Origin>& top_frame_origin) {
+  // This is a temporary early return in order to test ephemeral storage.
+  // TODO(mrobinson): Do this in a better way.
+  return true;
+
   static const base::NoDestructor<
       // url -> first_party_url allow map
       std::vector<std::pair<ContentSettingsPattern,

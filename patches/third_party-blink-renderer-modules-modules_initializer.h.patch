@@ -1,0 +1,12 @@
+diff --git a/third_party/blink/renderer/modules/modules_initializer.h b/third_party/blink/renderer/modules/modules_initializer.h
+index 3728f27bc24a88924a0bb18f5a2fc418b24a0c70..ca7506008183b24ffbb3a02acc51b4e4b54a594b 100644
+--- a/third_party/blink/renderer/modules/modules_initializer.h
++++ b/third_party/blink/renderer/modules/modules_initializer.h
+@@ -46,6 +46,7 @@ class MODULES_EXPORT ModulesInitializer : public CoreInitializer {
+ 
+   void CloneSessionStorage(
+       Page* clone_from_page,
++      LocalFrame* clone_from_frame,
+       const SessionStorageNamespaceId& clone_to_namespace) override;
+ 
+   void DidChangeManifest(LocalFrame&) override;

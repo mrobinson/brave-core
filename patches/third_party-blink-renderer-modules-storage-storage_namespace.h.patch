@@ -1,0 +1,38 @@
+diff --git a/third_party/blink/renderer/modules/storage/storage_namespace.h b/third_party/blink/renderer/modules/storage/storage_namespace.h
+index 4eaca73c0f0be4e873753564699e0c813b694bf9..77433b6d4c10d4803f5e31d1668fec43d29fefef 100644
+--- a/third_party/blink/renderer/modules/storage/storage_namespace.h
++++ b/third_party/blink/renderer/modules/storage/storage_namespace.h
+@@ -64,20 +64,18 @@ class WebViewClient;
+ // area for an origin.
+ //
+ // With the kOnionSoupDOMStorage flag on:
+-// The StorageNamespace for SessioStorage supplement the Page. |GetCachedArea|
+-// is used to get the storage area for an origin.
++// The StorageNamespace for SessioStorage supplement the LocalFrame.
++// |GetCachedArea| is used to get the storage area for an origin.
+ class MODULES_EXPORT StorageNamespace final
+     : public GarbageCollected<StorageNamespace>,
+-      public Supplement<Page> {
++      public Supplement<LocalFrame> {
+   USING_GARBAGE_COLLECTED_MIXIN(StorageNamespace);
+ 
+  public:
+   static const char kSupplementName[];
+ 
+   static void ProvideSessionStorageNamespaceTo(Page&, WebViewClient*);
+-  static StorageNamespace* From(Page* page) {
+-    return Supplement<Page>::From<StorageNamespace>(page);
+-  }
++  static StorageNamespace* From(Page* page, LocalFrame* local_frame);
+ 
+   // Creates a namespace for LocalStorage.
+   StorageNamespace(StorageController*);
+@@ -126,7 +124,7 @@ class MODULES_EXPORT StorageNamespace final
+   HeapHashSet<WeakMember<InspectorDOMStorageAgent>> inspector_agents_;
+ 
+   // Lives globally.
+-  StorageController* controller_;
++  WeakMember<StorageController> controller_;
+   String namespace_id_;
+   // |StorageNamespace| is a per-Page object and doesn't have any
+   // |ExecutionContext|.

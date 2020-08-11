@@ -1,0 +1,14 @@
+diff --git a/content/browser/storage_partition_impl_map.h b/content/browser/storage_partition_impl_map.h
+index 83c7be47ca76af06b4c6472bdc058a28e7a5c210..62a0aa8f669d355150557064db28350a8aa4ad64 100644
+--- a/content/browser/storage_partition_impl_map.h
++++ b/content/browser/storage_partition_impl_map.h
+@@ -39,6 +39,9 @@ class CONTENT_EXPORT StoragePartitionImplMap
+   StoragePartitionImpl* Get(const StoragePartitionConfig& partition_config,
+                             bool can_create);
+ 
++  // Delete the given in-memory partition, if it exists.
++  void DeleteInMemory(const StoragePartitionConfig& partition_config);
++
+   // Starts an asynchronous best-effort attempt to delete all on-disk storage
+   // related to |partition_domain|, avoiding any directories that are known to
+   // be in use.

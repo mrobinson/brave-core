@@ -1,0 +1,35 @@
+diff --git a/third_party/blink/renderer/modules/storage/storage_controller.h b/third_party/blink/renderer/modules/storage/storage_controller.h
+index 3deb45c0fb2848c0836a63d9c7df9abbc714a5dc..49b8458de8e9c578edfbc946c7131ee2307bc533 100644
+--- a/third_party/blink/renderer/modules/storage/storage_controller.h
++++ b/third_party/blink/renderer/modules/storage/storage_controller.h
+@@ -46,10 +46,17 @@ class StorageNamespace;
+ // StorageController delegates the following methods to that namespace:
+ // GetLocalStorageArea, AddLocalStorageInspectorStorageAgent,
+ // RemoveLocalStorageInspectorStorageAgent, DidDispatchLocalStorageEvent
+-class MODULES_EXPORT StorageController : public mojom::blink::DomStorageClient {
+-  USING_FAST_MALLOC(StorageController);
++class MODULES_EXPORT StorageController
++    : public GarbageCollected<StorageController>,
++      public mojom::blink::DomStorageClient,
++      public Supplement<LocalFrame> {
++  USING_GARBAGE_COLLECTED_MIXIN(StorageController);
+ 
+  public:
++  static const char kSupplementName[];
++  static StorageController& From(LocalFrame& frame);
++  void Trace(Visitor* visitor) const override;
++
+   // Returns the one global StorageController instance.
+   static StorageController* GetInstance();
+ 
+@@ -103,8 +110,8 @@ class MODULES_EXPORT StorageController : public mojom::blink::DomStorageClient {
+   void ResetStorageAreaAndNamespaceConnections() override;
+ 
+   scoped_refptr<base::SingleThreadTaskRunner> ipc_runner_;
+-  Persistent<HeapHashMap<String, WeakMember<StorageNamespace>>> namespaces_;
+-  Persistent<StorageNamespace> local_storage_namespace_;
++  Member<HeapHashMap<String, WeakMember<StorageNamespace>>> namespaces_;
++  Member<StorageNamespace> local_storage_namespace_;
+   size_t total_cache_limit_;
+ 
+   mojo::Remote<mojom::blink::DomStorage> dom_storage_remote_;

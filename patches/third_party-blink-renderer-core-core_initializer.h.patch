@@ -1,0 +1,12 @@
+diff --git a/third_party/blink/renderer/core/core_initializer.h b/third_party/blink/renderer/core/core_initializer.h
+index 7c4975a9e7eeafe8729446408405b127ac0dfc2c..1fbe22dd24a478a30b1f8802c7c3059e943e1400 100644
+--- a/third_party/blink/renderer/core/core_initializer.h
++++ b/third_party/blink/renderer/core/core_initializer.h
+@@ -121,6 +121,7 @@ class CORE_EXPORT CoreInitializer {
+ 
+   virtual void CloneSessionStorage(
+       Page* clone_from_page,
++      LocalFrame* clone_from_frame,
+       const SessionStorageNamespaceId& clone_to_namespace) = 0;
+ 
+   virtual void DidChangeManifest(LocalFrame&) = 0;

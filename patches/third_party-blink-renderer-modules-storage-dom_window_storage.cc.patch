@@ -1,0 +1,27 @@
+diff --git a/third_party/blink/renderer/modules/storage/dom_window_storage.cc b/third_party/blink/renderer/modules/storage/dom_window_storage.cc
+index a77fb13242bc03f238470cb8e6deb288a9a0d35a..8f67db4e0695d5335191e717a82405df93e5e306 100644
+--- a/third_party/blink/renderer/modules/storage/dom_window_storage.cc
++++ b/third_party/blink/renderer/modules/storage/dom_window_storage.cc
+@@ -92,7 +92,8 @@ StorageArea* DOMWindowStorage::sessionStorage(
+   if (!page)
+     return nullptr;
+ 
+-  StorageNamespace* storage_namespace = StorageNamespace::From(page);
++  StorageNamespace* storage_namespace =
++      StorageNamespace::From(page, document->GetFrame());
+   if (!storage_namespace)
+     return nullptr;
+   auto storage_area =
+@@ -143,8 +144,10 @@ StorageArea* DOMWindowStorage::localStorage(
+   Page* page = document->GetPage();
+   if (!page || !page->GetSettings().GetLocalStorageEnabled())
+     return nullptr;
+-  auto storage_area = StorageController::GetInstance()->GetLocalStorageArea(
+-      document->GetSecurityOrigin());
++
++  auto& controller = StorageController::From(*document->GetFrame());
++  auto storage_area =
++      controller.GetLocalStorageArea(document->GetSecurityOrigin());
+   local_storage_ =
+       StorageArea::Create(document->GetFrame(), std::move(storage_area),
+                           StorageArea::StorageType::kLocalStorage);

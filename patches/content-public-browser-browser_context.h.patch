@@ -1,0 +1,33 @@
+diff --git a/content/public/browser/browser_context.h b/content/public/browser/browser_context.h
+index 429b7d0188e7c2efc40df0fb5cb3d8006a2368a9..88d1578efaa83b891757add5cf53c75c22412350 100644
+--- a/content/public/browser/browser_context.h
++++ b/content/public/browser/browser_context.h
+@@ -88,6 +88,7 @@ class PermissionController;
+ class PermissionControllerDelegate;
+ class PushMessagingService;
+ class ResourceContext;
++class RenderViewHost;
+ class SharedCorsOriginAccessList;
+ class SiteInstance;
+ class StorageNotificationService;
+@@ -132,6 +133,20 @@ class CONTENT_EXPORT BrowserContext : public base::SupportsUserData {
+                                                SiteInstance* site_instance,
+                                                bool can_create = true);
+ 
++  // Returns an ephemeral StoragePartition for the given view. This will create
++  // a new StoragePartition if it doesn't exist.
++  static StoragePartition* GetEphemeralStoragePartitionForView(
++      BrowserContext* browser_context,
++      RenderViewHost* host,
++      bool can_create = true);
++  // Clear the data from an ephemeral storage partition, if it exists.
++  static void ClearEphemeralStorageIfNecessary(BrowserContext* browser_context,
++                                               RenderViewHost* host);
++  // Delete an ephemeral storage partition, if it exists.
++  static void DeleteEphemeralStorageIfNecessary(BrowserContext* browser_context,
++                                                RenderViewHost* host);
++
++
+   // Returns a StoragePartition for the given StoragePartitionConfig. By
+   // default this will create a new StoragePartition if it doesn't exist,
+   // unless |can_create| is false.

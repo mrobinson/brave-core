@@ -1,0 +1,74 @@
+diff --git a/third_party/blink/renderer/modules/storage/storage_controller.cc b/third_party/blink/renderer/modules/storage/storage_controller.cc
+index 995be273325481199cffa39e0b6b139f48c9ab55..d309e8429dad7114004f98cc65ad2bc93ce77f4e 100644
+--- a/third_party/blink/renderer/modules/storage/storage_controller.cc
++++ b/third_party/blink/renderer/modules/storage/storage_controller.cc
+@@ -6,6 +6,7 @@
+ 
+ #include "base/feature_list.h"
+ #include "base/system/sys_info.h"
++#include "third_party/blink/public/common/browser_interface_broker_proxy.h"
+ #include "third_party/blink/public/common/features.h"
+ #include "third_party/blink/public/common/thread_safe_browser_interface_broker_proxy.h"
+ #include "third_party/blink/public/platform/platform.h"
+@@ -42,13 +43,54 @@ StorageController::DomStorageConnection GetDomStorageConnection() {
+ 
+ // static
+ StorageController* StorageController::GetInstance() {
+-  DEFINE_STATIC_LOCAL(StorageController, gCachedStorageAreaController,
+-                      (GetDomStorageConnection(),
+-                       Thread::MainThread()->Scheduler()->IPCTaskRunner(),
+-                       base::SysInfo::IsLowEndDevice()
+-                           ? kStorageControllerTotalCacheLimitInBytesLowEnd
+-                           : kStorageControllerTotalCacheLimitInBytes));
+-  return &gCachedStorageAreaController;
++  DEFINE_STATIC_LOCAL(Persistent<StorageController>,
++                      gCachedStorageAreaController, ());
++
++  if (gCachedStorageAreaController.Get())
++    return gCachedStorageAreaController.Get();
++  gCachedStorageAreaController = MakeGarbageCollected<StorageController>(
++      GetDomStorageConnection(),
++      Thread::MainThread()->Scheduler()->IPCTaskRunner(),
++      base::SysInfo::IsLowEndDevice()
++          ? kStorageControllerTotalCacheLimitInBytesLowEnd
++          : kStorageControllerTotalCacheLimitInBytes);
++  return gCachedStorageAreaController.Get();
++}
++
++const char StorageController::kSupplementName[] = "StorageController";
++
++// static
++StorageController& StorageController::From(LocalFrame& frame) {
++  StorageController* supplement =
++      Supplement<LocalFrame>::From<StorageController>(frame);
++  if (!supplement) {
++    StorageController::DomStorageConnection connection;
++    mojo::Remote<mojom::blink::DomStorageProvider> provider;
++    frame.GetBrowserInterfaceBroker().GetInterface(
++        provider.BindNewPipeAndPassReceiver());
++    mojo::PendingRemote<mojom::blink::DomStorageClient> client;
++    connection.client_receiver = client.InitWithNewPipeAndPassReceiver();
++    provider->BindDomStorage(
++        connection.dom_storage_remote.BindNewPipeAndPassReceiver(),
++        std::move(client));
++
++    supplement = MakeGarbageCollected<StorageController>(
++        std::move(connection),
++        Thread::MainThread()->Scheduler()->IPCTaskRunner(),
++        base::SysInfo::IsLowEndDevice()
++            ? kStorageControllerTotalCacheLimitInBytesLowEnd
++            : kStorageControllerTotalCacheLimitInBytes);
++
++    ProvideTo(frame, supplement);
++  }
++
++  return *supplement;
++}
++
++void StorageController::Trace(Visitor* visitor) const {
++  visitor->Trace(namespaces_);
++  visitor->Trace(local_storage_namespace_);
++  Supplement<LocalFrame>::Trace(visitor);
+ }
+ 
+ // static

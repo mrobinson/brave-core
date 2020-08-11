@@ -1,0 +1,16 @@
+diff --git a/content/browser/renderer_host/render_process_host_impl.h b/content/browser/renderer_host/render_process_host_impl.h
+index 734767f1555f2e08582d899448e23bc4787aaa2e..a545b16424454274953d6c3c8cc8590a3025557d 100644
+--- a/content/browser/renderer_host/render_process_host_impl.h
++++ b/content/browser/renderer_host/render_process_host_impl.h
+@@ -254,6 +254,11 @@ class CONTENT_EXPORT RenderProcessHostImpl
+       mojo::PendingReceiver<network::mojom::URLLoaderFactory> receiver,
+       network::mojom::URLLoaderFactoryParamsPtr params) override;
+ 
++  void CreateURLLoaderFactory(
++      StoragePartition* storage_partition,
++      mojo::PendingReceiver<network::mojom::URLLoaderFactory> receiver,
++      network::mojom::URLLoaderFactoryParamsPtr params);
++
+   bool MayReuseHost() override;
+   bool IsUnused() override;
+   void SetIsUsed() override;

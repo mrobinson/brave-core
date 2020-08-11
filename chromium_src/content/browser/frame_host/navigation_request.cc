@@ -38,6 +38,18 @@ GURL GetTopDocumentGURL(content::FrameTreeNode* frame_tree_node) {
       GetTopDocumentGURL(frame_tree_node_), frame_tree_node_->IsMainFrame(), \
       common_params_->method, &common_params_->referrer);
 
+#define BRAVE_ONSTARTCHECKSCOMPLETE_REPLACESTORAGEPARTITION                  \
+  const url::Origin top_level_origin = url::Origin::Create(                  \
+        frame_tree_node()->frame_tree()->root()->current_url());             \
+  const url::Origin target_origin = url::Origin::Create(common_params_->url);\
+  if (!navigating_frame_host->is_main_frame() &&                             \
+          !top_level_origin.IsSameOriginWith(target_origin)) {               \
+    partition = BrowserContext::GetEphemeralStoragePartitionForView(         \
+            browser_context, navigating_frame_host->GetRenderViewHost());    \
+    DCHECK(partition);                                                       \
+  }
+
 #include "../../../../../content/browser/frame_host/navigation_request.cc"
 
 #undef BRAVE_ONSTARTCHECKSCOMPLETE_MAYBEHIDEREFERRER
+#undef BRAVE_ONSTARTCHECKSCOMPLETE_REPLACESTORAGEPARTITION

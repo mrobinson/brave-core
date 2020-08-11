@@ -1,0 +1,16 @@
+diff --git a/third_party/blink/renderer/modules/modules_initializer.cc b/third_party/blink/renderer/modules/modules_initializer.cc
+index df76ac04d4c64697cf5979609a55372b025adadb..f1e55f206242e802dedc0eb8cf7dc25230ef5c9e 100644
+--- a/third_party/blink/renderer/modules/modules_initializer.cc
++++ b/third_party/blink/renderer/modules/modules_initializer.cc
+@@ -297,8 +297,10 @@ void ModulesInitializer::
+ 
+ void ModulesInitializer::CloneSessionStorage(
+     Page* clone_from_page,
++    LocalFrame* clone_from_frame,
+     const SessionStorageNamespaceId& clone_to_namespace) {
+-  StorageNamespace* storage_namespace = StorageNamespace::From(clone_from_page);
++  StorageNamespace* storage_namespace =
++      StorageNamespace::From(clone_from_page, clone_from_frame);
+   if (storage_namespace)
+     storage_namespace->CloneTo(WebString::FromLatin1(clone_to_namespace));
+ }

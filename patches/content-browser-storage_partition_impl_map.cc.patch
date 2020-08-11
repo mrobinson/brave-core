@@ -1,0 +1,25 @@
+diff --git a/content/browser/storage_partition_impl_map.cc b/content/browser/storage_partition_impl_map.cc
+index a64b50802ae4e6b008944730191917f4ee53f512..658d227fb90bd37fe0be86722490c513e4972f5d 100644
+--- a/content/browser/storage_partition_impl_map.cc
++++ b/content/browser/storage_partition_impl_map.cc
+@@ -358,6 +358,20 @@ StoragePartitionImpl* StoragePartitionImplMap::Get(
+   return partition;
+ }
+ 
++void StoragePartitionImplMap::DeleteInMemory(
++    const StoragePartitionConfig& partition_config) {
++  // Find the previously created partition if it's available.
++  PartitionMap::const_iterator it = partitions_.find(partition_config);
++  if (it == partitions_.end())
++    return;
++
++  it->second->ClearData(StoragePartition::REMOVE_DATA_MASK_ALL,
++                        StoragePartition::QUOTA_MANAGED_STORAGE_MASK_ALL,
++                        GURL(), base::Time(), base::Time::Max(),
++                        base::DoNothing());
++  partitions_.erase(it);
++}
++
+ void StoragePartitionImplMap::AsyncObliterate(
+     const std::string& partition_domain,
+     base::OnceClosure on_gc_required) {

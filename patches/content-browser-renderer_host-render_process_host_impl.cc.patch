@@ -1,0 +1,38 @@
+diff --git a/content/browser/renderer_host/render_process_host_impl.cc b/content/browser/renderer_host/render_process_host_impl.cc
+index b3cee953abdb4f8d6991dedaa43b4f8267f44f9d..eac0a38c5dfff1ed73dc548bfd06cefef62412bb 100644
+--- a/content/browser/renderer_host/render_process_host_impl.cc
++++ b/content/browser/renderer_host/render_process_host_impl.cc
+@@ -2815,6 +2815,7 @@ void RenderProcessHostImpl::CreateURLLoaderFactoryForRendererProcess(
+     mojo::PendingReceiver<network::mojom::URLLoaderFactory> receiver) {
+   DCHECK_CURRENTLY_ON(BrowserThread::UI);
+   CreateURLLoaderFactory(
++      storage_partition_impl_,
+       std::move(receiver),
+       URLLoaderFactoryParamsHelper::CreateForRendererProcess(this));
+ }
+@@ -2822,16 +2823,23 @@ void RenderProcessHostImpl::CreateURLLoaderFactoryForRendererProcess(
+ void RenderProcessHostImpl::CreateURLLoaderFactory(
+     mojo::PendingReceiver<network::mojom::URLLoaderFactory> receiver,
+     network::mojom::URLLoaderFactoryParamsPtr params) {
++  CreateURLLoaderFactory(storage_partition_impl_, std::move(receiver), std::move(params));
++}
++
++void RenderProcessHostImpl::CreateURLLoaderFactory(
++    StoragePartition* storage_partition,
++    mojo::PendingReceiver<network::mojom::URLLoaderFactory> receiver,
++    network::mojom::URLLoaderFactoryParamsPtr params) {
+   DCHECK_CURRENTLY_ON(BrowserThread::UI);
+   DCHECK(params);
+   DCHECK_EQ(GetID(), static_cast<int>(params->process_id));
+ 
+   if (GetCreateNetworkFactoryCallback().is_null()) {
+-    storage_partition_impl_->GetNetworkContext()->CreateURLLoaderFactory(
++    storage_partition->GetNetworkContext()->CreateURLLoaderFactory(
+         std::move(receiver), std::move(params));
+   } else {
+     mojo::PendingRemote<network::mojom::URLLoaderFactory> original_factory;
+-    storage_partition_impl_->GetNetworkContext()->CreateURLLoaderFactory(
++    storage_partition->GetNetworkContext()->CreateURLLoaderFactory(
+         original_factory.InitWithNewPipeAndPassReceiver(), std::move(params));
+     GetCreateNetworkFactoryCallback().Run(std::move(receiver), GetID(),
+                                           std::move(original_factory));
