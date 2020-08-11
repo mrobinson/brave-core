@@ -12,13 +12,16 @@
 
 namespace ads {
 
-bool ShouldAllowHeader(
-    const std::string& header);
-
 std::string UrlRequestToString(
     const UrlRequestPtr& request);
 
+std::string UrlRequestHeadersToString(
+    const UrlRequestPtr& request);
+
 std::string UrlResponseToString(
+    const UrlResponse& response);
+
+std::string UrlResponseHeadersToString(
     const UrlResponse& response);
 
 }  // namespace ads

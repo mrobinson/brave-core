@@ -49,6 +49,7 @@ void GetCatalog::Download() {
   GetCatalogUrlRequestBuilder url_request_builder;
   UrlRequestPtr url_request = url_request_builder.Build();
   BLOG(5, UrlRequestToString(url_request));
+  BLOG(7, UrlRequestHeadersToString(url_request));
 
   auto callback = std::bind(&GetCatalog::OnDownloaded, this, _1);
   ads_->get_ads_client()->UrlRequest(std::move(url_request), callback);
@@ -63,6 +64,7 @@ uint64_t GetCatalog::LastUpdated() const {
 void GetCatalog::OnDownloaded(
     const UrlResponse& response) {
   BLOG(7, UrlResponseToString(response));
+  BLOG(7, UrlResponseHeadersToString(url_response));
 
   bool should_retry = false;
 

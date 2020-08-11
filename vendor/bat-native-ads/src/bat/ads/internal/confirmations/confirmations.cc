@@ -184,7 +184,7 @@ void Confirmations::Save() {
     return;
   }
 
-  BLOG(3, "Saving confirmations state");
+  BLOG(9, "Saving confirmations state");
 
   const std::string json = state_->ToJson();
   auto callback = std::bind(&Confirmations::OnSaved, this, _1);
@@ -234,7 +234,7 @@ void Confirmations::OnSaved(
     return;
   }
 
-  BLOG(3, "Successfully saved confirmations state");
+  BLOG(9, "Successfully saved confirmations state");
 }
 
 void Confirmations::Load() {
