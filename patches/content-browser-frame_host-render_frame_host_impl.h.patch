@@ -1,5 +1,5 @@
 diff --git a/content/browser/frame_host/render_frame_host_impl.h b/content/browser/frame_host/render_frame_host_impl.h
-index a6adfbd54964d52a9ad0654b2d18d0fdd1ca8eaa..25b3e10dbc0eba0dd477ac0cc5b1bd41d8275b76 100644
+index a6adfbd54964d52a9ad0654b2d18d0fdd1ca8eaa..8df3fc88dde232b9f1489605f7875d8bc78fbb55 100644
 --- a/content/browser/frame_host/render_frame_host_impl.h
 +++ b/content/browser/frame_host/render_frame_host_impl.h
 @@ -244,6 +244,7 @@ class CONTENT_EXPORT RenderFrameHostImpl
@@ -10,15 +10,7 @@ index a6adfbd54964d52a9ad0654b2d18d0fdd1ca8eaa..25b3e10dbc0eba0dd477ac0cc5b1bd41
        public ui::AXActionHandler,
        public network::mojom::CookieAccessObserver {
   public:
-@@ -379,6 +380,7 @@ class CONTENT_EXPORT RenderFrameHostImpl
-   bool IsInBackForwardCache() override;
-   ukm::SourceId GetPageUkmSourceId() override;
-   StoragePartition* GetStoragePartition() override;
-+  bool ShouldUseEphemeralStorage();
-   BrowserContext* GetBrowserContext() override;
-   void ReportHeavyAdIssue(blink::mojom::HeavyAdResolutionStatus resolution,
-                           blink::mojom::HeavyAdReason reason) override;
-@@ -1681,6 +1683,9 @@ class CONTENT_EXPORT RenderFrameHostImpl
+@@ -1681,6 +1682,9 @@ class CONTENT_EXPORT RenderFrameHostImpl
    mojo::PendingRemote<network::mojom::CookieAccessObserver>
    CreateCookieAccessObserver();
  
@@ -28,7 +20,7 @@ index a6adfbd54964d52a9ad0654b2d18d0fdd1ca8eaa..25b3e10dbc0eba0dd477ac0cc5b1bd41
    // network::mojom::CookieAccessObserver:
    void OnCookiesAccessed(
        network::mojom::CookieAccessDetailsPtr details) override;
-@@ -1838,6 +1843,12 @@ class CONTENT_EXPORT RenderFrameHostImpl
+@@ -1838,6 +1842,12 @@ class CONTENT_EXPORT RenderFrameHostImpl
                             AttemptDuplicateRenderWidgetHost);
    FRIEND_TEST_ALL_PREFIXES(RenderDocumentHostUserDataTest,
                             CheckInPendingDeletionState);

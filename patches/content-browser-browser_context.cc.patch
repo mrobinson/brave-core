@@ -1,5 +1,5 @@
 diff --git a/content/browser/browser_context.cc b/content/browser/browser_context.cc
-index 13e78598fea92df8a30475118a3cc2cd48f2a817..faf22f71334d7d491e3fe750ec9cf74fed37ca50 100644
+index 13e78598fea92df8a30475118a3cc2cd48f2a817..3c0abb011cbafd48de1945d6222be2ada2ab14e0 100644
 --- a/content/browser/browser_context.cc
 +++ b/content/browser/browser_context.cc
 @@ -50,6 +50,7 @@
@@ -10,49 +10,14 @@ index 13e78598fea92df8a30475118a3cc2cd48f2a817..faf22f71334d7d491e3fe750ec9cf74f
  #include "content/public/browser/shared_cors_origin_access_list.h"
  #include "content/public/browser/site_instance.h"
  #include "content/public/browser/storage_partition_config.h"
-@@ -261,6 +262,45 @@ StoragePartition* BrowserContext::GetStoragePartition(
-   return partition_map->Get(config_to_use, can_create);
+@@ -626,4 +627,10 @@ variations::VariationsClient* BrowserContext::GetVariationsClient() {
+   return nullptr;
  }
  
-+namespace {
-+StoragePartitionConfig GetEphemeralStorageConfig(RenderViewHost* host) {
-+  std::string domain = std::string("ephemeral-") +
-+      base::NumberToString(host->GetRoutingID());
-+  std::string name;
-+  return StoragePartitionConfig::Create(domain, name, true /* in_memory */);
-+}
-+}  // namespace
-+
 +// static
-+StoragePartition* BrowserContext::GetEphemeralStoragePartitionForView(
-+    BrowserContext* browser_context,
-+    RenderViewHost* host,
-+    bool can_create) {
-+  return GetStoragePartition(browser_context, GetEphemeralStorageConfig(host), can_create);
++StoragePartitionImplMap* BrowserContext::GetStoragePartitionImplMap() {
++  return static_cast<StoragePartitionImplMap*>(
++      GetUserData(kStoragePartitionMapKeyName));
 +}
 +
-+// static
-+void BrowserContext::ClearEphemeralStorageIfNecessary(
-+    BrowserContext* browser_context,
-+    RenderViewHost* host) {
-+  auto* partition = GetStoragePartition(
-+      browser_context, GetEphemeralStorageConfig(host), false /* can_create */);
-+  if (!partition)
-+    return;
-+
-+  partition->ClearData(StoragePartition::REMOVE_DATA_MASK_ALL,
-+                       StoragePartition::QUOTA_MANAGED_STORAGE_MASK_ALL, GURL(),
-+                       base::Time(), base::Time::Max(), base::DoNothing());
-+}
-+
-+// static
-+void BrowserContext::DeleteEphemeralStorageIfNecessary(
-+    BrowserContext* browser_context,
-+    RenderViewHost* host) {
-+  GetStoragePartitionMap(browser_context)
-+      ->DeleteInMemory(GetEphemeralStorageConfig(host));
-+}
-+
- StoragePartition* BrowserContext::GetStoragePartitionForSite(
-     BrowserContext* browser_context,
-     const GURL& site,
+ }  // namespace content

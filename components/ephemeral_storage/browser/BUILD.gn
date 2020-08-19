@@ -1,0 +1,23 @@
+source_set("browser") {
+  sources = [
+    "ephemeral_storage_web_contents_observer.cc",
+    "ephemeral_storage_web_contents_observer.h",
+  ]
+
+  deps = [
+    "//base",
+    "//chrome/common",
+    "//components/content_settings/core/common",
+    "//components/content_settings/core/browser",
+    "//components/keyed_service/core",
+    "//components/prefs",
+    "//components/sessions",
+    "//content/public/browser",
+    "//mojo/public/cpp/bindings",
+    "//net",
+    "//third_party/blink/public/mojom:mojom_platform_headers",
+    "//url",
+
+  ]
+}
+

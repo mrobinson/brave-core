@@ -44,8 +44,14 @@ GURL GetTopDocumentGURL(content::FrameTreeNode* frame_tree_node) {
   const url::Origin target_origin = url::Origin::Create(common_params_->url);\
   if (!navigating_frame_host->is_main_frame() &&                             \
           !top_level_origin.IsSameOriginWith(target_origin)) {               \
-    partition = BrowserContext::GetEphemeralStoragePartitionForView(         \
-            browser_context, navigating_frame_host->GetRenderViewHost());    \
+  RenderViewHost* host = navigating_frame_host->GetRenderViewHost();         \
+  std::string domain = std::string("ephemeral-") +                           \
+      base::NumberToString(host->GetRoutingID());                            \
+  std::string name;                                                          \
+  StoragePartitionConfig config =                                            \
+     StoragePartitionConfig::Create(domain, name, true /* in_memory */);     \
+    partition = BrowserContext::GetStoragePartition(                         \
+        browser_context, config, true /* can create */);                     \
     DCHECK(partition);                                                       \
   }
 

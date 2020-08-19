@@ -1,60 +1,30 @@
 diff --git a/content/browser/frame_host/render_frame_host_impl.cc b/content/browser/frame_host/render_frame_host_impl.cc
-index 1531d69cfe3d6c975073d293edf15e0bc4d9325b..0a8ee0c0e0997911ee02d777c104c0b61377e71b 100644
+index 1531d69cfe3d6c975073d293edf15e0bc4d9325b..a9d92944c7a3dc8e5d38f8136d8a38ed38d91539 100644
 --- a/content/browser/frame_host/render_frame_host_impl.cc
 +++ b/content/browser/frame_host/render_frame_host_impl.cc
-@@ -3496,8 +3496,17 @@ void RenderFrameHostImpl::ReportHeavyAdIssue(
+@@ -3496,8 +3496,19 @@ void RenderFrameHostImpl::ReportHeavyAdIssue(
  }
  
  StoragePartition* RenderFrameHostImpl::GetStoragePartition() {
 -  return BrowserContext::GetStoragePartition(GetBrowserContext(),
 -                                             GetSiteInstance());
-+  if (!ShouldUseEphemeralStorage()) {
++  bool should_use_ephemeral_storage =
++      !frame_tree_node_->IsMainFrame() && ComputeSiteForCookies().IsNull();
++  if (!should_use_ephemeral_storage) {
 +    return BrowserContext::GetStoragePartition(GetBrowserContext(),
 +                                               GetSiteInstance());
 +  } else {
-+    return BrowserContext::GetEphemeralStoragePartitionForView(
-+        GetBrowserContext(), GetRenderViewHost());
++      std::string domain = std::string("ephemeral-") +
++          base::NumberToString(GetRenderViewHost()->GetRoutingID());
++      std::string name;
++      StoragePartitionConfig config =
++          StoragePartitionConfig::Create(domain, name, true /* in_memory */);
++    return BrowserContext::GetStoragePartition(GetBrowserContext(), config);
 +  }
-+}
-+
-+bool RenderFrameHostImpl::ShouldUseEphemeralStorage() {
-+  return !frame_tree_node_->IsMainFrame() && ComputeSiteForCookies().IsNull();
  }
  
  void RenderFrameHostImpl::RequestTextSurroundingSelection(
-@@ -4846,12 +4855,15 @@ void RenderFrameHostImpl::CreateNewWindow(
-     return;
-   }
- 
-+  // Since we are creating a new window we don't want to use anything
-+  // from our potentially ephemeral storage partition. Instead look
-+  // at the default storage partition.
-+  auto* partition = BrowserContext::GetStoragePartition(GetBrowserContext(),
-+                                                        GetSiteInstance());
-+
-   // This will clone the sessionStorage for namespace_id_to_clone.
--  StoragePartition* storage_partition = BrowserContext::GetStoragePartition(
--      GetSiteInstance()->GetBrowserContext(), GetSiteInstance());
-   DOMStorageContextWrapper* dom_storage_context =
--      static_cast<DOMStorageContextWrapper*>(
--          storage_partition->GetDOMStorageContext());
-+      static_cast<DOMStorageContextWrapper*>(partition->GetDOMStorageContext());
- 
-   scoped_refptr<SessionStorageNamespaceImpl> cloned_namespace;
-   if (!params->clone_from_session_storage_namespace_id.empty()) {
-@@ -5221,6 +5233,11 @@ void RenderFrameHostImpl::BeginNavigation(
-       std::move(blob_url_loader_factory), std::move(navigation_client),
-       std::move(navigation_initiator), EnsurePrefetchedSignedExchangeCache(),
-       MaybeCreateWebBundleHandleTracker());
-+
-+  if (frame_tree_node()->IsMainFrame()) {
-+    BrowserContext::ClearEphemeralStorageIfNecessary(GetBrowserContext(),
-+                                                     GetRenderViewHost());
-+  }
- }
- 
- void RenderFrameHostImpl::SubresourceResponseStarted(
-@@ -6115,8 +6132,7 @@ void RenderFrameHostImpl::CommitNavigation(
+@@ -6115,8 +6126,7 @@ void RenderFrameHostImpl::CommitNavigation(
      }
  #endif
  
@@ -64,7 +34,7 @@ index 1531d69cfe3d6c975073d293edf15e0bc4d9325b..0a8ee0c0e0997911ee02d777c104c0b6
      auto storage_partition_config =
          GetContentClient()->browser()->GetStoragePartitionConfigForSite(
              browser_context, site_instance_->GetSiteInfo().site_url());
-@@ -6225,9 +6241,8 @@ void RenderFrameHostImpl::CommitNavigation(
+@@ -6225,9 +6235,8 @@ void RenderFrameHostImpl::CommitNavigation(
        // factories. TODO(kinuko): Consider setting this up only when prefetch
        // is used. Currently we have this here to make sure we have non-racy
        // situation (https://crbug.com/849929).
@@ -76,7 +46,7 @@ index 1531d69cfe3d6c975073d293edf15e0bc4d9325b..0a8ee0c0e0997911ee02d777c104c0b6
        storage_partition->GetPrefetchURLLoaderService()->GetFactory(
            prefetch_loader_factory.InitWithNewPipeAndPassReceiver(),
            frame_tree_node_->frame_tree_node_id(),
-@@ -6481,8 +6496,7 @@ void RenderFrameHostImpl::SetUpMojoIfNeeded() {
+@@ -6481,8 +6490,7 @@ void RenderFrameHostImpl::SetUpMojoIfNeeded() {
        base::Unretained(this)));
  
    file_system_manager_.reset(new FileSystemManagerImpl(
@@ -86,25 +56,17 @@ index 1531d69cfe3d6c975073d293edf15e0bc4d9325b..0a8ee0c0e0997911ee02d777c104c0b6
        ChromeBlobStorageContext::GetFor(GetProcess()->GetBrowserContext())));
  
    mojo::PendingRemote<mojom::FrameFactory> frame_factory;
-@@ -6949,8 +6963,6 @@ bool RenderFrameHostImpl::CreateNetworkServiceDefaultFactoryAndObserve(
+@@ -6949,8 +6957,7 @@ bool RenderFrameHostImpl::CreateNetworkServiceDefaultFactoryAndObserve(
        (!network_service_disconnect_handler_holder_ ||
         !network_service_disconnect_handler_holder_.is_connected())) {
      network_service_disconnect_handler_holder_.reset();
 -    StoragePartition* storage_partition = BrowserContext::GetStoragePartition(
 -        GetSiteInstance()->GetBrowserContext(), GetSiteInstance());
++    StoragePartition* storage_partition = GetStoragePartition();
      network::mojom::URLLoaderFactoryParamsPtr monitoring_factory_params =
          network::mojom::URLLoaderFactoryParams::New();
      monitoring_factory_params->process_id = GetProcess()->GetID();
-@@ -6962,7 +6974,7 @@ bool RenderFrameHostImpl::CreateNetworkServiceDefaultFactoryAndObserve(
-         url::Origin::Create(
-             GURL("https://monitoring.url.loader.factory.invalid"));
- 
--    storage_partition->GetNetworkContext()->CreateURLLoaderFactory(
-+    GetStoragePartition()->GetNetworkContext()->CreateURLLoaderFactory(
-         network_service_disconnect_handler_holder_.BindNewPipeAndPassReceiver(),
-         std::move(monitoring_factory_params));
-     network_service_disconnect_handler_holder_.set_disconnect_handler(
-@@ -6994,8 +7006,11 @@ bool RenderFrameHostImpl::CreateNetworkServiceDefaultFactoryInternal(
+@@ -6994,8 +7001,11 @@ bool RenderFrameHostImpl::CreateNetworkServiceDefaultFactoryInternal(
        this, false /* is_navigation */, false /* is_download */,
        &default_factory_receiver, &params->factory_override);
  
@@ -118,7 +80,7 @@ index 1531d69cfe3d6c975073d293edf15e0bc4d9325b..0a8ee0c0e0997911ee02d777c104c0b6
  
    return bypass_redirect_checks;
  }
-@@ -7423,7 +7438,7 @@ void RenderFrameHostImpl::GetIdleManager(
+@@ -7423,7 +7433,7 @@ void RenderFrameHostImpl::GetIdleManager(
      mojo::ReportBadMessage("Feature policy blocks access to IdleDetection.");
      return;
    }
@@ -127,7 +89,7 @@ index 1531d69cfe3d6c975073d293edf15e0bc4d9325b..0a8ee0c0e0997911ee02d777c104c0b6
        ->GetIdleManager()
        ->CreateService(std::move(receiver),
                        GetMainFrame()->GetLastCommittedOrigin());
-@@ -7502,7 +7517,7 @@ void RenderFrameHostImpl::BindSmsReceiverReceiver(
+@@ -7502,7 +7512,7 @@ void RenderFrameHostImpl::BindSmsReceiverReceiver(
  
  void RenderFrameHostImpl::BindRestrictedCookieManager(
      mojo::PendingReceiver<network::mojom::RestrictedCookieManager> receiver) {
@@ -136,25 +98,7 @@ index 1531d69cfe3d6c975073d293edf15e0bc4d9325b..0a8ee0c0e0997911ee02d777c104c0b6
        ->CreateRestrictedCookieManager(
            network::mojom::RestrictedCookieManagerRole::SCRIPT,
            GetLastCommittedOrigin(), isolation_info_.site_for_cookies(),
-@@ -7545,7 +7560,7 @@ void RenderFrameHostImpl::BindHasTrustTokensAnswerer(
-     return;
-   }
- 
--  GetProcess()->GetStoragePartition()->CreateHasTrustTokensAnswerer(
-+  GetStoragePartition()->CreateHasTrustTokensAnswerer(
-       std::move(receiver), ComputeTopFrameOrigin(GetLastCommittedOrigin()));
- }
- 
-@@ -7574,7 +7589,7 @@ void RenderFrameHostImpl::CreateAppCacheBackend(
-   base::debug::ScopedCrashKeyString scoped_crash_key(crash_key, data);
- 
-   auto* storage_partition_impl =
--      static_cast<StoragePartitionImpl*>(GetProcess()->GetStoragePartition());
-+      static_cast<StoragePartitionImpl*>(GetStoragePartition());
-   storage_partition_impl->GetAppCacheService()->CreateBackend(
-       GetProcess()->GetID(), routing_id_, std::move(receiver));
- }
-@@ -7598,6 +7613,23 @@ void RenderFrameHostImpl::GetFileSystemManager(
+@@ -7598,6 +7608,23 @@ void RenderFrameHostImpl::GetFileSystemManager(
                                  std::move(receiver)));
  }
  
@@ -178,7 +122,7 @@ index 1531d69cfe3d6c975073d293edf15e0bc4d9325b..0a8ee0c0e0997911ee02d777c104c0b6
  void RenderFrameHostImpl::GetGeolocationService(
      mojo::PendingReceiver<blink::mojom::GeolocationService> receiver) {
    if (!geolocation_service_) {
-@@ -7614,7 +7646,7 @@ void RenderFrameHostImpl::GetNativeFileSystemManager(
+@@ -7614,7 +7641,7 @@ void RenderFrameHostImpl::GetNativeFileSystemManager(
      mojo::PendingReceiver<blink::mojom::NativeFileSystemManager> receiver) {
    DCHECK_CURRENTLY_ON(BrowserThread::UI);
    auto* storage_partition =
@@ -187,7 +131,7 @@ index 1531d69cfe3d6c975073d293edf15e0bc4d9325b..0a8ee0c0e0997911ee02d777c104c0b6
    auto* manager = storage_partition->GetNativeFileSystemManager();
    manager->BindReceiver(NativeFileSystemManagerImpl::BindingContext(
                              GetLastCommittedOrigin(), GetLastCommittedURL(),
-@@ -7630,7 +7662,16 @@ void RenderFrameHostImpl::CreateLockManager(
+@@ -7630,7 +7657,16 @@ void RenderFrameHostImpl::CreateLockManager(
  
  void RenderFrameHostImpl::CreateIDBFactory(
      mojo::PendingReceiver<blink::mojom::IDBFactory> receiver) {
@@ -205,7 +149,7 @@ index 1531d69cfe3d6c975073d293edf15e0bc4d9325b..0a8ee0c0e0997911ee02d777c104c0b6
  }
  
  void RenderFrameHostImpl::CreatePermissionService(
-@@ -7655,10 +7696,11 @@ void RenderFrameHostImpl::GetAuthenticator(
+@@ -7655,10 +7691,11 @@ void RenderFrameHostImpl::GetAuthenticator(
  void RenderFrameHostImpl::GetPushMessaging(
      mojo::PendingReceiver<blink::mojom::PushMessaging> receiver) {
    if (!push_messaging_manager_) {
@@ -221,21 +165,3 @@ index 1531d69cfe3d6c975073d293edf15e0bc4d9325b..0a8ee0c0e0997911ee02d777c104c0b6
    }
  
    RunOrPostTaskOnThread(
-@@ -7692,7 +7734,7 @@ RenderFrameHostImpl::CreateNavigationRequestForCommit(
-   // one only for cross-document navigations.
-   if (!is_same_document) {
-     coep_reporter = std::make_unique<CrossOriginEmbedderPolicyReporter>(
--        process_->GetStoragePartition(), params.url,
-+        GetStoragePartition(), params.url,
-         cross_origin_embedder_policy_.reporting_endpoint,
-         cross_origin_embedder_policy_.report_only_reporting_endpoint);
-   }
-@@ -8350,7 +8392,7 @@ void RenderFrameHostImpl::MaybeGenerateCrashReport(
-     body.SetString("reason", reason);
- 
-   // Send the crash report to the Reporting API.
--  GetProcess()->GetStoragePartition()->GetNetworkContext()->QueueReport(
-+  GetStoragePartition()->GetNetworkContext()->QueueReport(
-       "crash" /* type */, "default" /* group */, last_committed_url_,
-       base::nullopt, std::move(body));
- }
