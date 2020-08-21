@@ -1,0 +1,40 @@
+diff --git a/third_party/blink/renderer/modules/service_worker/service_worker_container.cc b/third_party/blink/renderer/modules/service_worker/service_worker_container.cc
+index c4dd8a29d6f0cfc0f5259104272e4ba2e360f608..5a8b010b6e08f4616e95eed37147d19ad113b86d 100644
+--- a/third_party/blink/renderer/modules/service_worker/service_worker_container.cc
++++ b/third_party/blink/renderer/modules/service_worker/service_worker_container.cc
+@@ -76,15 +76,17 @@ namespace blink {
+ 
+ namespace {
+ 
+-void MaybeRecordThirdPartyServiceWorkerUsage(
++bool MaybeRecordThirdPartyServiceWorkerUsage(
+     ExecutionContext* execution_context) {
+   DCHECK(execution_context);
+   // ServiceWorkerContainer is only supported on windows.
+   LocalDOMWindow* window = To<LocalDOMWindow>(execution_context);
+   DCHECK(window);
+ 
+-  if (window->IsCrossSiteSubframe())
++  bool cross_site_subframe = window->IsCrossSiteSubframe();
++  if (cross_site_subframe)
+     UseCounter::Count(window, WebFeature::kThirdPartyServiceWorker);
++  return cross_site_subframe;
+ }
+ 
+ bool HasFiredDomContentLoaded(const Document& document) {
+@@ -234,7 +236,14 @@ ScriptPromise ServiceWorkerContainer::registerServiceWorker(
+       ServiceWorkerRegistration, ServiceWorkerErrorForUpdate>>(resolver);
+ 
+   ExecutionContext* execution_context = ExecutionContext::From(script_state);
+-  MaybeRecordThirdPartyServiceWorkerUsage(execution_context);
++  bool cross_site_subframe =
++      MaybeRecordThirdPartyServiceWorkerUsage(execution_context);
++  if (cross_site_subframe) {
++    resolver->Reject(MakeGarbageCollected<DOMException>(
++        DOMExceptionCode::kNotSupportedError,
++        "ServiceWorker not supported in third-party iframes."));
++    return promise;
++  }
+ 
+   // The IDL definition is expected to restrict service worker to secure
+   // contexts.
