@@ -37,6 +37,7 @@ bool BraveIsAllowedThirdParty(
     const GURL& url,
     const GURL& site_for_cookies,
     const base::Optional<url::Origin>& top_frame_origin) {
+    return true;
   static const base::NoDestructor<
       // url -> first_party_url allow map
       std::vector<std::pair<ContentSettingsPattern,

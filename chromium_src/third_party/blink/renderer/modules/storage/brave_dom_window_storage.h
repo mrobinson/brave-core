@@ -12,14 +12,26 @@ class ExceptionState;
 class LocalDOMWindow;
 class StorageArea;
 
-class BraveDOMWindowStorage {
+class BraveDOMWindowStorage final : public GarbageCollected<BraveDOMWindowStorage>,
+                                    public Supplement<LocalDOMWindow> {
+  USING_GARBAGE_COLLECTED_MIXIN(BraveDOMWindowStorage);
+
  public:
+  static const char kSupplementName[];
+
+  static BraveDOMWindowStorage& From(LocalDOMWindow&);
   static StorageArea* sessionStorage(LocalDOMWindow&, ExceptionState&);
   static StorageArea* localStorage(LocalDOMWindow&, ExceptionState&);
 
+  StorageArea* sessionStorage(ExceptionState&) const;
+  StorageArea* localStorage(ExceptionState&) const;
+
+  explicit BraveDOMWindowStorage(LocalDOMWindow&);
+
+  void Trace(Visitor*) const override;
+
  private:
-  BraveDOMWindowStorage();
-  ~BraveDOMWindowStorage();
+  mutable Member<StorageArea> ephemeral_session_storage_;
 };
 
 }  // namespace blink

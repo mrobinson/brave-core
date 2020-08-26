@@ -1,0 +1,13 @@
+diff --git a/third_party/blink/renderer/modules/storage/storage_namespace.h b/third_party/blink/renderer/modules/storage/storage_namespace.h
+index 4eaca73c0f0be4e873753564699e0c813b694bf9..665982fa069bdc09d7c56e3cfe1d2cce032b7b26 100644
+--- a/third_party/blink/renderer/modules/storage/storage_namespace.h
++++ b/third_party/blink/renderer/modules/storage/storage_namespace.h
+@@ -120,6 +120,8 @@ class MODULES_EXPORT StorageNamespace final
+   // Also forces all owned CachedStorageAreas to be reconnected.
+   void ResetStorageAreaAndNamespaceConnections();
+ 
++  const String& namespace_id() { return namespace_id_; }
++
+  private:
+   void EnsureConnected();
+ 
