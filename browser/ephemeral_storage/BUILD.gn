@@ -1,4 +1,5 @@
-source_set("browser") {
+source_set("ephemeral_storage") {
+  check_includes = false
   sources = [
     "ephemeral_storage_tab_helper.cc",
     "ephemeral_storage_tab_helper.h",

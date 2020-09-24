@@ -3,8 +3,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef BRAVE_COMPONENTS_EPHEMERAL_STORAGE_BROWSER_EPHEMERAL_STORAGE_TAB_HELPER_H_
-#define BRAVE_COMPONENTS_EPHEMERAL_STORAGE_BROWSER_EPHEMERAL_STORAGE_TAB_HELPER_H_
+#ifndef BRAVE_BROWSER_EPHEMERAL_STORAGE_EPHEMERAL_STORAGE_TAB_HELPER_H_
+#define BRAVE_BROWSER_EPHEMERAL_STORAGE_EPHEMERAL_STORAGE_TAB_HELPER_H_
+
+#include <string>
 
 #include "content/public/browser/web_contents_observer.h"
 #include "content/public/browser/web_contents_user_data.h"
@@ -30,11 +32,12 @@ class EphemeralStorageTabHelper
  private:
   friend class content::WebContentsUserData<EphemeralStorageTabHelper>;
 
-  void ClearEphemeralStorage();
+  void ClearEphemeralStorageIfNecessary(base::Optional<std::string> new_domain);
+  bool IsAnotherTabOpenWithStorageDomain(const std::string&);
 
   WEB_CONTENTS_USER_DATA_KEY_DECL();
 };
 
 }  // namespace ephemeral_storage
 
-#endif  // BRAVE_COMPONENTS_EPHEMERAL_STORAGE_BROWSER_EPHEMERAL_STORAGE_TAB_HELPER_H_
+#endif  // BRAVE_BROWSER_EPHEMERAL_STORAGE_EPHEMERAL_STORAGE_TAB_HELPER_H_

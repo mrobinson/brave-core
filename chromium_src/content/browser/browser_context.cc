@@ -10,8 +10,11 @@
 #include "base/memory/ref_counted.h"
 #include "content/browser/dom_storage/dom_storage_context_wrapper.h"
 #include "content/browser/dom_storage/session_storage_namespace_impl.h"
+#include "content/browser/renderer_host/render_view_host_delegate.h"
+#include "content/public/browser/render_view_host.h"
 #include "content/public/browser/session_storage_namespace.h"
 #include "content/public/browser/storage_partition.h"
+#include "content/public/browser/web_contents.h"
 
 namespace content {
 
@@ -20,10 +23,17 @@ scoped_refptr<content::SessionStorageNamespace> CreateSessionStorageNamespace(
     const std::string& namespace_id) {
   content::DOMStorageContextWrapper* context_wrapper =
       static_cast<content::DOMStorageContextWrapper*>(
-            partition->GetDOMStorageContext());
+          partition->GetDOMStorageContext());
 
   return content::SessionStorageNamespaceImpl::Create(context_wrapper,
                                                       namespace_id);
+}
+
+std::string GetSessionStorageNamespaceId(WebContents* web_contents) {
+  return web_contents->GetRenderViewHost()
+      ->GetDelegate()
+      ->GetSessionStorageNamespace(web_contents->GetSiteInstance())
+      ->id();
 }
 
 }  // namespace content

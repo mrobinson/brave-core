@@ -15,12 +15,15 @@
 
 namespace content {
 
+class WebContents;
 class SessionStorageNamespace;
 class StoragePartition;
 
-CONTENT_EXPORT scoped_refptr<content::SessionStorageNamespace> CreateSessionStorageNamespace(
-    content::StoragePartition* partition,
-    const std::string& namespace_id);
+CONTENT_EXPORT scoped_refptr<content::SessionStorageNamespace>
+CreateSessionStorageNamespace(content::StoragePartition* partition,
+                              const std::string& namespace_id);
+
+CONTENT_EXPORT std::string GetSessionStorageNamespaceId(WebContents*);
 
 }  // namespace content
 
