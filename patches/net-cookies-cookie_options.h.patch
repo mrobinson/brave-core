@@ -1,0 +1,12 @@
+diff --git a/net/cookies/cookie_options.h b/net/cookies/cookie_options.h
+index abf074b6aab28a85b779c7efd78dd5de60f23f4a..64ab56468707fad5ccc64cdc9878c2282376e383 100644
+--- a/net/cookies/cookie_options.h
++++ b/net/cookies/cookie_options.h
+@@ -131,6 +131,7 @@ class NET_EXPORT CookieOptions {
+   SameSiteCookieContext same_site_cookie_context_;
+   bool update_access_time_;
+   bool return_excluded_cookies_;
++  BRAVE_COOKIE_OPTIONS_H
+ };
+ 
+ }  // namespace net

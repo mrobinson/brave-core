@@ -1,0 +1,12 @@
+diff --git a/content/public/browser/BUILD.gn b/content/public/browser/BUILD.gn
+index bd83dfa0a32658c5b45ca001bfd04cc051d8bc73..5a515a67b62e0ac356c59c796a9551c62f95f2e2 100644
+--- a/content/public/browser/BUILD.gn
++++ b/content/public/browser/BUILD.gn
+@@ -416,6 +416,7 @@ source_set("browser_sources") {
+     "websocket_handshake_request_info.h",
+     "worker_type.h",
+   ]
++  sources += brave_content_public_browser_sources
+   configs += [
+     "//build/config:precompiled_headers",
+     "//build/config/compiler:wexit_time_destructors",

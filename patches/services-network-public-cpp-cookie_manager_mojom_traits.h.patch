@@ -1,0 +1,12 @@
+diff --git a/services/network/public/cpp/cookie_manager_mojom_traits.h b/services/network/public/cpp/cookie_manager_mojom_traits.h
+index 9baa054951b4abc12635cd081d56b73b75b44eba..0a10dad5fcf5490542984b55cf415cda670c042c 100644
+--- a/services/network/public/cpp/cookie_manager_mojom_traits.h
++++ b/services/network/public/cpp/cookie_manager_mojom_traits.h
+@@ -110,6 +110,7 @@ struct StructTraits<network::mojom::CookieOptionsDataView, net::CookieOptions> {
+     return o.return_excluded_cookies();
+   }
+ 
++  BRAVE_STRUCTTRAITSCOOKIEOPTIONSEPHEMERALSTORAGEDOMAIN
+   static bool Read(network::mojom::CookieOptionsDataView mojo_options,
+                    net::CookieOptions* cookie_options);
+ };

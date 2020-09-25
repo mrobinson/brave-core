@@ -1,0 +1,12 @@
+diff --git a/services/network/public/cpp/cookie_manager_mojom_traits.cc b/services/network/public/cpp/cookie_manager_mojom_traits.cc
+index 56e5c6f60899f33870ea31d5110aad4a72bb7cfb..cebe7f397ba204aa53aabf84e651d9d595292f76 100644
+--- a/services/network/public/cpp/cookie_manager_mojom_traits.cc
++++ b/services/network/public/cpp/cookie_manager_mojom_traits.cc
+@@ -342,6 +342,7 @@ bool StructTraits<network::mojom::CookieOptionsDataView, net::CookieOptions>::
+     cookie_options->set_return_excluded_cookies();
+   else
+     cookie_options->unset_return_excluded_cookies();
++  BRAVE_STRUCTTRAITSCOOKIEOPTIONS_READ
+ 
+   return true;
+ }

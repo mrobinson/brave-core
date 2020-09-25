@@ -1,0 +1,12 @@
+diff --git a/net/cookies/cookie_monster.h b/net/cookies/cookie_monster.h
+index 57ce9d640ac069ddacb0e6c7712bf462b4a1179d..58fc0128a8433f27e8f2a1d29f9dd9a21bb14efd 100644
+--- a/net/cookies/cookie_monster.h
++++ b/net/cookies/cookie_monster.h
+@@ -681,6 +681,7 @@ class NET_EXPORT CookieMonster : public CookieStore {
+ 
+   base::ThreadChecker thread_checker_;
+ 
++  BRAVE_COOKIE_MONSTER_H
+   base::WeakPtrFactory<CookieMonster> weak_ptr_factory_{this};
+ 
+   DISALLOW_COPY_AND_ASSIGN(CookieMonster);

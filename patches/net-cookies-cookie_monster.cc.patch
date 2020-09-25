@@ -1,0 +1,52 @@
+diff --git a/net/cookies/cookie_monster.cc b/net/cookies/cookie_monster.cc
+index 140b61a81dcd748aa22e9dec472f1d375bebcfae..527470acda3863843bca0bcb93e918aa2c35961a 100644
+--- a/net/cookies/cookie_monster.cc
++++ b/net/cookies/cookie_monster.cc
+@@ -579,6 +579,7 @@ void CookieMonster::AttachAccessSemanticsListForCookieList(
+ void CookieMonster::GetCookieListWithOptions(const GURL& url,
+                                              const CookieOptions& options,
+                                              GetCookieListCallback callback) {
++  BRAVE_GETCOOKIELISTWITHOPTIONS
+   DCHECK(thread_checker_.CalledOnValidThread());
+ 
+   CookieAccessResultList included_cookies;
+@@ -600,6 +601,7 @@ void CookieMonster::GetCookieListWithOptions(const GURL& url,
+ 
+ void CookieMonster::DeleteAllCreatedInTimeRange(const TimeRange& creation_range,
+                                                 DeleteCallback callback) {
++  BRAVE_DELETEALLCREATEDINTIMERANGE
+   DCHECK(thread_checker_.CalledOnValidThread());
+ 
+   uint32_t num_deleted = 0;
+@@ -623,6 +625,7 @@ void CookieMonster::DeleteAllCreatedInTimeRange(const TimeRange& creation_range,
+ 
+ void CookieMonster::DeleteAllMatchingInfo(CookieDeletionInfo delete_info,
+                                           DeleteCallback callback) {
++  BRAVE_DELETEALLMATCHINGINFO
+   uint32_t num_deleted = 0;
+   for (auto it = cookies_.begin(); it != cookies_.end();) {
+     auto curit = it;
+@@ -645,6 +648,7 @@ void CookieMonster::DeleteAllMatchingInfo(CookieDeletionInfo delete_info,
+ 
+ void CookieMonster::DeleteCanonicalCookie(const CanonicalCookie& cookie,
+                                           DeleteCallback callback) {
++  BRAVE_DELETECANONICALCOOKIE
+   DCHECK(thread_checker_.CalledOnValidThread());
+ 
+   uint32_t result = 0u;
+@@ -669,6 +673,7 @@ void CookieMonster::DeleteCanonicalCookie(const CanonicalCookie& cookie,
+ }
+ 
+ void CookieMonster::DeleteSessionCookies(DeleteCallback callback) {
++  BRAVE_DELETESESSIONCOOKIES
+   DCHECK(thread_checker_.CalledOnValidThread());
+ 
+   uint32_t num_deleted = 0;
+@@ -1168,6 +1173,7 @@ void CookieMonster::SetCanonicalCookie(std::unique_ptr<CanonicalCookie> cc,
+                                        const GURL& source_url,
+                                        const CookieOptions& options,
+                                        SetCookiesCallback callback) {
++  BRAVE_SETCANONICALCOOKIE
+   DCHECK(thread_checker_.CalledOnValidThread());
+ 
+   CookieAccessResult access_result;
