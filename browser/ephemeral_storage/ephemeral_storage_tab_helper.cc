@@ -13,6 +13,7 @@
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/ui/browser.h"
 #include "chrome/browser/ui/browser_list.h"
+#include "content/browser/dom_storage/dom_storage_context_wrapper.h"
 #include "content/public/browser/browser_context.h"
 #include "content/public/browser/navigation_handle.h"
 #include "content/public/browser/session_storage_namespace.h"
@@ -87,11 +88,11 @@ void EphemeralStorageTabHelper::ReadyToCommitNavigation(
         std::move(session_storage_namespace);
   }
 
-  ClearEphemeralStorageIfNecessary(domain);
+  ClearEphemeralStorageIfNecessary(domain, partition);
 }
 
 void EphemeralStorageTabHelper::WebContentsDestroyed() {
-  ClearEphemeralStorageIfNecessary(base::nullopt);
+  ClearEphemeralStorageIfNecessary(base::nullopt, nullptr);
 }
 
 bool EphemeralStorageTabHelper::IsAnotherTabOpenWithStorageDomain(
@@ -115,7 +116,8 @@ bool EphemeralStorageTabHelper::IsAnotherTabOpenWithStorageDomain(
 }
 
 void EphemeralStorageTabHelper::ClearEphemeralStorageIfNecessary(
-    base::Optional<std::string> new_domain) {
+    base::Optional<std::string> new_domain,
+    content::StoragePartition* partition) {
   if (!base::FeatureList::IsEnabled(blink::features::kBraveEphemeralStorage)) {
     return;
   }
@@ -126,11 +128,43 @@ void EphemeralStorageTabHelper::ClearEphemeralStorageIfNecessary(
     local_storage_namespace_map().erase(domain + "/ephemeral-local-storage");
   }
 
-  if (!new_domain.has_value() || *new_domain != domain) {
-    session_storage_namespace_map().erase(
-        content::GetSessionStorageNamespaceId(web_contents()) +
-        "/ephemeral-session-storage");
+  std::string session_partition_id =
+      content::GetSessionStorageNamespaceId(web_contents()) +
+      "/ephemeral-session-storage";
+  if (!new_domain.has_value()) {
+    session_storage_namespace_map().erase(session_partition_id);
+    return;
   }
+
+  if (*new_domain != domain) {
+    if (!partition)
+      return;
+
+    content::DOMStorageContextWrapper* dom_storage_context =
+        static_cast<content::DOMStorageContextWrapper*>(
+            partition->GetDOMStorageContext());
+    storage::mojom::SessionStorageControl* session_storage_control =
+        dom_storage_context->GetSessionStorageControl();
+    session_storage_control->ClearDataInNamespace(session_partition_id,
+                                                  base::DoNothing());
+  }
+}
+
+bool EphemeralStorageTabHelper::DoesEphemeralLocalStorageExist(
+    const GURL& url) {
+  std::string domain = URLToStorageDomain(url);
+  std::string local_partition_id = domain + "/ephemeral-local-storage";
+  content::SessionStorageNamespaceMap::const_iterator it =
+      local_storage_namespace_map().find(local_partition_id);
+  return it != local_storage_namespace_map().end();
+}
+
+bool EphemeralStorageTabHelper::DoesEphemeralSessionStorageExist() {
+  std::string session_partition_id =
+      content::GetSessionStorageNamespaceId(web_contents()) +
+      "/ephemeral-session-storage";
+  auto it = session_storage_namespace_map().find(session_partition_id);
+  return it != session_storage_namespace_map().end();
 }
 
 WEB_CONTENTS_USER_DATA_KEY_IMPL(EphemeralStorageTabHelper)
