@@ -13,7 +13,6 @@
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/ui/browser.h"
 #include "chrome/browser/ui/browser_list.h"
-#include "content/browser/dom_storage/dom_storage_context_wrapper.h"
 #include "content/public/browser/browser_context.h"
 #include "content/public/browser/navigation_handle.h"
 #include "content/public/browser/session_storage_namespace.h"
@@ -128,29 +127,19 @@ void EphemeralStorageTabHelper::ClearEphemeralStorageIfNecessary(
     local_storage_namespace_map().erase(domain + "/ephemeral-local-storage");
   }
 
-  std::string session_partition_id =
+  std::string session_namespace_id =
       content::GetSessionStorageNamespaceId(web_contents()) +
       "/ephemeral-session-storage";
   if (!new_domain.has_value()) {
-    session_storage_namespace_map().erase(session_partition_id);
+    session_storage_namespace_map().erase(session_namespace_id);
     return;
   }
 
-  if (*new_domain != domain) {
-    if (!partition)
-      return;
-
-    content::DOMStorageContextWrapper* dom_storage_context =
-        static_cast<content::DOMStorageContextWrapper*>(
-            partition->GetDOMStorageContext());
-    storage::mojom::SessionStorageControl* session_storage_control =
-        dom_storage_context->GetSessionStorageControl();
-    session_storage_control->ClearDataInNamespace(session_partition_id,
-                                                  base::DoNothing());
-  }
+  if (*new_domain != domain)
+    ClearDataInNamespace(partition, session_namespace_id);
 }
 
-bool EphemeralStorageTabHelper::DoesEphemeralLocalStorageExist(
+bool EphemeralStorageTabHelper::URLHasEphemeralLocalStorageForTesting(
     const GURL& url) {
   std::string domain = URLToStorageDomain(url);
   std::string local_partition_id = domain + "/ephemeral-local-storage";
@@ -159,9 +148,10 @@ bool EphemeralStorageTabHelper::DoesEphemeralLocalStorageExist(
   return it != local_storage_namespace_map().end();
 }
 
-bool EphemeralStorageTabHelper::DoesEphemeralSessionStorageExist() {
+bool EphemeralStorageTabHelper::WebContentsHasEphemeralSessionStorageForTesting(
+    WebContents* web_contents) {
   std::string session_partition_id =
-      content::GetSessionStorageNamespaceId(web_contents()) +
+      content::GetSessionStorageNamespaceId(web_contents) +
       "/ephemeral-session-storage";
   auto it = session_storage_namespace_map().find(session_partition_id);
   return it != session_storage_namespace_map().end();

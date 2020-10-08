@@ -25,6 +25,10 @@ CreateSessionStorageNamespace(content::StoragePartition* partition,
 
 CONTENT_EXPORT std::string GetSessionStorageNamespaceId(WebContents*);
 
+CONTENT_EXPORT void ClearDataInNamespace(
+    StoragePartition*,
+    const std::string& session_namespace_id);
+
 }  // namespace content
 
 #endif  // BRAVE_CHROMIUM_SRC_CONTENT_PUBLIC_BROWSER_BROWSER_CONTEXT_H_

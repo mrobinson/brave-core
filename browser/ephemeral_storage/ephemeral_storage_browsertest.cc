@@ -29,6 +29,7 @@
 
 using content::RenderFrameHost;
 using content::WebContents;
+using ephemeral_storage::EphemeralStorageTabHelper;
 using net::test_server::EmbeddedTestServer;
 
 namespace {
@@ -461,17 +462,23 @@ IN_PROC_BROWSER_TEST_F(EphemeralStorageBrowserTest,
 
   ui_test_utils::NavigateToURL(browser(), b_site_simple_url_);
   auto* web_contents = browser()->tab_strip_model()->GetActiveWebContents();
-  ephemeral_storage::EphemeralStorageTabHelper tab_helper(web_contents);
 
   EXPECT_EQ(true,
-            tab_helper.DoesEphemeralLocalStorageExist(b_site_simple_url_));
-  EXPECT_EQ(true, tab_helper.DoesEphemeralSessionStorageExist());
+            EphemeralStorageTabHelper::URLHasEphemeralLocalStorageForTesting(
+                b_site_simple_url_));
+  EXPECT_EQ(true,
+            EphemeralStorageTabHelper::
+                WebContentsHasEphemeralSessionStorageForTesting(web_contents));
 
   ui_test_utils::NavigateToURL(browser(), a_site_ephemeral_storage_url_);
 
   EXPECT_EQ(false,
-            tab_helper.DoesEphemeralLocalStorageExist(b_site_simple_url_));
-  EXPECT_EQ(true, tab_helper.DoesEphemeralLocalStorageExist(
-                      a_site_ephemeral_storage_url_));
-  EXPECT_EQ(true, tab_helper.DoesEphemeralSessionStorageExist());
+            EphemeralStorageTabHelper::URLHasEphemeralLocalStorageForTesting(
+                b_site_simple_url_));
+  EXPECT_EQ(true,
+            EphemeralStorageTabHelper::URLHasEphemeralLocalStorageForTesting(
+                a_site_ephemeral_storage_url_));
+  EXPECT_EQ(true,
+            EphemeralStorageTabHelper::
+                WebContentsHasEphemeralSessionStorageForTesting(web_contents));
 }

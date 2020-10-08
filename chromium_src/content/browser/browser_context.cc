@@ -36,6 +36,18 @@ std::string GetSessionStorageNamespaceId(WebContents* web_contents) {
       ->id();
 }
 
+void ClearDataInNamespace(StoragePartition* partition,
+                          const std::string& session_namespace_id) {
+  DCHECK(partition);
+  content::DOMStorageContextWrapper* dom_storage_context =
+      static_cast<content::DOMStorageContextWrapper*>(
+          partition->GetDOMStorageContext());
+  storage::mojom::SessionStorageControl* session_storage_control =
+      dom_storage_context->GetSessionStorageControl();
+  session_storage_control->ClearDataInNamespace(session_namespace_id,
+                                                base::DoNothing());
+}
+
 }  // namespace content
 
 #include "../../../../content/browser/browser_context.cc"

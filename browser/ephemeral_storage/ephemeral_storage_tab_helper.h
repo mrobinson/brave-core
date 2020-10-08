@@ -23,9 +23,10 @@ class EphemeralStorageTabHelper
  public:
   explicit EphemeralStorageTabHelper(content::WebContents* web_contents);
   ~EphemeralStorageTabHelper() override;
-  // For test
-  bool DoesEphemeralLocalStorageExist(const GURL& url);
-  bool DoesEphemeralSessionStorageExist();
+
+  static bool URLHasEphemeralLocalStorageForTesting(const GURL& url);
+  static bool WebContentsHasEphemeralSessionStorageForTesting(
+      content::WebContents*);
 
  protected:
   void ReadyToCommitNavigation(
@@ -35,9 +36,8 @@ class EphemeralStorageTabHelper
  private:
   friend class content::WebContentsUserData<EphemeralStorageTabHelper>;
 
-  void ClearEphemeralStorageIfNecessary(
-      base::Optional<std::string> new_domain,
-      content::StoragePartition* partition);
+  void ClearEphemeralStorageIfNecessary(base::Optional<std::string> new_domain,
+                                        content::StoragePartition* partition);
   bool IsAnotherTabOpenWithStorageDomain(const std::string&);
 
   WEB_CONTENTS_USER_DATA_KEY_DECL();
