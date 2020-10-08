@@ -25,7 +25,7 @@ CreateSessionStorageNamespace(content::StoragePartition* partition,
 
 CONTENT_EXPORT std::string GetSessionStorageNamespaceId(WebContents*);
 
-CONTENT_EXPORT void ClearDataInNamespace(
+CONTENT_EXPORT void ClearDataInSessionStorageNamespace(
     StoragePartition*,
     const std::string& session_namespace_id);
 

@@ -36,7 +36,7 @@ std::string GetSessionStorageNamespaceId(WebContents* web_contents) {
       ->id();
 }
 
-void ClearDataInNamespace(StoragePartition* partition,
+void ClearDataInSessionStorageNamespace(StoragePartition* partition,
                           const std::string& session_namespace_id) {
   DCHECK(partition);
   content::DOMStorageContextWrapper* dom_storage_context =

@@ -136,7 +136,7 @@ void EphemeralStorageTabHelper::ClearEphemeralStorageIfNecessary(
   }
 
   if (*new_domain != domain)
-    ClearDataInNamespace(partition, session_namespace_id);
+    ClearDataInSessionStorageNamespace(partition, session_namespace_id);
 }
 
 bool EphemeralStorageTabHelper::URLHasEphemeralLocalStorageForTesting(
