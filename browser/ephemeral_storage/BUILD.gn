@@ -10,4 +10,8 @@ source_set("ephemeral_storage") {
     "//content/public/browser",
     "//net",
   ]
+
+  if (is_android) {
+    deps += [ "//chrome/browser/ui" ]
+  }
 }

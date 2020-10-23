@@ -32,8 +32,11 @@ class EphemeralStorageTabHelper
  private:
   friend class content::WebContentsUserData<EphemeralStorageTabHelper>;
 
-  void ClearEphemeralStorageIfNecessary(base::Optional<std::string> new_domain);
+  void ClearEphemeralStorageIfNecessary();
   bool IsAnotherTabOpenWithStorageDomain(const std::string&);
+  bool IsDifferentWebContentsWithMatchingStorageDomain(
+      content::WebContents* other_web_contents,
+      const std::string& storage_domain);
 
   WEB_CONTENTS_USER_DATA_KEY_DECL();
 };
