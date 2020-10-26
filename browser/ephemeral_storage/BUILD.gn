@@ -7,11 +7,26 @@ source_set("ephemeral_storage") {
 
   deps = [
     "//base",
+    "//chrome/browser/ui",
     "//content/public/browser",
     "//net",
+    "//third_party/blink/public/common",
   ]
+}
 
-  if (is_android) {
-    deps += [ "//chrome/browser/ui" ]
-  }
+source_set("ephemeral_storage_tests") {
+  testonly = true
+  sources = [ "ephemeral_storage_browsertest.cc" ]
+  defines = [ "HAS_OUT_OF_PROC_TEST_RUNNER" ]
+  deps = [
+    "//base",
+    "//chrome/browser",
+    "//chrome/browser/ui",
+    "//chrome/test:test_support_ui",
+    "//content/public/common",
+    "//content/test:test_support",
+    "//services/network:test_support",
+    "//third_party/blink/public/common",
+    "//url",
+  ]
 }

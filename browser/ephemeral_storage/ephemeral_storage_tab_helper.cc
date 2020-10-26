@@ -12,7 +12,6 @@
 #include "base/feature_list.h"
 #include "base/no_destructor.h"
 #include "chrome/browser/profiles/profile.h"
-#include "chrome/browser/ui/browser.h"
 #include "chrome/browser/ui/browser_list.h"
 #include "content/public/browser/browser_context.h"
 #include "content/public/browser/navigation_handle.h"
@@ -24,7 +23,10 @@
 
 #if defined(OS_ANDROID)
 #include "chrome/browser/android/tab_android.h"
+#include "chrome/browser/ui/android/tab_model/tab_model.h"
 #include "chrome/browser/ui/android/tab_model/tab_model_list.h"
+#else
+#include "chrome/browser/ui/browser.h"
 #endif
 
 using content::BrowserContext;
@@ -131,7 +133,7 @@ bool EphemeralStorageTabHelper::IsAnotherTabOpenWithStorageDomain(
 #if defined(OS_ANDROID)
   for (auto it = TabModelList::begin(); it != TabModelList::end(); ++it) {
     TabModel* tab_model = *it;
-    if (tab_model->GetProfile() == profile) {
+    if (tab_model->GetProfile() == web_contents()->GetBrowserContext()) {
       for (int i = 0; i < tab_model->GetTabCount(); i++) {
         TabAndroid* tab = tab_model->GetTabAt(i);
         WebContents* web_contents = tab->web_contents();
