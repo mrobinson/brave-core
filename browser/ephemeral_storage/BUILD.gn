@@ -1,5 +1,4 @@
 source_set("ephemeral_storage") {
-  check_includes = false
   sources = [
     "ephemeral_storage_tab_helper.cc",
     "ephemeral_storage_tab_helper.h",
@@ -10,7 +9,7 @@ source_set("ephemeral_storage") {
     "//chrome/browser/ui",
     "//content/public/browser",
     "//net",
-    "//third_party/blink/public/common",
+    "//third_party/blink/public/common"
   ]
 }
 
@@ -20,6 +19,8 @@ source_set("ephemeral_storage_tests") {
   defines = [ "HAS_OUT_OF_PROC_TEST_RUNNER" ]
   deps = [
     "//base",
+    "//brave/components/brave_shields/common:common",
+    "//brave/components/brave_shields/browser:browser",
     "//chrome/browser",
     "//chrome/browser/ui",
     "//chrome/test:test_support_ui",

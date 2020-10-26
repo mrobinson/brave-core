@@ -11,8 +11,6 @@
 
 #include "base/feature_list.h"
 #include "base/no_destructor.h"
-#include "chrome/browser/profiles/profile.h"
-#include "chrome/browser/ui/browser_list.h"
 #include "content/public/browser/browser_context.h"
 #include "content/public/browser/navigation_handle.h"
 #include "content/public/browser/session_storage_namespace.h"
@@ -27,6 +25,7 @@
 #include "chrome/browser/ui/android/tab_model/tab_model_list.h"
 #else
 #include "chrome/browser/ui/browser.h"
+#include "chrome/browser/ui/browser_list.h"
 #endif
 
 using content::BrowserContext;
@@ -145,7 +144,10 @@ bool EphemeralStorageTabHelper::IsAnotherTabOpenWithStorageDomain(
   }
 #else
   for (Browser* browser : *BrowserList::GetInstance()) {
-    if (browser->profile() == web_contents()->GetBrowserContext()) {
+    // We need to use reinterpret_cast here, because BrowserContext is a subclass of Profile,
+    // yet to include the header for Profile here would introduce a circular dependency in
+    // the build.
+    if (reinterpret_cast<BrowserContext*>(browser->profile()) == web_contents()->GetBrowserContext()) {
       TabStripModel* tab_strip = browser->tab_strip_model();
       for (int i = 0; i < tab_strip->count(); ++i) {
         WebContents* web_contents = tab_strip->GetWebContentsAt(i);
