@@ -139,7 +139,7 @@ class EphemeralStorageBrowserTest : public InProcessBrowserTest {
 
   ValuesFromFrames GetValuesFromFrames(WebContents* web_contents) {
     RenderFrameHost* main_frame = web_contents->GetMainFrame();
-    return ValuesFromFrames{
+    return {
         GetValuesFromFrame(main_frame),
         GetValuesFromFrame(content::ChildFrameAt(main_frame, 0)),
         GetValuesFromFrame(content::ChildFrameAt(main_frame, 1)),

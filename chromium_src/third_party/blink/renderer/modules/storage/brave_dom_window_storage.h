@@ -26,14 +26,15 @@ class BraveDOMWindowStorage final
 
   StorageArea* sessionStorage(ExceptionState&);
   StorageArea* localStorage(ExceptionState&);
-  StorageArea* ephemeralSessionStorage(StorageArea*);
-  StorageArea* ephemeralLocalStorage(StorageArea*);
 
   explicit BraveDOMWindowStorage(LocalDOMWindow&);
 
   void Trace(Visitor*) const override;
 
  private:
+  StorageArea* ephemeralSessionStorage(StorageArea*);
+  StorageArea* ephemeralLocalStorage(StorageArea*);
+
   mutable Member<StorageArea> ephemeral_session_storage_;
   mutable Member<StorageArea> ephemeral_local_storage_;
 };

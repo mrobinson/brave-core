@@ -4,6 +4,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "../../../../../../../third_party/blink/renderer/modules/storage/dom_window_storage.cc"
+#include "third_party/blink/public/common/dom_storage/session_storage_namespace_id.h"
 #include "third_party/blink/public/common/features.h"
 #include "third_party/blink/public/web/web_view_client.h"
 #include "third_party/blink/renderer/core/execution_context/execution_context.h"
@@ -15,6 +16,14 @@
 namespace blink {
 
 namespace {
+
+// This replicates the conversion of a string into a session storage namespace id
+// that is found in the implementation of EphemeralStorageTabHelper.
+String StringToSessionStorageId(const String& string) {
+  std::string hash = base::MD5String(string.Utf8()) + "____";
+  DCHECK_EQ(hash.length(), kSessionStorageNamespaceIdLength);
+  return String(hash.c_str());
+}
 
 // If storage is null and there was an exception then clear the exception unless
 // it was caused by CanAccessSessionStorage for the document security origin
@@ -87,24 +96,26 @@ EphemeralStorageNamespaces* EphemeralStorageNamespaces::From(
   if (supplement)
     return supplement;
 
-  Document* document = window->GetFrame()->GetDocument();
-  auto* web_frame = WebLocalFrameImpl::FromFrame(document->GetFrame());
+  auto* web_frame = WebLocalFrameImpl::FromFrame(window->GetFrame());
   WebViewImpl* webview = web_frame->ViewImpl();
   if (!webview || !webview->Client())
     return nullptr;
-  String session_storage_id =
+  String session_storage_id = StringToSessionStorageId(
       String::FromUTF8(webview->Client()->GetSessionStorageNamespaceId()) +
-      String("/ephemeral-session-storage");
+      "/ephemeral-session-storage");
 
   auto* security_origin =
       page->MainFrame()->GetSecurityContext()->GetSecurityOrigin();
   String domain = security_origin->RegistrableDomain();
   // RegistrableDomain might return an empty string if this host is an IP
   // address or a file URL.
-  if (domain.IsEmpty())
-    domain = String::FromUTF8(security_origin->ToUrlOrigin().Serialize());
+  if (domain.IsEmpty()) {
+    url::Origin origin = url::Origin::Create(GURL(window->Url()).GetOrigin());
+    domain = String::FromUTF8(origin.Serialize());
+  }
 
-  String local_storage_id = domain + String("/ephemeral-local-storage");
+  String local_storage_id =
+      StringToSessionStorageId(domain + String("/ephemeral-local-storage"));
   supplement = MakeGarbageCollected<EphemeralStorageNamespaces>(
       StorageController::GetInstance(), session_storage_id, local_storage_id);
 
@@ -150,11 +161,7 @@ StorageArea* BraveDOMWindowStorage::sessionStorage(
       DOMWindowStorage::From(*window).sessionStorage(exception_state);
 
   MaybeClearAccessDeniedException(storage, *window, &exception_state);
-  if (base::FeatureList::IsEnabled(features::kBraveEphemeralStorage)) {
-    storage = ephemeralSessionStorage(storage);
-  }
-
-  return storage;
+  return ephemeralSessionStorage(storage);
 }
 
 StorageArea* BraveDOMWindowStorage::ephemeralSessionStorage(
@@ -183,9 +190,8 @@ StorageArea* BraveDOMWindowStorage::ephemeralSessionStorage(
   auto storage_area =
       namespaces->session_storage()->GetCachedArea(window->GetSecurityOrigin());
 
-  Document* document = window->GetFrame()->GetDocument();
   ephemeral_session_storage_ =
-      StorageArea::Create(document->GetFrame(), std::move(storage_area),
+      StorageArea::Create(window->GetFrame(), std::move(storage_area),
                           StorageArea::StorageType::kSessionStorage);
   return ephemeral_session_storage_;
 }
@@ -196,11 +202,7 @@ StorageArea* BraveDOMWindowStorage::localStorage(
   auto* storage = DOMWindowStorage::From(*window).localStorage(exception_state);
 
   MaybeClearAccessDeniedException(storage, *window, &exception_state);
-  if (base::FeatureList::IsEnabled(features::kBraveEphemeralStorage)) {
-    storage = ephemeralLocalStorage(storage);
-  }
-
-  return storage;
+  return ephemeralLocalStorage(storage);
 }
 
 StorageArea* BraveDOMWindowStorage::ephemeralLocalStorage(
@@ -229,6 +231,9 @@ StorageArea* BraveDOMWindowStorage::ephemeralLocalStorage(
   auto storage_area =
       namespaces->local_storage()->GetCachedArea(window->GetSecurityOrigin());
 
+  // Ephemeral localStorage never persists stored data, which is also how
+  // sessionStorage works. Due to this, when opening up a new ephemeral
+  // localStorage area, we use the sessionStorage infrastructure.
   Document* document = window->GetFrame()->GetDocument();
   ephemeral_local_storage_ =
       StorageArea::Create(document->GetFrame(), std::move(storage_area),

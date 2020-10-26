@@ -5,11 +5,11 @@
 
 #include "brave/browser/ephemeral_storage/ephemeral_storage_tab_helper.h"
 
+#include <map>
 #include <set>
-#include <string>
-#include <utility>
 
 #include "base/feature_list.h"
+#include "base/hash/md5.h"
 #include "base/no_destructor.h"
 #include "content/public/browser/browser_context.h"
 #include "content/public/browser/navigation_handle.h"
@@ -19,31 +19,21 @@
 #include "net/base/registry_controlled_domains/registry_controlled_domain.h"
 #include "third_party/blink/public/common/features.h"
 
-#if defined(OS_ANDROID)
-#include "chrome/browser/android/tab_android.h"
-#include "chrome/browser/ui/android/tab_model/tab_model.h"
-#include "chrome/browser/ui/android/tab_model/tab_model_list.h"
-#else
-#include "chrome/browser/ui/browser.h"
-#include "chrome/browser/ui/browser_list.h"
-#endif
-
 using content::BrowserContext;
 using content::NavigationHandle;
+using content::SessionStorageNamespace;
 using content::WebContents;
+
+namespace ephemeral_storage {
 
 namespace {
 
-content::SessionStorageNamespaceMap& session_storage_namespace_map() {
-  static base::NoDestructor<content::SessionStorageNamespaceMap>
-      session_storage_namespace_map;
-  return *session_storage_namespace_map.get();
-}
+using PerTLDEphemeralStorageMap =
+    std::map<PerTLDEphemeralStorageKey, base::WeakPtr<PerTLDEphemeralStorage>>;
 
-content::SessionStorageNamespaceMap& local_storage_namespace_map() {
-  static base::NoDestructor<content::SessionStorageNamespaceMap>
-      local_storage_namespace_map;
-  return *local_storage_namespace_map.get();
+PerTLDEphemeralStorageMap& active_per_tld_storage_areas() {
+  static base::NoDestructor<PerTLDEphemeralStorageMap> active_storage_areas;
+  return *active_storage_areas.get();
 }
 
 std::string URLToStorageDomain(const GURL& url) {
@@ -58,128 +48,90 @@ std::string URLToStorageDomain(const GURL& url) {
   return domain;
 }
 
+// Session storage ids are expected to be 36 character long GUID strings. Since
+// we are constructing our own ids, we convert our string into a 32 character
+// hash and then use that make up our own GUID-like string. Because of the way
+// we are constructing the string we should never collide with a real GUID and
+// we only need to worry about hash collisions, which are unlikely.
+std::string StringToSessionStorageId(const std::string& string) {
+  std::string hash = base::MD5String(string) + "____";
+  DCHECK_EQ(hash.size(), 36u);
+  return hash;
+}
+
 }  // namespace
-namespace ephemeral_storage {
+
+PerTLDEphemeralStorage::PerTLDEphemeralStorage(
+    PerTLDEphemeralStorageKey key,
+    scoped_refptr<content::SessionStorageNamespace> local_storage_namespace)
+    : key_(key), local_storage_namespace_(local_storage_namespace) {
+  DCHECK(active_per_tld_storage_areas().find(key) ==
+         active_per_tld_storage_areas().end());
+  active_per_tld_storage_areas().emplace(key, weak_factory_.GetWeakPtr());
+}
+
+PerTLDEphemeralStorage::~PerTLDEphemeralStorage() {
+  active_per_tld_storage_areas().erase(key_);
+}
+
+EphemeralStorageTabHelper::EphemeralStorageTabHelper(WebContents* web_contents)
+    : WebContentsObserver(web_contents) {
+  DCHECK(base::FeatureList::IsEnabled(blink::features::kBraveEphemeralStorage));
+}
 
 EphemeralStorageTabHelper::~EphemeralStorageTabHelper() {}
 
-EphemeralStorageTabHelper::EphemeralStorageTabHelper(WebContents* web_contents)
-    : WebContentsObserver(web_contents) {}
-
 void EphemeralStorageTabHelper::ReadyToCommitNavigation(
     NavigationHandle* navigation_handle) {
-  if (!base::FeatureList::IsEnabled(blink::features::kBraveEphemeralStorage))
-    return;
   if (!navigation_handle->IsInMainFrame())
     return;
   if (navigation_handle->IsSameDocument())
     return;
 
-  std::string domain = URLToStorageDomain(navigation_handle->GetURL());
+  const GURL& new_url = navigation_handle->GetURL();
+  std::string new_domain = URLToStorageDomain(new_url);
   std::string previous_domain =
       URLToStorageDomain(web_contents()->GetLastCommittedURL());
-  if (domain == previous_domain)
+  if (new_domain == previous_domain)
     return;
 
-  ClearEphemeralStorageIfNecessary();
-
   auto* browser_context = web_contents()->GetBrowserContext();
-  auto site_instance = content::SiteInstance::CreateForURL(
-      browser_context, navigation_handle->GetURL());
+  auto site_instance =
+      content::SiteInstance::CreateForURL(browser_context, new_url);
   auto* partition =
       BrowserContext::GetStoragePartition(browser_context, site_instance.get());
 
-  std::string local_partition_id = domain + "/ephemeral-local-storage";
-  content::SessionStorageNamespaceMap::const_iterator it =
-      local_storage_namespace_map().find(local_partition_id);
-  if (it == local_storage_namespace_map().end()) {
-    auto local_storage_namespace =
-        content::CreateSessionStorageNamespace(partition, local_partition_id);
-    local_storage_namespace_map()[local_partition_id] =
-        std::move(local_storage_namespace);
+  // If another EphemeralStorageTabHelper is already using a storage area for
+  // our TLD, we can use that.  Otherwise, we create a fresh storage area.
+  PerTLDEphemeralStorageKey key = std::make_pair(browser_context, new_domain);
+  auto it = active_per_tld_storage_areas().find(key);
+  if (it != active_per_tld_storage_areas().end()) {
+    DCHECK(!it->second.WasInvalidated());
+
+    // The map stores a weak pointer and we are upgrading it to a scoped_refptr
+    // here.
+    per_tld_ephemeral_storage_ = it->second.get();
+  } else {
+    std::string local_partition_id = new_domain + "/ephemeral-local-storage";
+    auto local_storage_namespace = content::CreateSessionStorageNamespace(
+        partition, StringToSessionStorageId(local_partition_id));
+    per_tld_ephemeral_storage_ = base::MakeRefCounted<PerTLDEphemeralStorage>(
+        key, local_storage_namespace);
   }
+
+  // Session storage is always per-tab and never per-TLD, so we always delete
+  // and recreate the session storage when switching domains.
+  //
+  // We need to explicitly release the storage namespace before recreating a
+  // new one in order to make sure that we remove the final reference and free
+  // it.
+  session_storage_namespace_.reset();
 
   std::string session_partition_id =
       content::GetSessionStorageNamespaceId(web_contents()) +
       "/ephemeral-session-storage";
-  it = session_storage_namespace_map().find(session_partition_id);
-  if (it == session_storage_namespace_map().end()) {
-    auto session_storage_namespace =
-        content::CreateSessionStorageNamespace(partition, session_partition_id);
-    session_storage_namespace_map()[session_partition_id] =
-        std::move(session_storage_namespace);
-  }
-}
-
-void EphemeralStorageTabHelper::WebContentsDestroyed() {
-  ClearEphemeralStorageIfNecessary();
-}
-
-bool EphemeralStorageTabHelper::IsDifferentWebContentsWithMatchingStorageDomain(
-    WebContents* other_web_contents,
-    const std::string& storage_domain) {
-  DCHECK(other_web_contents);
-  if (web_contents() == other_web_contents)
-    return false;
-
-  std::string other_storage_domain =
-      URLToStorageDomain(other_web_contents->GetLastCommittedURL());
-  return storage_domain == other_storage_domain;
-}
-
-bool EphemeralStorageTabHelper::IsAnotherTabOpenWithStorageDomain(
-    const std::string& storage_domain) {
-#if defined(OS_ANDROID)
-  for (auto it = TabModelList::begin(); it != TabModelList::end(); ++it) {
-    TabModel* tab_model = *it;
-    if (tab_model->GetProfile() == web_contents()->GetBrowserContext()) {
-      for (int i = 0; i < tab_model->GetTabCount(); i++) {
-        TabAndroid* tab = tab_model->GetTabAt(i);
-        WebContents* web_contents = tab->web_contents();
-        if (IsDifferentWebContentsWithMatchingStorageDomain(web_contents,
-                                                            storage_domain))
-          return true;
-      }
-    }
-  }
-#else
-  for (Browser* browser : *BrowserList::GetInstance()) {
-    // We need to use reinterpret_cast here, because BrowserContext is a subclass of Profile,
-    // yet to include the header for Profile here would introduce a circular dependency in
-    // the build.
-    if (reinterpret_cast<BrowserContext*>(browser->profile()) == web_contents()->GetBrowserContext()) {
-      TabStripModel* tab_strip = browser->tab_strip_model();
-      for (int i = 0; i < tab_strip->count(); ++i) {
-        WebContents* web_contents = tab_strip->GetWebContentsAt(i);
-        if (IsDifferentWebContentsWithMatchingStorageDomain(web_contents,
-                                                            storage_domain))
-          return true;
-      }
-    }
-  }
-#endif
-
-  return false;
-}
-
-void EphemeralStorageTabHelper::ClearEphemeralStorageIfNecessary() {
-  if (!base::FeatureList::IsEnabled(blink::features::kBraveEphemeralStorage)) {
-    return;
-  }
-
-  std::string previous_domain =
-      URLToStorageDomain(web_contents()->GetLastCommittedURL());
-  if (!IsAnotherTabOpenWithStorageDomain(previous_domain)) {
-    local_storage_namespace_map().erase(previous_domain +
-                                        "/ephemeral-local-storage");
-  }
-
-  // This method should only be called if we are navigating to a new domain or
-  // shutting down this tab helper. This means that it is always appropriate to
-  // clear the ephemeral session storage.
-  session_storage_namespace_map().erase(
-      content::GetSessionStorageNamespaceId(web_contents()) +
-      "/ephemeral-session-storage");
+  session_storage_namespace_ = content::CreateSessionStorageNamespace(
+      partition, StringToSessionStorageId(session_partition_id));
 }
 
 WEB_CONTENTS_USER_DATA_KEY_IMPL(EphemeralStorageTabHelper)
