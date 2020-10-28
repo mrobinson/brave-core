@@ -28,14 +28,6 @@ namespace ephemeral_storage {
 
 namespace {
 
-using PerTLDEphemeralStorageMap =
-    std::map<PerTLDEphemeralStorageKey, base::WeakPtr<PerTLDEphemeralStorage>>;
-
-PerTLDEphemeralStorageMap& active_per_tld_storage_areas() {
-  static base::NoDestructor<PerTLDEphemeralStorageMap> active_storage_areas;
-  return *active_storage_areas.get();
-}
-
 std::string URLToStorageDomain(const GURL& url) {
   std::string domain = net::registry_controlled_domains::GetDomainAndRegistry(
       url, net::registry_controlled_domains::INCLUDE_PRIVATE_REGISTRIES);
@@ -61,19 +53,6 @@ std::string StringToSessionStorageId(const std::string& string,
 }
 
 }  // namespace
-
-PerTLDEphemeralStorage::PerTLDEphemeralStorage(
-    PerTLDEphemeralStorageKey key,
-    scoped_refptr<content::SessionStorageNamespace> local_storage_namespace)
-    : key_(key), local_storage_namespace_(local_storage_namespace) {
-  DCHECK(active_per_tld_storage_areas().find(key) ==
-         active_per_tld_storage_areas().end());
-  active_per_tld_storage_areas().emplace(key, weak_factory_.GetWeakPtr());
-}
-
-PerTLDEphemeralStorage::~PerTLDEphemeralStorage() {
-  active_per_tld_storage_areas().erase(key_);
-}
 
 EphemeralStorageTabHelper::EphemeralStorageTabHelper(WebContents* web_contents)
     : WebContentsObserver(web_contents) {
@@ -102,24 +81,14 @@ void EphemeralStorageTabHelper::ReadyToCommitNavigation(
   auto* partition =
       BrowserContext::GetStoragePartition(browser_context, site_instance.get());
 
-  // If another EphemeralStorageTabHelper is already using a storage area for
-  // our TLD, we can use that.  Otherwise, we create a fresh storage area.
-  PerTLDEphemeralStorageKey key = std::make_pair(browser_context, new_domain);
-  auto it = active_per_tld_storage_areas().find(key);
-  if (it != active_per_tld_storage_areas().end()) {
-    DCHECK(!it->second.WasInvalidated());
-
-    // The map stores a weak pointer and we are upgrading it to a scoped_refptr
-    // here.
-    per_tld_ephemeral_storage_ = it->second.get();
-  } else {
-    std::string local_partition_id =
-        StringToSessionStorageId(new_domain, "/ephemeral-local-storage");
-    auto local_storage_namespace =
-        content::CreateSessionStorageNamespace(partition, local_partition_id);
-    per_tld_ephemeral_storage_ = base::MakeRefCounted<PerTLDEphemeralStorage>(
-        key, local_storage_namespace);
-  }
+  // This will fetch a session storage namespace for this storage partition
+  // and storage domain. If another tab helper is already using the same
+  // namespace, this will just give us a new reference. When the last tab helper
+  // drops the reference, the namespace should be deleted.
+  std::string local_partition_id =
+      StringToSessionStorageId(new_domain, "/ephemeral-local-storage");
+  local_storage_namespace_ =
+      content::CreateSessionStorageNamespace(partition, local_partition_id);
 
   // Session storage is always per-tab and never per-TLD, so we always delete
   // and recreate the session storage when switching domains.
