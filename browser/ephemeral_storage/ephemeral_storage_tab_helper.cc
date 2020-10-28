@@ -53,10 +53,11 @@ std::string URLToStorageDomain(const GURL& url) {
 // hash and then use that make up our own GUID-like string. Because of the way
 // we are constructing the string we should never collide with a real GUID and
 // we only need to worry about hash collisions, which are unlikely.
-std::string StringToSessionStorageId(const std::string& string) {
+std::string StringToSessionStorageId(const std::string& string,
+                                     const std::string& suffix) {
   std::string hash = base::MD5String(string) + "____";
   DCHECK_EQ(hash.size(), 36u);
-  return hash;
+  return hash + suffix;
 }
 
 }  // namespace
@@ -112,9 +113,10 @@ void EphemeralStorageTabHelper::ReadyToCommitNavigation(
     // here.
     per_tld_ephemeral_storage_ = it->second.get();
   } else {
-    std::string local_partition_id = new_domain + "/ephemeral-local-storage";
-    auto local_storage_namespace = content::CreateSessionStorageNamespace(
-        partition, StringToSessionStorageId(local_partition_id));
+    std::string local_partition_id =
+        StringToSessionStorageId(new_domain, "/ephemeral-local-storage");
+    auto local_storage_namespace =
+        content::CreateSessionStorageNamespace(partition, local_partition_id);
     per_tld_ephemeral_storage_ = base::MakeRefCounted<PerTLDEphemeralStorage>(
         key, local_storage_namespace);
   }
@@ -127,11 +129,11 @@ void EphemeralStorageTabHelper::ReadyToCommitNavigation(
   // it.
   session_storage_namespace_.reset();
 
-  std::string session_partition_id =
-      content::GetSessionStorageNamespaceId(web_contents()) +
-      "/ephemeral-session-storage";
-  session_storage_namespace_ = content::CreateSessionStorageNamespace(
-      partition, StringToSessionStorageId(session_partition_id));
+  std::string session_partition_id = StringToSessionStorageId(
+      content::GetSessionStorageNamespaceId(web_contents()),
+      "/ephemeral-session-storage");
+  session_storage_namespace_ =
+      content::CreateSessionStorageNamespace(partition, session_partition_id);
 }
 
 WEB_CONTENTS_USER_DATA_KEY_IMPL(EphemeralStorageTabHelper)

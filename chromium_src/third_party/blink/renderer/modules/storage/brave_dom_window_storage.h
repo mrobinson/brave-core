@@ -32,8 +32,8 @@ class BraveDOMWindowStorage final
   void Trace(Visitor*) const override;
 
  private:
-  StorageArea* ephemeralSessionStorage(StorageArea*);
-  StorageArea* ephemeralLocalStorage(StorageArea*);
+  StorageArea* ephemeralSessionStorage();
+  StorageArea* ephemeralLocalStorage();
 
   mutable Member<StorageArea> ephemeral_session_storage_;
   mutable Member<StorageArea> ephemeral_local_storage_;
