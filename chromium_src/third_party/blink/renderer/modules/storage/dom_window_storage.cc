@@ -21,9 +21,10 @@ namespace {
 // id that is found in the implementation of EphemeralStorageTabHelper.
 String StringToSessionStorageId(const String& string,
                                 const std::string& suffix) {
-  std::string hash = base::MD5String(string.Utf8()) + "____";
+  std::string hash =
+      base::MD5String(std::string(string.Utf8()) + suffix) + "____";
   DCHECK_EQ(hash.length(), kSessionStorageNamespaceIdLength);
-  return String((hash + suffix).c_str());
+  return String(hash.c_str());
 }
 
 // If storage is null and there was an exception then clear the exception unless
@@ -43,6 +44,13 @@ void MaybeClearAccessDeniedException(StorageArea* storage,
 
 }  // namespace
 
+// EphemeralStorageNamespace manage ephemeral storage namespaces for a
+// particular Page object. The namespaces are instantiated on the Page lazily,
+// as soon as a third-party frame needs ephemeral storage. They are then shared
+// by all third-party frames that are embedded in this Page.
+//
+// These namespaces are created in the browser process ahead of time. We ensure
+// that we are using the same namespace by using a common naming scheme.
 class EphemeralStorageNamespaces
     : public GarbageCollected<EphemeralStorageNamespaces>,
       public Supplement<Page> {

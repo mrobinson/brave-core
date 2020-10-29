@@ -47,9 +47,9 @@ std::string URLToStorageDomain(const GURL& url) {
 // we only need to worry about hash collisions, which are unlikely.
 std::string StringToSessionStorageId(const std::string& string,
                                      const std::string& suffix) {
-  std::string hash = base::MD5String(string) + "____";
+  std::string hash = base::MD5String(string + suffix) + "____";
   DCHECK_EQ(hash.size(), 36u);
-  return hash + suffix;
+  return hash;
 }
 
 }  // namespace
@@ -57,6 +57,12 @@ std::string StringToSessionStorageId(const std::string& string,
 EphemeralStorageTabHelper::EphemeralStorageTabHelper(WebContents* web_contents)
     : WebContentsObserver(web_contents) {
   DCHECK(base::FeatureList::IsEnabled(blink::features::kBraveEphemeralStorage));
+
+  // The URL might not be empty if this is a restored WebContents, for instance.
+  // In that case we want to make sure it has valid ephemeral storage.
+  const GURL& url = web_contents->GetLastCommittedURL();
+  if (!url.is_empty())
+    CreateEphemeralStorageAreasForDomainAndURL(URLToStorageDomain(url), url);
 }
 
 EphemeralStorageTabHelper::~EphemeralStorageTabHelper() {}
@@ -75,6 +81,12 @@ void EphemeralStorageTabHelper::ReadyToCommitNavigation(
   if (new_domain == previous_domain)
     return;
 
+  CreateEphemeralStorageAreasForDomainAndURL(new_domain, new_url);
+}
+
+void EphemeralStorageTabHelper::CreateEphemeralStorageAreasForDomainAndURL(
+    std::string new_domain,
+    const GURL& new_url) {
   auto* browser_context = web_contents()->GetBrowserContext();
   auto site_instance =
       content::SiteInstance::CreateForURL(browser_context, new_url);
