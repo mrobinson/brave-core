@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "brave/content/public/browser/tld_ephemeral_storage.h"
+#include "brave/chromium_src/content/public/browser/tld_ephemeral_storage.h"
 
 #include <map>
 #include "base/no_destructor.h"
@@ -32,24 +32,6 @@ TLDEphemeralStorageMap& active_tld_storage_areas() {
 }
 
 }  // namespace
-
-scoped_refptr<content::SessionStorageNamespace> CreateSessionStorageNamespace(
-    content::StoragePartition* partition,
-    const std::string& namespace_id) {
-  content::DOMStorageContextWrapper* context_wrapper =
-      static_cast<content::DOMStorageContextWrapper*>(
-          partition->GetDOMStorageContext());
-
-  return content::SessionStorageNamespaceImpl::Create(context_wrapper,
-                                                      namespace_id);
-}
-
-std::string GetSessionStorageNamespaceId(WebContents* web_contents) {
-  return web_contents->GetRenderViewHost()
-      ->GetDelegate()
-      ->GetSessionStorageNamespace(web_contents->GetSiteInstance())
-      ->id();
-}
 
 TLDEphemeralStorage::TLDEphemeralStorage(TLDEphemeralStorageKey key,
                                          StoragePartition* storage_partition)

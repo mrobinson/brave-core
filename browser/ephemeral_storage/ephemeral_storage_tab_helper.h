@@ -9,7 +9,7 @@
 #include <string>
 #include <utility>
 
-#include "brave/content/public/browser/tld_ephemeral_storage.h"
+#include "content/public/browser/browser_context.h"
 #include "content/public/browser/session_storage_namespace.h"
 #include "content/public/browser/web_contents_observer.h"
 #include "content/public/browser/web_contents_user_data.h"

@@ -3,8 +3,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef BRAVE_CONTENT_PUBLIC_BROWSER_TLD_EPHEMERAL_STORAGE_H_
-#define BRAVE_CONTENT_PUBLIC_BROWSER_TLD_EPHEMERAL_STORAGE_H_
+#ifndef BRAVE_CHROMIUM_SRC_CONTENT_PUBLIC_BROWSER_TLD_EPHEMERAL_STORAGE_H_
+#define BRAVE_CHROMIUM_SRC_CONTENT_PUBLIC_BROWSER_TLD_EPHEMERAL_STORAGE_H_
 
 #include <string>
 #include <utility>
@@ -19,12 +19,6 @@ class SessionStorageNamespace;
 class StoragePartition;
 class StoragePartition;
 class WebContents;
-
-CONTENT_EXPORT scoped_refptr<content::SessionStorageNamespace>
-CreateSessionStorageNamespace(content::StoragePartition* partition,
-                              const std::string& namespace_id);
-
-CONTENT_EXPORT std::string GetSessionStorageNamespaceId(WebContents*);
 
 // TLD storage is keyed by the BrowserContext (profile) and the TLD-specific
 // security domain.
@@ -61,4 +55,4 @@ class CONTENT_EXPORT TLDEphemeralStorage
 
 }  // namespace content
 
-#endif  // BRAVE_CONTENT_PUBLIC_BROWSER_TLD_EPHEMERAL_STORAGE_H_
+#endif  // BRAVE_CHROMIUM_SRC_CONTENT_PUBLIC_BROWSER_TLD_EPHEMERAL_STORAGE_H_
