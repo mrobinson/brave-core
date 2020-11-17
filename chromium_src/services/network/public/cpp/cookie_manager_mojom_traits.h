@@ -6,9 +6,10 @@
 #ifndef BRAVE_CHROMIUM_SRC_SERVICES_NETWORK_PUBLIC_CPP_COOKIE_MANAGER_MOJOM_TRAITS_H_
 #define BRAVE_CHROMIUM_SRC_SERVICES_NETWORK_PUBLIC_CPP_COOKIE_MANAGER_MOJOM_TRAITS_H_
 
-#define BRAVE_STRUCTTRAITSCOOKIEOPTIONSEPHEMERALSTORAGEDOMAIN                \
-  static std::string ephemeral_storage_domain(const net::CookieOptions& o) { \
-    return o.ephemeral_storage_domain_;                                      \
+#define BRAVE_STRUCTTRAITSCOOKIEOPTIONSEPHEMERALSTORAGEDOMAIN \
+  static GURL top_frame_url_for_ephemeral_storage(            \
+      const net::CookieOptions& o) {                          \
+    return o.top_frame_url_for_ephemeral_storage_;            \
   }
 
 #include "../../../../../services/network/public/cpp/cookie_manager_mojom_traits.h"

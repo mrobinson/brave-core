@@ -8,7 +8,7 @@
 
 #define BRAVE_COOKIE_OPTIONS_H \
  public:                       \
-  std::string ephemeral_storage_domain_;
+  GURL top_frame_url_for_ephemeral_storage_;
 
 #include "../../../../../net/cookies/cookie_options.h"
 

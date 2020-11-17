@@ -6,11 +6,11 @@
 #ifndef BRAVE_CHROMIUM_SRC_NET_COOKIES_COOKIE_MONSTER_H_
 #define BRAVE_CHROMIUM_SRC_NET_COOKIES_COOKIE_MONSTER_H_
 
-#define BRAVE_COOKIE_MONSTER_H                             \
-  std::map<std::string, std::unique_ptr<CookieMonster>>    \
-      ephemeral_cookie_stores_;                            \
-  CookieMonster* GetOrCreateEphemeralCookieStoreForDomain( \
-      const std::string& domain);
+#define BRAVE_COOKIE_MONSTER_H                                  \
+  std::map<std::string, std::unique_ptr<CookieMonster>>         \
+      ephemeral_cookie_stores_;                                 \
+  CookieMonster* GetOrCreateEphemeralCookieStoreForTopFrameURL( \
+      const GURL& top_frame_url);
 
 #include "../../../../../net/cookies/cookie_monster.h"
 

@@ -5,7 +5,6 @@
 
 #include "services/network/restricted_cookie_manager.h"
 
-#include "net/base/url_util.h"
 #include "net/base/features.h"
 
 namespace {
@@ -17,8 +16,7 @@ void AddEphemeralStorageDomainIfNecessary(const GURL& url,
     return;
   if (url::Origin::Create(url) == top_frame_origin)
     return;
-  options->ephemeral_storage_domain_ =
-      net::URLToEphemeralStorageDomain(top_frame_origin.GetURL());
+  options->top_frame_url_for_ephemeral_storage_ = top_frame_origin.GetURL();
 }
 
 }  // namespace

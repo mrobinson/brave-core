@@ -7,11 +7,13 @@
 
 #include <iostream>
 #include <memory>
+#include "net/base/url_util.h"
 
 namespace net {
 
-CookieMonster* CookieMonster::GetOrCreateEphemeralCookieStoreForDomain(
-    const std::string& domain) {
+CookieMonster* CookieMonster::GetOrCreateEphemeralCookieStoreForTopFrameURL(
+    const GURL& top_frame_url) {
+  std::string domain = URLToEphemeralStorageDomain(top_frame_url);
   auto it = ephemeral_cookie_stores_.find(domain);
   if (it != ephemeral_cookie_stores_.end())
     return it->second.get();
@@ -25,24 +27,24 @@ CookieMonster* CookieMonster::GetOrCreateEphemeralCookieStoreForDomain(
 }  // namespace net
 
 #define BRAVE_SETCANONICALCOOKIE                                             \
-  if (!options.ephemeral_storage_domain_.empty()) {                          \
+  if (!options.top_frame_url_for_ephemeral_storage_.is_empty()) {            \
     CookieMonster* ephemeral_monster =                                       \
-        GetOrCreateEphemeralCookieStoreForDomain(                            \
-            options.ephemeral_storage_domain_);                              \
+        GetOrCreateEphemeralCookieStoreForTopFrameURL(                       \
+            options.top_frame_url_for_ephemeral_storage_);                   \
     CookieOptions new_options(options);                                      \
-    new_options.ephemeral_storage_domain_ = std::string();                   \
+    new_options.top_frame_url_for_ephemeral_storage_ = GURL();               \
     ephemeral_monster->SetCanonicalCookie(std::move(cc), source_url,         \
                                           new_options, std::move(callback)); \
     return;                                                                  \
   }
 
 #define BRAVE_GETCOOKIELISTWITHOPTIONS                                \
-  if (!options.ephemeral_storage_domain_.empty()) {                   \
+  if (!options.top_frame_url_for_ephemeral_storage_.is_empty()) {     \
     CookieMonster* ephemeral_monster =                                \
-        GetOrCreateEphemeralCookieStoreForDomain(                     \
-            options.ephemeral_storage_domain_);                       \
+        GetOrCreateEphemeralCookieStoreForTopFrameURL(                \
+            options.top_frame_url_for_ephemeral_storage_);            \
     CookieOptions new_options(options);                               \
-    new_options.ephemeral_storage_domain_ = std::string();            \
+    new_options.top_frame_url_for_ephemeral_storage_ = GURL();        \
     ephemeral_monster->GetCookieListWithOptions(url, new_options,     \
                                                 std::move(callback)); \
     return;                                                           \
