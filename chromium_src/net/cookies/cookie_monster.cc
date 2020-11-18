@@ -19,7 +19,7 @@ namespace {
 
 CookieOptions OptionsWithoutEphemeralStorageURL(const CookieOptions& options) {
   CookieOptions new_options(options);
-  new_options.top_frame_url_for_ephemeral_storage_ = GURL();
+  new_options.top_frame_url_ = GURL();
   return new_options;
 }
 
@@ -59,10 +59,9 @@ void CookieMonster::SetCanonicalCookieAsync(
     const GURL& source_url,
     const CookieOptions& options,
     SetCookiesCallback callback) {
-  if (!options.top_frame_url_for_ephemeral_storage_.is_empty()) {
+  if (!options.top_frame_url_.is_empty()) {
     SimpleCookieMonster* ephemeral_monster =
-        GetOrCreateEphemeralCookieStoreForTopFrameURL(
-            options.top_frame_url_for_ephemeral_storage_);
+        GetOrCreateEphemeralCookieStoreForTopFrameURL(options.top_frame_url_);
     ephemeral_monster->SetCanonicalCookieAsync(
         std::move(cookie), source_url,
         OptionsWithoutEphemeralStorageURL(options), std::move(callback));
@@ -76,10 +75,9 @@ void CookieMonster::GetCookieListWithOptionsAsync(
     const GURL& url,
     const CookieOptions& options,
     GetCookieListCallback callback) {
-  if (!options.top_frame_url_for_ephemeral_storage_.is_empty()) {
+  if (!options.top_frame_url_.is_empty()) {
     SimpleCookieMonster* ephemeral_monster =
-        GetOrCreateEphemeralCookieStoreForTopFrameURL(
-            options.top_frame_url_for_ephemeral_storage_);
+        GetOrCreateEphemeralCookieStoreForTopFrameURL(options.top_frame_url_);
     ephemeral_monster->GetCookieListWithOptionsAsync(
         url, OptionsWithoutEphemeralStorageURL(options), std::move(callback));
     return;

@@ -16,7 +16,7 @@ void AddEphemeralStorageDomainIfNecessary(const GURL& url,
     return;
   if (url::Origin::Create(url) == top_frame_origin)
     return;
-  options->top_frame_url_for_ephemeral_storage_ = top_frame_origin.GetURL();
+  options->top_frame_url_ = top_frame_origin.GetURL();
 }
 
 }  // namespace

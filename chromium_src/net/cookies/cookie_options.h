@@ -8,7 +8,7 @@
 
 #define BRAVE_COOKIE_OPTIONS_H \
  public:                       \
-  GURL top_frame_url_for_ephemeral_storage_;
+  GURL top_frame_url_;
 
 #include "../../../../../net/cookies/cookie_options.h"
 

@@ -1,12 +1,12 @@
 diff --git a/services/network/public/mojom/cookie_manager.mojom b/services/network/public/mojom/cookie_manager.mojom
-index efb5fa353efa87c39de48c477c0bddd8dc4d4b19..3ab93ead231af68d1cf93002110c2ec04bc977bb 100644
+index efb5fa353efa87c39de48c477c0bddd8dc4d4b19..b9353e785a9e980acb0a5768567c4c81a324864b 100644
 --- a/services/network/public/mojom/cookie_manager.mojom
 +++ b/services/network/public/mojom/cookie_manager.mojom
 @@ -114,6 +114,7 @@ struct CookieOptions {
    CookieSameSiteContext same_site_cookie_context;
    bool update_access_time = true;
    bool return_excluded_cookies = false;
-+  url.mojom.Url top_frame_url_for_ephemeral_storage;
++  url.mojom.Url top_frame_url;
  };
  
  // See net/cookies/canonical_cookie.{h,cc} for documentation.
