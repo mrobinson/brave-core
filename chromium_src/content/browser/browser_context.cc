@@ -38,5 +38,12 @@ std::string GetSessionStorageNamespaceId(WebContents* web_contents) {
 
 }  // namespace content
 
+
+namespace content {
+bool BrowserContext::IsTor() const {
+  return false;
+}
+}  // namespace content
+
 #include "../../../../content/browser/browser_context.cc"
 #include "brave/chromium_src/content/browser/tld_ephemeral_storage.cc"
